@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Times New Roman", serif;
+  --font-script: "Great Vibes", cursive;
+  --font-sans: "Poppins", system-ui, sans-serif;
+
+  --color-ivory: #fdfaf4;
+  --color-linen: #f6efe4;
+  --color-champagne: #f0e2c8;
+  --color-champagne-deep: #e3cd9c;
+  --color-blush: #f6e2df;
+  --color-blush-deep: #e8bfba;
+  --color-rose: #c98f8a;
+  --color-gold: #c9a24b;
+  --color-gold-soft: #ddc186;
+  --color-ink: #4a3f3a;
+  --color-ink-soft: #7a6a63;
+
+  --shadow-soft: 0 10px 40px -10px rgba(154, 122, 76, 0.25);
+  --shadow-card: 0 4px 24px -4px rgba(154, 122, 76, 0.18);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-ivory);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100svh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+  }
+}
+
+@layer utilities {
+  .bg-petals {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(233, 191, 186, 0.35) 0, transparent 45%),
+      radial-gradient(circle at 80% 0%, rgba(221, 193, 134, 0.3) 0, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(240, 226, 200, 0.4) 0, transparent 45%);
+  }
+}
+
+/* Continuous petal drift — CSS-driven so it never costs a JS frame. */
+.petal-fall {
+  position: absolute;
+  top: 0;
+  animation-name: petal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.petal {
+  display: block;
+  border-radius: 50% 0 50% 0;
+  animation-name: petal-sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  will-change: transform;
+}
+
+@keyframes petal-fall {
+  from {
+    transform: translate3d(0, -15vh, 0);
+  }
+  to {
+    transform: translate3d(0, 115vh, 0);
+  }
+}
+
+@keyframes petal-sway {
+  from {
+    transform: translateX(calc(var(--sway) * -1)) rotate(0deg);
+  }
+  to {
+    transform: translateX(var(--sway)) rotate(var(--spin));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal-fall,
+  .petal {
+    animation: none;
+  }
+}

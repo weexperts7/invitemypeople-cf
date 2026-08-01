@@ -7,7 +7,14 @@ import { AlertCircle, Heart, Loader2 } from 'lucide-react'
 // route, so this stays quiet on the default local-dev setup.
 const ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT
 
-export default function WishesWall({ slug }) {
+export default function WishesWall({
+  slug,
+  heading = 'Wishes Wall',
+  subheading = 'Blessings from friends and family',
+  sectionClassName = 'px-6 py-20',
+  cardClassName = 'rounded-2xl border border-white/60 bg-ivory/50 backdrop-blur-xl shadow-soft px-5 py-4',
+  renderIcon,
+}) {
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [wishes, setWishes] = useState([])
   const reduceMotion = useReducedMotion()
@@ -45,25 +52,29 @@ export default function WishesWall({ slug }) {
   }
 
   return (
-    <section className="px-6 py-20">
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="font-serif text-3xl sm:text-4xl text-ink text-center mb-2"
-      >
-        Wishes Wall
-      </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="text-ink-soft text-center mb-10"
-      >
-        Blessings from friends and family
-      </motion.p>
+    <section className={sectionClassName}>
+      {heading && (
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="font-serif text-3xl sm:text-4xl text-ink text-center mb-2"
+        >
+          {heading}
+        </motion.h2>
+      )}
+      {subheading && (
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-ink-soft text-center mb-10"
+        >
+          {subheading}
+        </motion.p>
+      )}
 
       <div className="max-w-md mx-auto space-y-4">
         {status === 'loading' && (
@@ -90,10 +101,14 @@ export default function WishesWall({ slug }) {
               whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: Math.min(i * 0.06, 0.6) }}
-              className="rounded-2xl border border-white/60 bg-ivory/50 backdrop-blur-xl shadow-soft px-5 py-4"
+              className={cardClassName}
             >
               <div className="flex items-center gap-2 mb-1.5">
-                <Heart className="w-3.5 h-3.5 text-rose shrink-0" strokeWidth={1.5} />
+                {renderIcon ? (
+                  renderIcon(wish)
+                ) : (
+                  <Heart className="w-3.5 h-3.5 text-rose shrink-0" strokeWidth={1.5} />
+                )}
                 <span className="font-serif text-lg text-ink">{wish.name}</span>
               </div>
               <p className="text-ink-soft text-sm leading-relaxed">{wish.message}</p>

@@ -127,6 +127,82 @@ const MOTIFS = {
       <circle cx="45" cy="46" r="3" fill={accent} opacity="0.6" />
     </pattern>
   ),
+  // The Divine Peacock (Satsang) — a tiled peacock-feather "eye".
+  'peacock-feather': (line, accent) => (
+    <pattern id="motif-peacock-feather" width="110" height="130" patternUnits="userSpaceOnUse">
+      <path d="M55 118 Q40 80 55 40" fill="none" stroke={line} strokeWidth="1.4" />
+      <circle cx="55" cy="30" r="15" fill="none" stroke={accent} strokeWidth="1.4" />
+      <circle cx="55" cy="30" r="8" fill="none" stroke={accent} strokeWidth="1" />
+      <circle cx="55" cy="30" r="2.8" fill={accent} opacity="0.7" />
+      <path d="M55 44 Q30 58 22 82" fill="none" stroke={line} strokeWidth="1" opacity="0.7" />
+      <path d="M55 44 Q80 58 88 82" fill="none" stroke={line} strokeWidth="1" opacity="0.7" />
+    </pattern>
+  ),
+  // Saffron Blossom (Satsang) — an open lotus bloom.
+  'saffron-lotus': (line, accent) => (
+    <pattern id="motif-saffron-lotus" width="120" height="120" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke={line} strokeWidth="1.3">
+        <path d="M60 88 Q48 64 60 38 Q72 64 60 88 Z" />
+        <path d="M34 76 Q48 70 60 88 Q40 92 34 76 Z" />
+        <path d="M86 76 Q72 70 60 88 Q80 92 86 76 Z" />
+        <path d="M22 58 Q42 60 60 88 Q30 78 22 58 Z" />
+        <path d="M98 58 Q78 60 60 88 Q90 78 98 58 Z" />
+      </g>
+      <circle cx="60" cy="86" r="3" fill={accent} opacity="0.7" />
+    </pattern>
+  ),
+  // Radiant Sunrise (Satsang) — a small sun disc with radiating rays.
+  'sunrise-rays': (line, accent) => (
+    <pattern id="motif-sunrise-rays" width="120" height="120" patternUnits="userSpaceOnUse">
+      <circle cx="60" cy="100" r="14" fill="none" stroke={accent} strokeWidth="1.4" />
+      {[-3, -2, -1, 0, 1, 2, 3].map((i) => {
+        const rad = ((-90 + i * 18) * Math.PI) / 180
+        return (
+          <line
+            key={i}
+            x1={60 + Math.cos(rad) * 18}
+            y1={100 + Math.sin(rad) * 18}
+            x2={60 + Math.cos(rad) * 38}
+            y2={100 + Math.sin(rad) * 38}
+            stroke={line}
+            strokeWidth="1.2"
+          />
+        )
+      })}
+    </pattern>
+  ),
+  // Tulsi Serenity (Satsang) — a tulsi (holy basil) sprig with paired leaves.
+  'tulsi-leaf': (line) => (
+    <pattern id="motif-tulsi-leaf" width="90" height="110" patternUnits="userSpaceOnUse">
+      <path d="M45 92 L45 38" stroke={line} strokeWidth="1.2" fill="none" />
+      <path d="M45 50 Q30 46 26 34 Q40 36 45 50 Z" fill="none" stroke={line} strokeWidth="1.1" />
+      <path d="M45 50 Q60 46 64 34 Q50 36 45 50 Z" fill="none" stroke={line} strokeWidth="1.1" />
+      <path d="M45 68 Q32 64 28 54 Q42 56 45 68 Z" fill="none" stroke={line} strokeWidth="1" opacity="0.85" />
+      <path d="M45 68 Q58 64 62 54 Q48 56 45 68 Z" fill="none" stroke={line} strokeWidth="1" opacity="0.85" />
+    </pattern>
+  ),
+  // Diya Ganga (Satsang) — a row of lit oil-lamps over a gentle river wave.
+  'diya-wave': (line, accent) => (
+    <pattern id="motif-diya-wave" width="110" height="100" patternUnits="userSpaceOnUse">
+      <path d="M20 70 Q35 60 55 70 Q75 80 90 70" fill="none" stroke={line} strokeWidth="1.2" opacity="0.8" />
+      <ellipse cx="55" cy="64" rx="13" ry="5" fill="none" stroke={line} strokeWidth="1.2" />
+      <path
+        d="M55 54 Q60 54 60 47 Q60 40 55 34 Q50 40 50 47 Q50 51 55 54 Z"
+        fill={accent}
+        opacity="0.75"
+      />
+    </pattern>
+  ),
+  // Celestial Om (Satsang) — an Om arc adrift among stars and a crescent.
+  'celestial-om': (line, accent) => (
+    <pattern id="motif-celestial-om" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M30 78 A20 20 0 1 1 30 18" fill="none" stroke={line} strokeWidth="1.3" />
+      <circle cx="70" cy="22" r="2.4" fill={accent} />
+      <circle cx="82" cy="42" r="1.6" fill={accent} opacity="0.8" />
+      <circle cx="66" cy="58" r="1.8" fill={accent} opacity="0.7" />
+      <path d="M74 76 A10 10 0 1 0 84 86" fill="none" stroke={accent} strokeWidth="1.2" />
+    </pattern>
+  ),
 }
 
 export default function CulturalMotif({ motif, palette, accent }) {

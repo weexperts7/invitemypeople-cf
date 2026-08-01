@@ -271,6 +271,88 @@ const BANNERS = {
       <line x1="40" y1="92" x2="280" y2="92" stroke={c.goldSoft} strokeWidth="1" opacity="0.7" />
     </>
   ),
+  // The Divine Peacock (Satsang) — a spread of three peacock-feather eyes.
+  'peacock-feather': (c, accent) => (
+    <>
+      {[100, 160, 220].map((x, i) => (
+        <g key={x}>
+          <path d={`M${x},70 Q${x - 10},44 ${x},18`} fill="none" stroke={c.gold} strokeWidth="1.3" />
+          <circle cx={x} cy="14" r={i === 1 ? 12 : 9} fill="none" stroke={accent} strokeWidth="1.4" />
+          <circle cx={x} cy="14" r={i === 1 ? 5 : 3.6} fill="none" stroke={accent} strokeWidth="1" />
+          <circle cx={x} cy="14" r="1.8" fill={accent} opacity="0.75" />
+        </g>
+      ))}
+      <line x1="24" y1="88" x2="296" y2="88" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
+  // Saffron Blossom (Satsang) — a wide open lotus bloom at center.
+  'saffron-lotus': (c, accent) => (
+    <>
+      <path d="M160,86 Q144,56 160,20 Q176,56 160,86 Z" fill={c.blush} stroke={c.rose} strokeWidth="1.2" />
+      <path d="M160,86 Q130,68 116,34 Q144,46 160,86 Z" fill="none" stroke={c.rose} strokeWidth="1.1" />
+      <path d="M160,86 Q190,68 204,34 Q176,46 160,86 Z" fill="none" stroke={c.rose} strokeWidth="1.1" />
+      <path d="M160,86 Q104,74 84,50 Q126,54 160,86 Z" fill="none" stroke={accent} strokeWidth="1" opacity="0.85" />
+      <path d="M160,86 Q216,74 236,50 Q194,54 160,86 Z" fill="none" stroke={accent} strokeWidth="1" opacity="0.85" />
+      <circle cx="160" cy="84" r="3.4" fill={accent} />
+      <line x1="30" y1="94" x2="290" y2="94" stroke={c.goldSoft} strokeWidth="1" opacity="0.7" />
+    </>
+  ),
+  // Radiant Sunrise (Satsang) — a rising sun disc with radiating rays.
+  'sunrise-rays': (c, accent) => (
+    <>
+      <circle cx="160" cy="46" r="16" fill="none" stroke={accent} strokeWidth="1.6" />
+      <circle cx="160" cy="46" r="8" fill={accent} opacity="0.25" />
+      {[...Array(9)].map((_, i) => {
+        const rad = ((-150 + i * 22.5) * Math.PI) / 180
+        const x1 = 160 + Math.cos(rad) * 22
+        const y1 = 46 + Math.sin(rad) * 22
+        const x2 = 160 + Math.cos(rad) * 34
+        const y2 = 46 + Math.sin(rad) * 34
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={c.gold} strokeWidth="1.4" />
+      })}
+      <line x1="24" y1="88" x2="296" y2="88" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
+  // Tulsi Serenity (Satsang) — a tulsi plant with tiers of paired leaves.
+  'tulsi-leaf': (c) => (
+    <>
+      <path d="M160,84 L160,30" stroke={c.gold} strokeWidth="1.4" fill="none" />
+      {[0, 1, 2, 3].map((i) => {
+        const y = 76 - i * 14
+        const spread = 20 + i * 4
+        return (
+          <g key={i}>
+            <path d={`M160,${y} Q${160 - spread},${y - 10} ${160 - spread + 6},${y - 22}`} fill="none" stroke={c.rose} strokeWidth="1.1" />
+            <path d={`M160,${y} Q${160 + spread},${y - 10} ${160 + spread - 6},${y - 22}`} fill="none" stroke={c.rose} strokeWidth="1.1" />
+          </g>
+        )
+      })}
+      <line x1="30" y1="90" x2="290" y2="90" stroke={c.goldSoft} strokeWidth="1" opacity="0.75" />
+    </>
+  ),
+  // Diya Ganga (Satsang) — three lit oil-lamps over a gentle river wave.
+  'diya-wave': (c, accent) => (
+    <>
+      {[120, 160, 200].map((x, i) => (
+        <g key={x}>
+          <path d={`M${x - 11},58 Q${x},44 ${x + 11},58 Z`} fill="none" stroke={c.gold} strokeWidth="1.4" />
+          <path d={`M${x},44 Q${x - 4},34 ${x},24 Q${x + 4},34 ${x},44 Z`} fill={accent} opacity={i === 1 ? 0.9 : 0.6} />
+        </g>
+      ))}
+      <path d="M30,80 Q95,64 160,80 Q225,96 290,80" fill="none" stroke={c.goldSoft} strokeWidth="1.2" opacity="0.85" />
+    </>
+  ),
+  // Celestial Om (Satsang) — an Om arc adrift among stars and a crescent.
+  'celestial-om': (c, accent) => (
+    <>
+      <path d="M140,70 A22 22 0 1 1 140,26" fill="none" stroke={c.gold} strokeWidth="1.6" />
+      <circle cx="190" cy="24" r="2.6" fill={accent} />
+      <circle cx="210" cy="42" r="1.8" fill={accent} opacity="0.8" />
+      <circle cx="180" cy="52" r="2" fill={accent} opacity="0.7" />
+      <path d="M225,60 A12 12 0 1 0 240,74" fill="none" stroke={accent} strokeWidth="1.3" />
+      <line x1="24" y1="90" x2="296" y2="90" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
 }
 
 const CORNERS = {
@@ -333,6 +415,39 @@ const CORNERS = {
     <>
       <path d="M6,50 L6,14 Q6,6 14,6 L50,6" fill="none" stroke={c.gold} strokeWidth="1.6" />
       <ellipse cx="14" cy="14" rx="5" ry="2.6" fill="none" stroke={accent} strokeWidth="1" transform="rotate(-40 14 14)" />
+    </>
+  ),
+  'peacock-feather': (c, accent) => (
+    <>
+      <path d="M6,52 Q6,26 24,16" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <circle cx="14" cy="14" r="7" fill="none" stroke={accent} strokeWidth="1.2" />
+      <circle cx="14" cy="14" r="2.4" fill={accent} opacity="0.75" />
+    </>
+  ),
+  'saffron-lotus': (c) => (
+    <path d="M6,50 Q6,22 34,12 Q18,30 6,50 Z" fill={c.blush} stroke={c.rose} strokeWidth="1" />
+  ),
+  'sunrise-rays': (c, accent) => (
+    <>
+      <circle cx="16" cy="22" r="6" fill="none" stroke={accent} strokeWidth="1.3" />
+      <line x1="16" y1="10" x2="16" y2="4" stroke={c.gold} strokeWidth="1.2" />
+      <line x1="26" y1="16" x2="32" y2="12" stroke={c.gold} strokeWidth="1.2" />
+    </>
+  ),
+  'tulsi-leaf': (c) => (
+    <path d="M14,50 L14,10 M14,30 Q24,26 28,16 M14,30 Q4,26 2,18" fill="none" stroke={c.rose} strokeWidth="1.1" />
+  ),
+  'diya-wave': (c, accent) => (
+    <>
+      <path d="M8,36 Q16,28 24,36 Z" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <path d="M16,28 Q13,22 16,16 Q19,22 16,28 Z" fill={accent} opacity="0.8" />
+    </>
+  ),
+  'celestial-om': (c, accent) => (
+    <>
+      <path d="M10,40 A10 10 0 1 1 10,20" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <circle cx="30" cy="12" r="2" fill={accent} />
+      <circle cx="40" cy="20" r="1.4" fill={accent} opacity="0.75" />
     </>
   ),
 }

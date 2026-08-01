@@ -16,7 +16,7 @@ dist-ssr
 .env
 
 # Guest RSVP submissions — personal data, never commit these
-data/
+/data/
 
 # Editor directories and files
 .vscode/*

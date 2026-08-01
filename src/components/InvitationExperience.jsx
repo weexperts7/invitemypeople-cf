@@ -215,6 +215,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                 palette={template?.palette}
                 motifAccent={template?.motifAccent}
                 couple={template?.couple}
+                heroPhoto={template?.heroPhoto}
               />
               <ScratchCardSection palette={template?.palette} />
               <EventTimeline

@@ -62,7 +62,7 @@ export default function TemplateCard({ template, onPreview, onCustomize }) {
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-rose px-4 py-2.5 text-sm font-medium text-ivory shadow-card"
           >
             <Eye className="w-3.5 h-3.5" />
-            Live Preview
+            Preview
           </motion.button>
           <motion.button
             type="button"

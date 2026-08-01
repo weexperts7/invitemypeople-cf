@@ -4,6 +4,7 @@ import { Flower2 } from 'lucide-react'
 import { getMotifIcon } from '../data/motifIcons'
 import { FrameBanner } from './TemplateFrame'
 import MotifBadge from './MotifBadge'
+import CouplePhoto from './CouplePhoto'
 import { coupleNameTier } from '../utils/coupleNameFit'
 
 const COUPLE_NAME_SIZES = [
@@ -65,7 +66,7 @@ function FloatingMotif({ className, size, duration = 8, delay = 0, parallax, Ico
   )
 }
 
-export default function WelcomeSplash({ greeting, motif, palette, motifAccent, couple }) {
+export default function WelcomeSplash({ greeting, motif, palette, motifAccent, couple, heroPhoto }) {
   const sectionRef = useRef(null)
   const reduceMotion = useReducedMotion()
   const Icon = getMotifIcon(motif) ?? Flower2
@@ -139,6 +140,16 @@ export default function WelcomeSplash({ greeting, motif, palette, motifAccent, c
         >
           <FrameBanner motif={motif} palette={palette} accent={motifAccent} className="w-full h-auto" />
         </motion.div>
+
+        {heroPhoto && (
+          <CouplePhoto
+            src={heroPhoto.src}
+            alt={heroPhoto.alt ?? coupleNames}
+            palette={palette}
+            halo={hints.halo}
+            className="mb-4"
+          />
+        )}
 
         {symbol && (
           <motion.p

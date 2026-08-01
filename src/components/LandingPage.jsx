@@ -19,10 +19,24 @@ import {
   X,
   Minus,
   Plus,
+  Flame,
+  Eye,
+  Cake,
+  Gem,
+  Baby,
+  Home,
+  Briefcase,
+  PartyPopper,
+  Gift,
 } from 'lucide-react'
 import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
+import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import TemplateCard from './TemplateCard'
+import SatsangTemplateCard from './SatsangTemplateCard'
+import TemplateMarquee from './TemplateMarquee'
 import CustomizeModal from './CustomizeModal'
+import Logo from './Logo'
+import { navigate } from '../utils/navigate'
 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
@@ -42,9 +56,20 @@ const ACCENT_TONES = [
 const HIGHLIGHTS = [
   { icon: IndianRupee, label: 'Cost-Effective' },
   { icon: Leaf, label: 'Eco-Friendly Design' },
-  { icon: Camera, label: 'Pre-Wedding Highlights' },
+  { icon: Camera, label: 'Event Highlights' },
   { icon: RefreshCw, label: '2 Free Revisions' },
   { icon: LayoutTemplate, label: 'Ready-Made Templates' },
+]
+
+// A visible signal that the two live categories aren't the whole roadmap —
+// more life-event categories are coming, not just wedding + Satsang.
+const COMING_SOON_OCCASIONS = [
+  { icon: Cake, label: 'Birthday Parties' },
+  { icon: Gem, label: 'Engagements' },
+  { icon: Baby, label: 'Baby Showers' },
+  { icon: Home, label: 'Housewarmings' },
+  { icon: Briefcase, label: 'Corporate Events' },
+  { icon: PartyPopper, label: 'Anniversaries' },
 ]
 
 const STEPS = [
@@ -80,13 +105,16 @@ const COMPARISON_ROWS = [
   },
   {
     feature: 'Cost',
-    ours: { state: 'yes', text: `₹${PRICING.shagunPrice.toLocaleString('en-IN')} shagun price, all-inclusive` },
+    ours: { state: 'yes', text: `₹${PRICING.shagunPrice.toLocaleString('en-IN')} all-inclusive, any celebration` },
     printed: { state: 'no', text: 'Card + printing + courier, per guest' },
     whatsapp: { state: 'partial', text: '"Free" but generic, no real design' },
   },
   {
     feature: 'Custom design',
-    ours: { state: 'yes', text: '10+ templates + 2 free revisions' },
+    ours: {
+      state: 'yes',
+      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length}+ templates across every occasion + 2 free revisions`,
+    },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
   },
@@ -143,9 +171,9 @@ function YoutubeIcon({ className }) {
 }
 
 const SOCIAL_LINKS = [
-  { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/vivahastudio' },
-  { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/vivahastudio' },
-  { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@vivahastudio' },
+  { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/invitemypeople' },
+  { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
+  { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
 ]
 
 const FAQS = [
@@ -156,7 +184,7 @@ const FAQS = [
   },
   {
     question: 'How much does it cost?',
-    answer: `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${PRICING.shagunPrice.toLocaleString('en-IN')} at our shagun price — all-inclusive, with no per-guest or printing costs.`,
+    answer: `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${PRICING.shagunPrice.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs.`,
   },
   {
     question: 'Can I make changes after I see my invitation?',
@@ -171,10 +199,10 @@ const FAQS = [
   {
     question: 'How do RSVPs work?',
     answer:
-      'Guests tap to respond right on the invitation — attendance, guest count, song requests and blessings all flow into one dashboard, so there\'s no chasing phone calls.',
+      'Guests tap to respond right on the invitation — attendance, guest count, and blessings or wishes all flow into one dashboard, so there\'s no chasing phone calls.',
   },
   {
-    question: 'Can I update details after the wedding date changes or a venue moves?',
+    question: 'Can I update details after the date changes or a venue moves?',
     answer:
       'Absolutely — message us the update on WhatsApp and we\'ll edit it live. Everyone with the link instantly sees the latest details, no reprinting or resending required.',
   },
@@ -227,13 +255,13 @@ const FEATURES = [
     icon: Sparkles,
     title: 'Scratch-to-Reveal Cards',
     description:
-      'A gold-foil scratch card reveals your save-the-date with real, satisfying suspense.',
+      'A gold-foil scratch card reveals something special — a save-the-date, a divine blessing, whatever suits the occasion — with real, satisfying suspense.',
   },
   {
     icon: ClipboardCheck,
     title: 'Effortless RSVP Management',
     description:
-      'Collect attendance, guest counts, song requests and blessings — all in one living dashboard.',
+      'Collect attendance, guest counts, and heartfelt wishes — all in one living dashboard.',
   },
   {
     icon: Smartphone,
@@ -267,6 +295,21 @@ function FloatingOrb({ className, size, duration = 10, delay = 0 }) {
       animate={{ y: [0, -22, 0], x: [0, 12, 0] }}
       transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
     />
+  )
+}
+
+// Faint, thin-stroke glyphs drifting behind the Hero copy — envelopes, a
+// heart, a gift, a flame (Satsang) — so the first fold reads as "digital
+// invitations for celebrations" at a glance, before a visitor reads a word.
+function FloatingIcon({ icon: Icon, className, size = 'w-9 h-9 sm:w-11 sm:h-11', duration = 9, delay = 0 }) {
+  return (
+    <motion.div
+      className={`pointer-events-none absolute text-rose/[0.14] ${className}`}
+      animate={{ y: [0, -16, 0], rotate: [0, 6, 0] }}
+      transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <Icon className={size} strokeWidth={1} />
+    </motion.div>
   )
 }
 
@@ -307,18 +350,34 @@ export default function LandingPage({ onPreview }) {
             <FloatingOrb className="left-[8%] top-16 bg-blush-deep/40" size={180} duration={11} />
             <FloatingOrb className="right-[10%] top-32 bg-gold-soft/30" size={140} duration={9} delay={1.4} />
             <FloatingOrb className="left-[20%] bottom-10 bg-champagne-deep/30" size={160} duration={13} delay={0.6} />
+
+            <FloatingIcon icon={Mail} className="left-[6%] top-24 sm:left-[10%]" duration={10} />
+            <FloatingIcon icon={Heart} className="right-[7%] top-20 sm:right-[12%]" duration={8} delay={1} />
+            <FloatingIcon icon={Gift} className="left-[10%] bottom-20 sm:left-[15%]" duration={11} delay={0.5} />
+            <FloatingIcon icon={PartyPopper} className="right-[6%] bottom-24 sm:right-[13%]" duration={9} delay={1.6} />
+            <FloatingIcon icon={Gem} className="right-[20%] top-10 hidden sm:block" duration={12} delay={0.3} />
+            <FloatingIcon icon={Flame} className="left-[22%] bottom-8 hidden sm:block" duration={10} delay={2} />
           </>
         )}
 
         <div className="relative mx-auto max-w-3xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-7 flex justify-center"
+          >
+            <Logo size="xl" />
+          </motion.div>
+
           <motion.span
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.08 }}
             className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-ink-soft shadow-card"
           >
             <Sparkles className="w-3.5 h-3.5 text-gold" />
-            Digital Wedding Invitations
+            Digital Invitations For Every Celebration
           </motion.span>
 
           <motion.h1
@@ -329,7 +388,7 @@ export default function LandingPage({ onPreview }) {
           >
             Invitations as unforgettable
             <br className="hidden sm:block" /> as your{' '}
-            <span className="font-script text-rose text-5xl sm:text-7xl">love story</span>
+            <span className="font-script text-rose text-5xl sm:text-7xl">celebration</span>
           </motion.h1>
 
           <motion.p
@@ -338,17 +397,76 @@ export default function LandingPage({ onPreview }) {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mx-auto mt-6 max-w-xl text-base sm:text-lg text-ink-soft"
           >
-            Interactive, mobile-first wedding invitations with tap-to-open
+            Interactive, mobile-first digital invitations for weddings,
+            Satsangs, and every celebration in between — tap-to-open
             envelopes, scratch-to-reveal cards, and built-in RSVP management.
-            Pick a template, make it yours.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="mx-auto mt-9 max-w-lg"
+            className="mt-9 flex flex-wrap items-center justify-center gap-3"
           >
+            <a
+              href="#templates"
+              className="inline-flex items-center gap-2 rounded-full bg-rose px-6 py-3.5 text-sm font-medium text-ivory shadow-soft transition-transform hover:scale-[1.03]"
+            >
+              <Heart className="w-4 h-4" />
+              Wedding Invitations
+            </a>
+            <a
+              href="#satsang-templates"
+              className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-ink shadow-soft transition-transform hover:scale-[1.03]"
+            >
+              <Flame className="w-4 h-4" />
+              Guruji Satsang Invitations
+            </a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="mt-5"
+          >
+            <a
+              href={getWhatsAppLink("Hi! I'd like to start a digital invitation.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-rose transition-colors"
+            >
+              Or tell us your occasion on WhatsApp
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Wedding template scroller — auto-scrolling, pauses on hover/touch */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="templates" className="bg-ivory pt-16 sm:pt-20 pb-8 scroll-mt-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10 px-6"
+        >
+          <div className="mb-4 flex justify-center">
+            <SectionEyebrow icon={Heart} tone="rose">Wedding Invitations</SectionEyebrow>
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
+            Choose Your Style
+          </h2>
+          <p className="text-ink-soft mb-8">
+            {filtered.length} template{filtered.length === 1 ? '' : 's'}{' '}
+            {activeWeddingType === 'All' ? '' : `for a ${activeWeddingType} wedding`} —
+            every one fully interactive
+          </p>
+
+          <div className="mx-auto max-w-lg">
             <div className="relative">
               <Search className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
               <input
@@ -356,17 +474,12 @@ export default function LandingPage({ onPreview }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or tradition — Hindu, Muslim, Sikh…"
-                className="w-full rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl py-4 pl-12 pr-5 text-sm text-ink placeholder:text-ink-soft/70 shadow-card focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                className="w-full rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl py-3.5 pl-12 pr-5 text-sm text-ink placeholder:text-ink-soft/70 shadow-card focus:outline-none focus:ring-2 focus:ring-gold-soft"
               />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.38 }}
-            className="mt-6 flex flex-wrap items-center justify-center gap-2"
-          >
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             {WEDDING_TYPES.map((type) => (
               <button
                 key={type}
@@ -381,22 +494,154 @@ export default function LandingPage({ onPreview }) {
                 {type}
               </button>
             ))}
+          </div>
+        </motion.div>
+
+        {filtered.length === 0 ? (
+          <div className="mx-auto max-w-sm rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl px-8 py-12 text-center shadow-card">
+            <Heart className="mx-auto mb-3 w-8 h-8 text-rose" strokeWidth={1.2} />
+            <p className="text-ink-soft">
+              No templates match &ldquo;{search}&rdquo;. Try another search
+              or category.
+            </p>
+          </div>
+        ) : (
+          <TemplateMarquee
+            items={filtered}
+            keyExtractor={(t) => t.id}
+            itemWidth={300}
+            renderItem={(template) => (
+              <TemplateCard
+                template={template}
+                onPreview={onPreview}
+                onCustomize={setCustomizeTarget}
+              />
+            )}
+          />
+        )}
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Guruji Satsang template scroller — same treatment, equal billing */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="satsang-templates" className="bg-champagne/50 pt-16 sm:pt-20 pb-16 sm:pb-20 scroll-mt-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10 px-6"
+        >
+          <div className="mb-4 flex justify-center">
+            <SectionEyebrow icon={Flame} tone="gold">Guruji Satsang Invitations</SectionEyebrow>
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
+            Devotional Templates
+          </h2>
+          <p className="text-ink-soft">
+            {SATSANG_TEMPLATES.length} template{SATSANG_TEMPLATES.length === 1 ? '' : 's'} —
+            Guruji&rsquo;s photo, a live Divine Blessing scratch card and RSVP built in
+          </p>
+        </motion.div>
+
+        <TemplateMarquee
+          items={SATSANG_TEMPLATES}
+          keyExtractor={(t) => t.slug}
+          itemWidth={300}
+          secondsPerItem={7}
+          reverse
+          renderItem={(template) => (
+            <SatsangTemplateCard
+              template={template}
+              onExplore={(slug) => navigate(`/satsang/${slug}`)}
+              whatsappHref={getWhatsAppLink(
+                `Hi! I'd like to create a "${template.name}" Satsang invitation.`,
+              )}
+            />
+          )}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-8 flex justify-center px-6"
+        >
+          <a
+            href={getWhatsAppLink("Hi! I'd like to start a Guruji Satsang invitation.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
+          >
+            <Eye className="w-4 h-4" />
+            Not sure which one? Ask us on WhatsApp
+          </a>
+        </motion.div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* More celebrations, coming soon — signals this is a platform for   */}
+      {/* every occasion, not just the two categories live today            */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="bg-ivory px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="mb-4 flex justify-center">
+              <SectionEyebrow icon={Sparkles} tone="gold">The Roadmap</SectionEyebrow>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink mb-2">
+              More Celebrations, Coming Soon
+            </h2>
+            <p className="text-ink-soft max-w-xl mx-auto">
+              Weddings and Guruji Satsangs are live today — we&rsquo;re building
+              digital invitations for every celebration next.
+            </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.46 }}
-            className="mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex flex-wrap items-center justify-center gap-3 mb-8"
           >
-            <a
-              href="#templates"
-              className="inline-flex items-center gap-2 rounded-full bg-rose px-7 py-3.5 text-sm font-medium text-ivory shadow-soft transition-transform hover:scale-[1.03]"
-            >
-              Get Started
-              <ArrowRight className="w-4 h-4" />
-            </a>
+            {COMING_SOON_OCCASIONS.map((occasion) => {
+              const Icon = occasion.icon
+              return (
+                <span
+                  key={occasion.label}
+                  className="inline-flex items-center gap-2.5 rounded-full border border-dashed border-champagne-deep/60 bg-ivory/50 pl-2 pr-4 py-2 text-sm text-ink-soft"
+                >
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-champagne/60 text-ink-soft">
+                    <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  </span>
+                  {occasion.label}
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-ink-soft/60">Soon</span>
+                </span>
+              )
+            })}
           </motion.div>
+
+          <motion.a
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            href={getWhatsAppLink("Hi! I'd like you to build a digital invitation for my event — here's the occasion:")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Request Your Occasion on WhatsApp
+          </motion.a>
         </div>
       </section>
 
@@ -412,7 +657,7 @@ export default function LandingPage({ onPreview }) {
             transition={{ duration: 0.5 }}
             className="mb-5 flex justify-center"
           >
-            <SectionEyebrow icon={Sparkles} tone="gold">Why Vivaha Studio</SectionEyebrow>
+            <SectionEyebrow icon={Sparkles} tone="gold">Why InviteMyPeople</SectionEyebrow>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -421,7 +666,7 @@ export default function LandingPage({ onPreview }) {
             transition={{ duration: 0.6 }}
             className="font-serif text-3xl sm:text-5xl text-ink mb-4"
           >
-            The Wedding Invite,
+            The Invitation,
             <br className="hidden sm:block" /> <span className="text-rose">Reinvented.</span>
           </motion.h2>
           <motion.p
@@ -467,7 +712,7 @@ export default function LandingPage({ onPreview }) {
             className="flex flex-wrap items-center justify-center gap-3"
           >
             <a
-              href={getWhatsAppLink("Hi! I'd like to start my wedding invitation.")}
+              href={getWhatsAppLink("Hi! I'd like to start my digital invitation.")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-rose px-7 py-3.5 text-sm font-medium text-ivory shadow-soft transition-transform hover:scale-[1.03]"
@@ -487,62 +732,9 @@ export default function LandingPage({ onPreview }) {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* Template gallery */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="templates" className="px-6 py-20 sm:py-24 scroll-mt-6">
-        <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <div className="mb-4 flex justify-center">
-              <SectionEyebrow icon={LayoutTemplate} tone="rose">Step 1</SectionEyebrow>
-            </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
-              Choose Your Style
-            </h2>
-            <p className="text-ink-soft">
-              {filtered.length} template{filtered.length === 1 ? '' : 's'}{' '}
-              {activeWeddingType === 'All' ? '' : `for a ${activeWeddingType} wedding`} —
-              every one fully interactive
-            </p>
-          </motion.div>
-
-          {filtered.length === 0 ? (
-            <div className="mx-auto max-w-sm rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl px-8 py-12 text-center shadow-card">
-              <Heart className="mx-auto mb-3 w-8 h-8 text-rose" strokeWidth={1.2} />
-              <p className="text-ink-soft">
-                No templates match &ldquo;{search}&rdquo;. Try another search
-                or category.
-              </p>
-            </div>
-          ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
-            >
-              <AnimatePresence mode="popLayout">
-                {filtered.map((template) => (
-                  <TemplateCard
-                    key={template.id}
-                    template={template}
-                    onPreview={onPreview}
-                    onCustomize={setCustomizeTarget}
-                  />
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
       {/* How It Works */}
       {/* ---------------------------------------------------------------- */}
-      <section className="bg-linen px-6 py-20 sm:py-24">
+      <section className="bg-blush/30 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -598,7 +790,7 @@ export default function LandingPage({ onPreview }) {
       {/* ---------------------------------------------------------------- */}
       {/* Why Choose Us — comparison */}
       {/* ---------------------------------------------------------------- */}
-      <section className="bg-blush/20 px-6 py-20 sm:py-24">
+      <section className="bg-ivory px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -684,7 +876,7 @@ export default function LandingPage({ onPreview }) {
       {/* ---------------------------------------------------------------- */}
       {/* Features */}
       {/* ---------------------------------------------------------------- */}
-      <section className="bg-linen/50 px-6 py-20 sm:py-24">
+      <section className="bg-champagne/40 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -694,7 +886,7 @@ export default function LandingPage({ onPreview }) {
             className="text-center mb-14"
           >
             <div className="mb-4 flex justify-center">
-              <SectionEyebrow icon={Heart} tone="ivory">What's Included</SectionEyebrow>
+              <SectionEyebrow icon={Heart} tone="rose">What's Included</SectionEyebrow>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
               Everything Your Guests Will Remember
@@ -760,7 +952,7 @@ export default function LandingPage({ onPreview }) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
-              href={getWhatsAppLink("Hi! I'd like to get started with my wedding invitation.")}
+              href={getWhatsAppLink("Hi! I'd like to get started with my digital invitation.")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-semibold text-ink shadow-soft transition-transform hover:scale-[1.03]"
@@ -782,7 +974,7 @@ export default function LandingPage({ onPreview }) {
       {/* ---------------------------------------------------------------- */}
       {/* FAQ */}
       {/* ---------------------------------------------------------------- */}
-      <section id="faq" className="bg-blush/20 px-6 py-20 sm:py-24 scroll-mt-6">
+      <section id="faq" className="bg-blush/40 px-6 py-20 sm:py-24 scroll-mt-6">
         <div className="mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -828,7 +1020,7 @@ export default function LandingPage({ onPreview }) {
           >
             Still have a question?{' '}
             <a
-              href={getWhatsAppLink("Hi! I have a question about my wedding invitation.")}
+              href={getWhatsAppLink("Hi! I have a question about my digital invitation.")}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-rose hover:underline"
@@ -846,21 +1038,22 @@ export default function LandingPage({ onPreview }) {
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
             <div>
-              <p className="font-script text-3xl text-rose mb-2">Vivaha Studio</p>
+              <Logo size="lg" className="mb-3" />
               <p className="text-sm text-ink-soft max-w-xs leading-relaxed">
-                Beautifully interactive digital wedding invitations —
-                designed to feel as personal as the day itself.
+                Beautifully interactive digital invitations for every
+                celebration — designed to feel as personal as the moment
+                itself.
               </p>
               <div className="mt-4 flex items-center gap-3">
                 <a
-                  href="mailto:hello@vivahastudio.com"
+                  href="mailto:hello@invitemypeople.com"
                   aria-label="Email"
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
                 >
                   <Mail className="w-4 h-4" />
                 </a>
                 <a
-                  href={getWhatsAppLink("Hi! I'd like to get started with my wedding invitation.")}
+                  href={getWhatsAppLink("Hi! I'd like to get started with my digital invitation.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="WhatsApp"
@@ -903,7 +1096,7 @@ export default function LandingPage({ onPreview }) {
                 </li>
                 <li>
                   <a
-                    href="mailto:hello@vivahastudio.com"
+                    href="mailto:hello@invitemypeople.com"
                     className="text-ink-soft hover:text-rose transition-colors"
                   >
                     Contact Us
@@ -957,9 +1150,9 @@ export default function LandingPage({ onPreview }) {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-champagne-deep/30 pt-6 text-xs text-ink-soft">
-            <p>&copy; {new Date().getFullYear()} Vivaha Studio. Crafted with love.</p>
+            <p>&copy; {new Date().getFullYear()} InviteMyPeople. Crafted with love.</p>
             <p className="flex items-center gap-1.5">
-              Made for couples, by hand
+              Made with love, by hand
               <Heart className="w-3.5 h-3.5 text-rose" fill="currentColor" />
             </p>
           </div>
@@ -971,6 +1164,30 @@ export default function LandingPage({ onPreview }) {
         onClose={() => setCustomizeTarget(null)}
         onPreview={handleCustomizePreview}
       />
+
+      <motion.a
+        href={getWhatsAppLink("Hi! I'd like to know more about InviteMyPeople.")}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        initial={{ opacity: 0, scale: 0.6, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.8, ease: 'easeOut' }}
+        whileHover={reduceMotion ? undefined : { scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
+        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-[70] flex h-14 w-14 items-center justify-center rounded-full shadow-soft"
+        style={{ backgroundColor: '#25D366' }}
+      >
+        {!reduceMotion && (
+          <motion.span
+            className="absolute inset-0 rounded-full"
+            style={{ backgroundColor: '#25D366' }}
+            animate={{ scale: [1, 1.6], opacity: [0.55, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+          />
+        )}
+        <MessageCircle className="relative w-6 h-6 text-ivory" strokeWidth={2} />
+      </motion.a>
     </div>
   )
 }

@@ -22,6 +22,21 @@ const HEADERS = [
 // Slugs are already URL-safe, so only the length cap realistically applies.
 const MAX_SHEET_NAME_LENGTH = 100
 
+// Powers the Satsang "Divine Blessing" scratch card (see
+// src/components/DivineBlessingScratchCard.jsx) — one quote per row in this
+// tab (column A: text, column B: optional author). Create the tab and add
+// rows any time; DEFAULT_BLESSINGS covers every request until you do.
+const BLESSINGS_SHEET_NAME = 'Blessings'
+
+const DEFAULT_BLESSINGS = [
+  { text: "Where there is devotion, there is Guruji's grace.", author: null },
+  { text: 'Surrender the mind, and peace follows on its own.', author: null },
+  { text: 'A moment spent in satsang is worth a lifetime of seeking.', author: null },
+  { text: "Guruji's blessings light the path even in the darkest hour.", author: null },
+  { text: 'Faith is the bridge between your effort and His grace.', author: null },
+  { text: 'Seva done with love reaches Guruji before words ever could.', author: null },
+]
+
 function doPost(e) {
   const lock = LockService.getScriptLock()
 
@@ -72,12 +87,19 @@ function doPost(e) {
 }
 
 /**
- * ?slug=<invitationSlug> returns that invitation's rows as JSON for the
- * Wishes Wall. No slug (or an unknown one) just confirms the deployment is
- * live, so opening the bare Web App URL in a browser stays a useful check.
+ * ?blessings=1 returns the Divine Blessing quote list for the Satsang
+ * scratch card. ?slug=<invitationSlug> returns that invitation's rows as
+ * JSON for the Wishes Wall. Neither param (or an unknown slug) just confirms
+ * the deployment is live, so opening the bare Web App URL stays a useful check.
  */
 function doGet(e) {
-  const slug = sanitizeSlug(e && e.parameter && e.parameter.slug)
+  const params = (e && e.parameter) || {}
+
+  if (params.blessings) {
+    return jsonOut({ ok: true, blessings: getBlessings() })
+  }
+
+  const slug = sanitizeSlug(params.slug)
 
   if (!slug) {
     return jsonOut({ ok: true, message: 'RSVP endpoint is live' })
@@ -108,6 +130,23 @@ function doGet(e) {
     .reverse() // newest first
 
   return jsonOut({ ok: true, wishes })
+}
+
+function getBlessings() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(BLESSINGS_SHEET_NAME)
+  if (!sheet || sheet.getLastRow() < 1) {
+    return DEFAULT_BLESSINGS
+  }
+
+  const rows = sheet.getRange(1, 1, sheet.getLastRow(), 2).getValues()
+  const blessings = rows
+    .map((row) => ({
+      text: String(row[0] || '').trim(),
+      author: String(row[1] || '').trim() || null,
+    }))
+    .filter((b) => b.text)
+
+  return blessings.length ? blessings : DEFAULT_BLESSINGS
 }
 
 function sanitizeSlug(rawSlug) {

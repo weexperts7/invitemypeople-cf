@@ -120,3 +120,16 @@
     animation: none;
   }
 }
+
+/* Auto-scrolling template carousels (TemplateMarquee.jsx). The track holds
+   two back-to-back copies of the item list; translating from -50% to 0%
+   slides the second copy into view from the left, reading as continuous
+   left-to-right motion, then loops with no visible seam. */
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}

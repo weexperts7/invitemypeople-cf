@@ -107,6 +107,21 @@ The first RSVP for a given invitation auto-creates its tab (named after the
 slug) with the same seven columns as Option A. Nothing to create by hand —
 just share the invitation and the tab appears on first response.
 
+### Satsang invitations
+
+Satsang RSVPs use the same mechanism — each template's slug is prefixed, so
+"The Divine Peacock" and "Saffron Blossom" land in tabs named
+`satsang-divine-peacock` and `satsang-saffron-blossom`, auto-created on first
+response exactly like the wedding tabs.
+
+The **Divine Blessing scratch card** (on every Satsang invitation) also reads
+from this same Web App, via `GET <endpoint>?blessings=1`. Add a tab named
+`Blessings` to your Sheet — column A the quote, column B an optional author —
+and every submission after your next **Deploy ▸ Manage deployments ▸ Edit ▸
+New version** will draw from it. Until that tab exists (or if you're still on
+an older deployed version of `Code.gs`), the card falls back to a small
+built-in quote list, so it always works.
+
 ### Notes on abuse
 
 With Option B the endpoint URL ships in the public JavaScript bundle —

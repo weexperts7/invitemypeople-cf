@@ -1,5 +1,8 @@
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { X, Wand2, Mail, Eye } from 'lucide-react'
+import { X, Wand2, Heart, Eye } from 'lucide-react'
+import { PRICING } from '../data/templatesData'
+
+const WHATSAPP_NUMBER = '919877647707'
 
 export default function CustomizeModal({ template, onClose, onPreview }) {
   const reduceMotion = useReducedMotion()
@@ -45,19 +48,23 @@ export default function CustomizeModal({ template, onClose, onPreview }) {
             </h3>
             <p className="text-sm text-ink-soft leading-relaxed mb-6">
               Our customization studio is launching soon — swap in your own
-              names, dates, photos and colors. Get in touch and we&rsquo;ll set
-              this template up for your big day.
+              names, dates, photos and colors. Buy now on WhatsApp and
+              we&rsquo;ll set this template up for your big day.
             </p>
 
             <div className="flex flex-col gap-2.5">
               <motion.a
-                href="mailto:hello@vivahastudio.com?subject=Customize%20the%20template"
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  `Hi! I'd like to buy the "${template.name}" wedding invitation template for myself at the shagun price of ₹${PRICING.shagunPrice.toLocaleString('en-IN')}.`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={reduceMotion ? undefined : { scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center justify-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-medium text-ivory shadow-card"
               >
-                <Mail className="w-4 h-4" />
-                Get in Touch
+                <Heart className="w-4 h-4" />
+                Buy Now — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
               </motion.a>
               <motion.button
                 type="button"

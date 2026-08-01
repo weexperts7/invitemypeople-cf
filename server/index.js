@@ -163,6 +163,12 @@ app.get('/api/rsvps.xlsx', (_req, res) => {
 // When a production build exists, serve the site from this same server.
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR))
+  // Client-side routes like /satsang/:slug (see src/App.jsx) only exist in
+  // the SPA's own router, so a direct load or refresh needs index.html
+  // served back for any non-API path — the app then reads the URL itself.
+  app.get(/^\/(?!api).*/, (_req, res) => {
+    res.sendFile(path.join(DIST_DIR, 'index.html'))
+  })
 }
 
 app.listen(PORT, () => {

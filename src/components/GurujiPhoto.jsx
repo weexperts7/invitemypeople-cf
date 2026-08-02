@@ -39,7 +39,7 @@ export default function GurujiPhoto({ size = 160, palette, halo = true, classNam
         {!errored ? (
           <img
             src={GURUJI_PHOTO_SRC}
-            alt="Guruji"
+            alt="Guruji portrait featured on the Satsang invitation"
             className="h-full w-full object-cover"
             onError={() => setErrored(true)}
           />

@@ -341,6 +341,7 @@ export default function LandingPage({ onPreview }) {
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
+      <main>
       {/* ---------------------------------------------------------------- */}
       {/* Hero */}
       {/* ---------------------------------------------------------------- */}
@@ -1030,6 +1031,7 @@ export default function LandingPage({ onPreview }) {
           </motion.p>
         </div>
       </section>
+      </main>
 
       {/* ---------------------------------------------------------------- */}
       {/* Footer */}

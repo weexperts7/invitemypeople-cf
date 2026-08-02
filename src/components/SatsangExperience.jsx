@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
-import { navigate } from '../utils/navigate'
+import { useNavigate } from 'react-router-dom'
 import { getSatsangLayoutComponent } from './satsang/layoutRegistry'
 import LegacySatsangExperience from './satsang/LegacySatsangExperience'
 
@@ -10,6 +10,8 @@ import LegacySatsangExperience from './satsang/LegacySatsangExperience'
 // declare one yet. Each bespoke component owns its own structure, CSS, and
 // interactive presentation — this file just decides which one to render.
 export default function SatsangExperience({ template }) {
+  const navigate = useNavigate()
+
   if (!template) {
     return (
       <div className="min-h-svh w-full bg-linen flex flex-col items-center justify-center gap-4 px-6 text-center">

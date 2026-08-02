@@ -4,6 +4,8 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ROUTES_SEO, SITE_URL } from '../src/data/routesSeo.js'
+import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -160,14 +162,102 @@ app.get('/api/rsvps.xlsx', (_req, res) => {
   res.download(XLSX_FILE, 'rsvps.xlsx')
 })
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+// Finds a <meta ...> tag by an attribute match (e.g. `name="description"` or
+// `property="og:title"`) and swaps its content="..." value — tolerant of the
+// multi-line attribute formatting index.html uses (`[^>]` matches newlines
+// via its negated character class, no need for a dotall flag).
+function setMetaContent(html, attrMatch, value) {
+  const re = new RegExp(`(<meta\\b[^>]*?${attrMatch}[^>]*?content=")[^"]*("[^>]*>)`, 'i')
+  return html.replace(re, `$1${escapeHtml(value)}$2`)
+}
+
+function setCanonical(html, href) {
+  return html.replace(
+    /(<link\b[^>]*?rel="canonical"[^>]*?href=")[^"]*("[^>]*>)/i,
+    `$1${escapeHtml(href)}$2`,
+  )
+}
+
+function setTitle(html, title) {
+  return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
+}
+
+// Resolves per-route SEO copy for any URL the SPA router recognizes —
+// static routes come straight from routesSeo.js; /satsang/:slug is dynamic,
+// so its title/description come from the matched template itself.
+function resolveSeoForPath(pathname) {
+  if (ROUTES_SEO[pathname]) return ROUTES_SEO[pathname]
+
+  const satsangMatch = pathname.match(/^\/satsang\/([^/]+)\/?$/)
+  if (satsangMatch) {
+    const template = getSatsangTemplateBySlug(decodeURIComponent(satsangMatch[1]))
+    if (template) {
+      const title = `${template.name} — Guruji Satsang Invitation | InviteMyPeople`
+      return { title, description: template.description, ogTitle: title, ogDescription: template.description }
+    }
+  }
+
+  return null
+}
+
+let indexHtmlTemplate = null
+function getIndexHtmlTemplate() {
+  // Cached after the first read — the file on disk doesn't change while the
+  // server is running (a fresh deploy restarts the process anyway).
+  if (indexHtmlTemplate === null) {
+    indexHtmlTemplate = fs.readFileSync(path.join(DIST_DIR, 'index.html'), 'utf8')
+  }
+  return indexHtmlTemplate
+}
+
+// The SPA is client-rendered, so the *initial* HTML response is all a
+// non-JS crawler — like WhatsApp's link-preview scraper — ever sees. This
+// swaps in the right title/description/canonical/OG tags per route before
+// sending index.html, so link previews and search snippets are correct for
+// every page, not just "/".
+function renderSeoHtml(pathname) {
+  const seo = resolveSeoForPath(pathname)
+  const html = getIndexHtmlTemplate()
+
+  if (!seo) {
+    // Unknown route — the SPA renders its 404 page client-side; keep
+    // crawlers from indexing this URL as a duplicate of the homepage.
+    return setMetaContent(html, 'name="robots"', 'noindex, follow')
+  }
+
+  const url = `${SITE_URL}${pathname}`
+  return [
+    [setTitle, seo.title],
+    [setMetaContent, 'name="description"', seo.description],
+    [setCanonical, url],
+    [setMetaContent, 'property="og:title"', seo.ogTitle || seo.title],
+    [setMetaContent, 'property="og:description"', seo.ogDescription || seo.description],
+    [setMetaContent, 'property="og:url"', url],
+    [setMetaContent, 'name="twitter:title"', seo.ogTitle || seo.title],
+    [setMetaContent, 'name="twitter:description"', seo.ogDescription || seo.description],
+  ].reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
+}
+
 // When a production build exists, serve the site from this same server.
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR))
-  // Client-side routes like /satsang/:slug (see src/App.jsx) only exist in
-  // the SPA's own router, so a direct load or refresh needs index.html
-  // served back for any non-API path — the app then reads the URL itself.
-  app.get(/^\/(?!api).*/, (_req, res) => {
-    res.sendFile(path.join(DIST_DIR, 'index.html'))
+  // Client-side routes (see src/App.jsx) only exist in the SPA's own
+  // router, so a direct load or refresh needs index.html served back for
+  // any non-API path — the app then reads the URL itself. The HTML is
+  // rewritten per-route first (see renderSeoHtml) for crawlers that don't
+  // execute JS.
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.set('Content-Type', 'text/html')
+    res.send(renderSeoHtml(req.path))
   })
 }
 

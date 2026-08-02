@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   Search,
@@ -21,22 +22,25 @@ import {
   Plus,
   Flame,
   Eye,
-  Cake,
   Gem,
-  Baby,
-  Home,
-  Briefcase,
   PartyPopper,
   Gift,
 } from 'lucide-react'
+import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
+import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
+import { ROUTES_SEO } from '../data/routesSeo'
 import TemplateCard from './TemplateCard'
 import SatsangTemplateCard from './SatsangTemplateCard'
 import TemplateMarquee from './TemplateMarquee'
 import CustomizeModal from './CustomizeModal'
+import SiteHeader from './SiteHeader'
+import SiteFooter from './SiteFooter'
+import SEO from './SEO'
 import Logo from './Logo'
-import { navigate } from '../utils/navigate'
+import { SectionEyebrow, FloatingOrb, FloatingIcon } from './PageDecor'
+import { usePreview } from '../hooks/usePreview'
 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
@@ -61,16 +65,6 @@ const HIGHLIGHTS = [
   { icon: LayoutTemplate, label: 'Ready-Made Templates' },
 ]
 
-// A visible signal that the two live categories aren't the whole roadmap —
-// more life-event categories are coming, not just wedding + Satsang.
-const COMING_SOON_OCCASIONS = [
-  { icon: Cake, label: 'Birthday Parties' },
-  { icon: Gem, label: 'Engagements' },
-  { icon: Baby, label: 'Baby Showers' },
-  { icon: Home, label: 'Housewarmings' },
-  { icon: Briefcase, label: 'Corporate Events' },
-  { icon: PartyPopper, label: 'Anniversaries' },
-]
 
 const STEPS = [
   {
@@ -140,41 +134,6 @@ function ComparisonMark({ state }) {
   const { icon, Icon } = STATE_STYLES[state]
   return <Icon className={`w-4 h-4 ${icon}`} strokeWidth={2.5} />
 }
-
-// lucide-react dropped brand/logo glyphs, so social icons are hand-drawn
-// SVGs here, sized and stroked to match the surrounding lucide icons.
-function InstagramIcon({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  )
-}
-
-function FacebookIcon({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  )
-}
-
-function YoutubeIcon({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
-      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
-    </svg>
-  )
-}
-
-const SOCIAL_LINKS = [
-  { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/invitemypeople' },
-  { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
-  { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
-]
 
 const FAQS = [
   {
@@ -271,49 +230,9 @@ const FEATURES = [
   },
 ]
 
-function SectionEyebrow({ icon: Icon, children, tone = 'rose' }) {
-  const tones = {
-    rose: 'border-rose/30 bg-blush/60 text-rose',
-    gold: 'border-gold-soft/50 bg-champagne/60 text-ink',
-    ivory: 'border-white/60 bg-ivory/70 text-ink-soft',
-  }
-  return (
-    <span
-      className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.2em] shadow-card ${tones[tone]}`}
-    >
-      {Icon && <Icon className="w-3.5 h-3.5" />}
-      {children}
-    </span>
-  )
-}
-
-function FloatingOrb({ className, size, duration = 10, delay = 0 }) {
-  return (
-    <motion.div
-      className={`pointer-events-none absolute rounded-full blur-2xl ${className}`}
-      style={{ width: size, height: size }}
-      animate={{ y: [0, -22, 0], x: [0, 12, 0] }}
-      transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
-    />
-  )
-}
-
-// Faint, thin-stroke glyphs drifting behind the Hero copy — envelopes, a
-// heart, a gift, a flame (Satsang) — so the first fold reads as "digital
-// invitations for celebrations" at a glance, before a visitor reads a word.
-function FloatingIcon({ icon: Icon, className, size = 'w-9 h-9 sm:w-11 sm:h-11', duration = 9, delay = 0 }) {
-  return (
-    <motion.div
-      className={`pointer-events-none absolute text-rose/[0.14] ${className}`}
-      animate={{ y: [0, -16, 0], rotate: [0, 6, 0] }}
-      transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      <Icon className={size} strokeWidth={1} />
-    </motion.div>
-  )
-}
-
-export default function LandingPage({ onPreview }) {
+export default function LandingPage() {
+  const onPreview = usePreview()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
   const [customizeTarget, setCustomizeTarget] = useState(null)
@@ -341,6 +260,8 @@ export default function LandingPage({ onPreview }) {
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
+      <SEO {...ROUTES_SEO['/']} path="/" />
+      <SiteHeader />
       <main>
       {/* ---------------------------------------------------------------- */}
       {/* Hero */}
@@ -420,7 +341,7 @@ export default function LandingPage({ onPreview }) {
               href="#satsang-templates"
               className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-ink shadow-soft transition-transform hover:scale-[1.03]"
             >
-              <Flame className="w-4 h-4" />
+              <FoldedHandsIcon className="w-4 h-4" />
               Guruji Satsang Invitations
             </a>
           </motion.div>
@@ -496,6 +417,14 @@ export default function LandingPage({ onPreview }) {
               </button>
             ))}
           </div>
+
+          <Link
+            to="/weddings"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
+          >
+            View the full wedding collection
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </motion.div>
 
         {filtered.length === 0 ? (
@@ -511,6 +440,7 @@ export default function LandingPage({ onPreview }) {
             items={filtered}
             keyExtractor={(t) => t.id}
             itemWidth={300}
+            reverse
             renderItem={(template) => (
               <TemplateCard
                 template={template}
@@ -534,7 +464,7 @@ export default function LandingPage({ onPreview }) {
           className="text-center mb-10 px-6"
         >
           <div className="mb-4 flex justify-center">
-            <SectionEyebrow icon={Flame} tone="gold">Guruji Satsang Invitations</SectionEyebrow>
+            <SectionEyebrow icon={FoldedHandsIcon} tone="gold">Guruji Satsang Invitations</SectionEyebrow>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
             Devotional Templates
@@ -543,6 +473,13 @@ export default function LandingPage({ onPreview }) {
             {SATSANG_TEMPLATES.length} template{SATSANG_TEMPLATES.length === 1 ? '' : 's'} —
             Guruji&rsquo;s photo, a live Divine Blessing scratch card and RSVP built in
           </p>
+          <Link
+            to="/guruji-satsangs"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
+          >
+            View the full Satsang collection
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </motion.div>
 
         <TemplateMarquee
@@ -616,16 +553,17 @@ export default function LandingPage({ onPreview }) {
             {COMING_SOON_OCCASIONS.map((occasion) => {
               const Icon = occasion.icon
               return (
-                <span
-                  key={occasion.label}
-                  className="inline-flex items-center gap-2.5 rounded-full border border-dashed border-champagne-deep/60 bg-ivory/50 pl-2 pr-4 py-2 text-sm text-ink-soft"
+                <Link
+                  key={occasion.slug}
+                  to={`/${occasion.slug}`}
+                  className="inline-flex items-center gap-2.5 rounded-full border border-dashed border-champagne-deep/60 bg-ivory/50 pl-2 pr-4 py-2 text-sm text-ink-soft transition-colors hover:bg-champagne/40 hover:text-ink"
                 >
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-champagne/60 text-ink-soft">
                     <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
                   </span>
                   {occasion.label}
                   <span className="text-[9px] uppercase tracking-[0.15em] text-ink-soft/60">Soon</span>
-                </span>
+                </Link>
               )
             })}
           </motion.div>
@@ -1033,133 +971,7 @@ export default function LandingPage({ onPreview }) {
       </section>
       </main>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Footer */}
-      {/* ---------------------------------------------------------------- */}
-      <footer className="border-t border-champagne-deep/40 bg-ivory px-6 py-14">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
-            <div>
-              <Logo size="lg" className="mb-3" />
-              <p className="text-sm text-ink-soft max-w-xs leading-relaxed">
-                Beautifully interactive digital invitations for every
-                celebration — designed to feel as personal as the moment
-                itself.
-              </p>
-              <div className="mt-4 flex items-center gap-3">
-                <a
-                  href="mailto:hello@invitemypeople.com"
-                  aria-label="Email"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                </a>
-                <a
-                  href={getWhatsAppLink("Hi! I'd like to get started with my digital invitation.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                </a>
-                {SOCIAL_LINKS.map((social) => {
-                  const Icon = social.icon
-                  return (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.label}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
-                    >
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-4">
-                Quick Links
-              </p>
-              <ul className="space-y-2.5 text-sm">
-                <li>
-                  <a href="#templates" className="text-ink-soft hover:text-rose transition-colors">
-                    Browse Templates
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-ink-soft hover:text-rose transition-colors">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="mailto:hello@invitemypeople.com"
-                    className="text-ink-soft hover:text-rose transition-colors"
-                  >
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#faq" className="text-ink-soft hover:text-rose transition-colors">
-                    FAQs
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-4">
-                Follow Us
-              </p>
-              <ul className="space-y-2.5 text-sm">
-                {SOCIAL_LINKS.map((social) => (
-                  <li key={social.label}>
-                    <a
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-ink-soft hover:text-rose transition-colors"
-                    >
-                      {social.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-4">
-                Legal
-              </p>
-              <ul className="space-y-2.5 text-sm">
-                <li>
-                  <a href="#" className="text-ink-soft hover:text-rose transition-colors">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-ink-soft hover:text-rose transition-colors">
-                    Terms of Service
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-champagne-deep/30 pt-6 text-xs text-ink-soft">
-            <p>&copy; {new Date().getFullYear()} InviteMyPeople. Crafted with love.</p>
-            <p className="flex items-center gap-1.5">
-              Made with love, by hand
-              <Heart className="w-3.5 h-3.5 text-rose" fill="currentColor" />
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <CustomizeModal
         template={customizeTarget}

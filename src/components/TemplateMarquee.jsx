@@ -1,5 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
+
+// Coarse-pointer (touch) devices get the plain swipeable row too: the
+// autoplaying track is a CSS-transform animation inside an overflow-hidden
+// box, which has no native scroll position for touch gestures to grab —
+// pausing on touch stops the animation but doesn't let a swipe move it.
+function useCoarsePointer() {
+  const [coarse, setCoarse] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+  )
+
+  useEffect(() => {
+    const mql = window.matchMedia('(pointer: coarse)')
+    const onChange = (e) => setCoarse(e.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return coarse
+}
 
 // A continuously auto-scrolling row of template cards — used for both the
 // wedding and Satsang galleries on the landing page so the two categories
@@ -23,15 +42,16 @@ export default function TemplateMarquee({
   reverse = false,
 }) {
   const reduceMotion = useReducedMotion()
+  const coarsePointer = useCoarsePointer()
   const [paused, setPaused] = useState(false)
 
   if (!items.length) return null
 
-  // Reduced motion: a plain swipeable row, no autoplay. Edge padding here
-  // (rather than on the track itself) keeps the autoplaying version flush
-  // corner-to-corner while this fallback still gives the first/last card
-  // room to breathe against the viewport edge.
-  if (reduceMotion) {
+  // Reduced motion or touch: a plain swipeable row, no autoplay. Edge
+  // padding here (rather than on the track itself) keeps the autoplaying
+  // version flush corner-to-corner while this fallback still gives the
+  // first/last card room to breathe against the viewport edge.
+  if (reduceMotion || coarsePointer) {
     return (
       <div className="flex overflow-x-auto pt-2 pb-4 pl-6 pr-6 snap-x snap-mandatory">
         {items.map((item) => (

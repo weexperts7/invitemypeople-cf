@@ -353,6 +353,67 @@ const BANNERS = {
       <line x1="24" y1="90" x2="296" y2="90" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
     </>
   ),
+  // Marigold Garland (Ganesh Chaturthi) — a strung marigold garland with a modak crest.
+  'marigold-garland': (c, accent) => (
+    <>
+      <path d="M22,20 Q160,66 298,20" fill="none" stroke={c.gold} strokeWidth="1.6" opacity="0.85" />
+      {[
+        [40, 32],
+        [76, 44],
+        [112, 52],
+        [148, 56],
+        [172, 56],
+        [208, 52],
+        [244, 44],
+        [280, 32],
+      ].map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r="6.5" fill={c.goldSoft} stroke={c.gold} strokeWidth="1" />
+          <circle cx={x} cy={y} r="2.2" fill={c.rose} />
+        </g>
+      ))}
+      <path d="M144,18 Q160,4 176,18 Q168,34 160,40 Q152,34 144,18 Z" fill={accent} opacity="0.9" />
+      <line x1="24" y1="90" x2="296" y2="90" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
+  // Modak Mandala (Ganesh Chaturthi) — a modak dome cradled in a mandala ring.
+  'modak-mandala': (c, accent) => (
+    <>
+      <circle cx="160" cy="46" r="30" fill="none" stroke={c.gold} strokeWidth="1" strokeDasharray="1.5 5" />
+      <path
+        d="M160,24 Q182,32 182,52 Q182,68 160,74 Q138,68 138,52 Q138,32 160,24 Z"
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.4"
+      />
+      <path d="M160,24 L160,14" stroke={accent} strokeWidth="1.4" />
+      <line x1="24" y1="90" x2="296" y2="90" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
+  // Royal Durbar (Ganesh Chaturthi) — a crowned jharokha arch flanked by peacock-feather flourishes.
+  'royal-durbar': (c, accent) => (
+    <>
+      <path
+        d="M30,88 L30,40 Q70,10 160,10 Q250,10 290,40 L290,88"
+        fill="none"
+        stroke={c.gold}
+        strokeWidth="2"
+      />
+      <path d="M150,22 L160,4 L170,22 Z" fill={c.gold} opacity="0.9" />
+      <circle cx="160" cy="18" r="2.6" fill={accent} />
+      <g>
+        <path d="M60,60 Q36,34 30,12" fill="none" stroke={accent} strokeWidth="1.2" opacity="0.8" />
+        <circle cx="30" cy="10" r="8" fill="none" stroke={accent} strokeWidth="1.3" />
+        <circle cx="30" cy="10" r="2.8" fill={accent} opacity="0.75" />
+      </g>
+      <g>
+        <path d="M260,60 Q284,34 290,12" fill="none" stroke={accent} strokeWidth="1.2" opacity="0.8" />
+        <circle cx="290" cy="10" r="8" fill="none" stroke={accent} strokeWidth="1.3" />
+        <circle cx="290" cy="10" r="2.8" fill={accent} opacity="0.75" />
+      </g>
+      <line x1="20" y1="92" x2="300" y2="92" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
+    </>
+  ),
 }
 
 const CORNERS = {
@@ -448,6 +509,32 @@ const CORNERS = {
       <path d="M10,40 A10 10 0 1 1 10,20" fill="none" stroke={c.gold} strokeWidth="1.3" />
       <circle cx="30" cy="12" r="2" fill={accent} />
       <circle cx="40" cy="20" r="1.4" fill={accent} opacity="0.75" />
+    </>
+  ),
+  'marigold-garland': (c, accent) => (
+    <>
+      <path d="M6,52 Q6,24 34,12" fill="none" stroke={c.gold} strokeWidth="1.4" opacity="0.85" />
+      <circle cx="12" cy="16" r="6" fill={c.goldSoft} stroke={c.gold} strokeWidth="1" />
+      <circle cx="12" cy="16" r="2" fill={accent} />
+    </>
+  ),
+  'modak-mandala': (c, accent) => (
+    <>
+      <path d="M6,50 Q6,22 34,12" fill="none" stroke={c.gold} strokeWidth="1.3" opacity="0.85" />
+      <path
+        d="M14,16 Q22,20 22,28 Q22,34 14,37 Q6,34 6,28 Q6,20 14,16 Z"
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.2"
+      />
+    </>
+  ),
+  'royal-durbar': (c, accent) => (
+    <>
+      <path d="M6,52 L6,20 Q6,6 20,6 L52,6" fill="none" stroke={c.gold} strokeWidth="1.8" />
+      <path d="M18,10 L24,2 L30,10 Z" fill={c.gold} opacity="0.85" />
+      <circle cx="14" cy="14" r="5" fill="none" stroke={accent} strokeWidth="1.2" />
+      <circle cx="14" cy="14" r="1.8" fill={accent} opacity="0.75" />
     </>
   ),
 }

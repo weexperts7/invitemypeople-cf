@@ -258,8 +258,9 @@ export default function AboutPage() {
                 One Platform, Every Occasion
               </h2>
               <p className="text-ink-soft max-w-xl mx-auto">
-                Weddings and Guruji Satsangs are live today. We&rsquo;re
-                building out the rest of life&rsquo;s celebrations next.
+                Weddings, Guruji Satsangs and Ganesh Chaturthi are live
+                today. We&rsquo;re building out the rest of life&rsquo;s
+                celebrations next.
               </p>
             </motion.div>
 
@@ -271,7 +272,7 @@ export default function AboutPage() {
               className="mb-6"
             >
               <p className="mb-3 text-xs uppercase tracking-[0.2em] text-ink-soft">Live Now</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
                   to="/weddings"
                   className="group flex items-center justify-between gap-4 rounded-3xl border border-rose/30 bg-blush/40 p-6 shadow-card transition-colors hover:bg-blush/60"
@@ -295,6 +296,19 @@ export default function AboutPage() {
                       <CheckCircle2 className="w-4 h-4 text-rose" />
                     </h3>
                     <p className="text-sm text-ink-soft">Devotional invitations with a Divine Blessing scratch card.</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 flex-none text-rose transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  to="/templates/ganesh-chaturthi"
+                  className="group flex items-center justify-between gap-4 rounded-3xl border border-gold-soft/50 bg-champagne/50 p-6 shadow-card transition-colors hover:bg-champagne/70"
+                >
+                  <div>
+                    <h3 className="font-serif text-xl text-ink mb-1 flex items-center gap-2">
+                      Ganesh Chaturthi
+                      <CheckCircle2 className="w-4 h-4 text-rose" />
+                    </h3>
+                    <p className="text-sm text-ink-soft">Immersive marigold-and-gold invitations with a curtain-reveal darshan.</p>
                   </div>
                   <ArrowRight className="w-5 h-5 flex-none text-rose transition-transform group-hover:translate-x-1" />
                 </Link>

@@ -5,14 +5,17 @@ import LandingPage from './components/LandingPage'
 import AboutPage from './pages/AboutPage'
 import WeddingsPage from './pages/WeddingsPage'
 import GurujiSatsangsPage from './pages/GurujiSatsangsPage'
+import GaneshChaturthiPage from './pages/GaneshChaturthiPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 import NotFoundPage from './pages/NotFoundPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
+import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
 import PreviewContext from './context/PreviewContext'
 import { getTemplateById } from './data/templatesData'
 import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
+import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from './data/occasionsData'
 
 // A Satsang invitation is a shareable, directly-linkable page — see
@@ -33,6 +36,26 @@ function SatsangRoute() {
         />
       )}
       <SatsangExperience template={template} />
+    </>
+  )
+}
+
+// A Ganesh Chaturthi invitation is likewise a shareable, directly-linkable
+// page — see ganeshTemplatesData.js — under /templates/ganesh-chaturthi/:slug.
+function GaneshRoute() {
+  const { slug } = useParams()
+  const template = getGaneshTemplateBySlug(slug)
+
+  return (
+    <>
+      {template && (
+        <SEO
+          title={`${template.name} — Ganesh Chaturthi Invitation | InviteMyPeople`}
+          description={template.description}
+          path={`/templates/ganesh-chaturthi/${slug}`}
+        />
+      )}
+      <GaneshExperience template={template} />
     </>
   )
 }
@@ -95,6 +118,8 @@ function App() {
             <Route path="/weddings" element={<WeddingsPage />} />
             <Route path="/guruji-satsangs" element={<GurujiSatsangsPage />} />
             <Route path="/satsang/:slug" element={<SatsangRoute />} />
+            <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
+            <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
             {COMING_SOON_OCCASIONS.map((occasion) => (
               <Route
                 key={occasion.slug}

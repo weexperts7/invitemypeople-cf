@@ -92,6 +92,14 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'Devotional digital invitations for Guruji Satsangs, complete with a Divine Blessing scratch card and built-in RSVP tracking.',
   },
+  '/templates/ganesh-chaturthi': {
+    title: 'Ganesh Chaturthi Invitations | InviteMyPeople',
+    description:
+      'Immersive digital Ganesh Chaturthi invitations — vibrant marigold & gold styling, a curtain-opening darshan reveal, full puja muhurat details, interactive RSVP and a blessing wall, delivered on WhatsApp in 30 minutes.',
+    ogTitle: 'Ganesh Chaturthi Invitations — InviteMyPeople',
+    ogDescription:
+      'Immersive, photo-rich digital invitations to welcome Ganpati Bappa — curtain-opening darshan reveal, puja muhurat, interactive RSVP and a blessing wall.',
+  },
 }
 
 export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {

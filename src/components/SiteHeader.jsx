@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles } from 'lucide-react'
 import Logo from './Logo'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
+import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 
 const PRIMARY_LINKS = [{ to: '/', label: 'Home', end: true }]
@@ -13,6 +14,7 @@ const SECONDARY_LINKS = [{ to: '/about', label: 'About', end: false }]
 const LIVE_OCCASIONS = [
   { to: '/weddings', label: 'Weddings', icon: Heart },
   { to: '/guruji-satsangs', label: 'Guruji Satsangs', icon: FoldedHandsIcon },
+  { to: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi', icon: GaneshIcon },
 ]
 const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
   to: `/${o.slug}`,

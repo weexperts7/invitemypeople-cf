@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ROUTES_SEO, SITE_URL } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
+import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -202,6 +203,15 @@ function resolveSeoForPath(pathname) {
     const template = getSatsangTemplateBySlug(decodeURIComponent(satsangMatch[1]))
     if (template) {
       const title = `${template.name} — Guruji Satsang Invitation | InviteMyPeople`
+      return { title, description: template.description, ogTitle: title, ogDescription: template.description }
+    }
+  }
+
+  const ganeshMatch = pathname.match(/^\/templates\/ganesh-chaturthi\/([^/]+)\/?$/)
+  if (ganeshMatch) {
+    const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
+    if (template) {
+      const title = `${template.name} — Ganesh Chaturthi Invitation | InviteMyPeople`
       return { title, description: template.description, ogTitle: title, ogDescription: template.description }
     }
   }

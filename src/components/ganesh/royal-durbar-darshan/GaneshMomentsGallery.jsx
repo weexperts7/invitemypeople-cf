@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Flower2, Flame, Cookie, Music2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Flower2, Flame, Cookie, Music2 } from 'lucide-react'
 
 const FALLBACK_ICONS = [Flower2, Flame, Cookie, Music2]
 const AUTOPLAY_MS = 4500
@@ -43,6 +43,15 @@ function MomentSlide({ moment, palette, rose, gold, FallbackIcon }) {
           }}
         >
           <FallbackIcon className="w-10 h-10" style={{ color: rose }} strokeWidth={1.3} />
+        </div>
+      )}
+      {moment.when && (
+        <div
+          className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 backdrop-blur-md"
+          style={{ background: 'rgba(10,4,2,0.5)' }}
+        >
+          <Clock className="w-3 h-3 text-ivory" strokeWidth={1.8} />
+          <span className="text-[11px] font-medium tracking-wide text-ivory">{moment.when}</span>
         </div>
       )}
       <div

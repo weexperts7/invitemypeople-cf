@@ -177,7 +177,7 @@ export default function GaneshRsvpForm({ palette, slug }) {
                   rows={3}
                   value={form.message}
                   onChange={handleChange('message')}
-                  placeholder="Share your blessings and wishes"
+                  placeholder="e.g. Ganpati Bappa Morya! Wishing your family a joyous and blessed celebration."
                   className="w-full rounded-lg border bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none resize-none"
                   style={{ borderColor: `${gold}55` }}
                 />

@@ -235,24 +235,28 @@ export const GANESH_TEMPLATES = [
         alt: 'Strings of fresh marigold flowers',
         caption: 'The Marigold Threshold',
         sub: 'Fresh garlands strung at the doorway',
+        when: 'September 13 · Evening',
       },
       {
         src: '/images/ganesh/royal-durbar/aarti.jpg',
         alt: 'Lit oil lamps at evening aarti',
         caption: 'Aarti’s Golden Glow',
         sub: 'Diyas lit at dusk, every evening',
+        when: 'Daily · 7:00 PM',
       },
       {
         src: '/images/ganesh/royal-durbar/modak.jpg',
         alt: 'Modak sweets offered as prasad',
         caption: 'Modak Prasad',
         sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
       },
       {
         src: '/images/ganesh/royal-durbar/dhol.jpg',
         alt: 'Dhol-tasha drummers celebrating',
         caption: 'Dhol-Tasha Welcome',
         sub: 'Drums that announce Bappa’s arrival',
+        when: 'September 14 · 6:00 AM',
       },
     ],
     palette: {

@@ -51,11 +51,11 @@ export default function DurbarPhotoHero({ template }) {
       </DurbarNiche>
 
       {greeting?.symbol && (
-        <p className="text-2xl text-champagne mb-1 drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+        <p className="text-2xl text-ivory mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
           {greeting.symbol}
         </p>
       )}
-      <p className="text-xs tracking-[0.35em] uppercase text-champagne/90 mb-4 drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+      <p className="text-xs tracking-[0.35em] uppercase text-ivory/90 mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
         {greeting?.line ?? 'Ganpati Bappa Morya'}
       </p>
       <p className="font-serif text-4xl sm:text-5xl leading-tight mb-4 text-ivory drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">

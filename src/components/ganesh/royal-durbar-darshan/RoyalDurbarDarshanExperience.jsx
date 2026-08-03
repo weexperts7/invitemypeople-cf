@@ -60,7 +60,9 @@ export default function RoyalDurbarDarshanExperience({ template }) {
             <MuhuratScroll event={event} puja={puja} palette={palette} gold={gold} rose={rose} />
           </section>
 
-          <GaneshRsvpForm palette={palette} slug={invitationSlug} />
+          <div className="px-6">
+            <GaneshRsvpForm palette={palette} slug={invitationSlug} />
+          </div>
           <WishesWall
             slug={invitationSlug}
             renderIcon={() => <Crown className="w-3.5 h-3.5" style={{ color: rose }} strokeWidth={1.6} />}

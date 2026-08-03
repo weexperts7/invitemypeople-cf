@@ -25,10 +25,11 @@ export default function GaneshIdolPhoto({ size = 160, palette, halo = true, clas
       )}
 
       <span
-        className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 shadow-soft"
+        className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4"
         style={{
           borderColor: palette?.gold ?? '#d9932e',
           background: palette?.champagne ?? '#fbdc9e',
+          boxShadow: '0 0 0 3px rgba(10,4,2,0.4), 0 8px 22px rgba(10,4,2,0.5)',
         }}
       >
         {!errored ? (

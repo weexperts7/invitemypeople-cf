@@ -133,7 +133,9 @@ export default function GoldenTrunkBlessingExperience({ template }) {
             </div>
           </section>
 
-          <GaneshRsvpForm palette={palette} slug={invitationSlug} />
+          <div className="px-6">
+            <GaneshRsvpForm palette={palette} slug={invitationSlug} />
+          </div>
           <WishesWall
             slug={invitationSlug}
             renderIcon={() => <ModakGlyph color={gold} accent={rose} size={14} />}

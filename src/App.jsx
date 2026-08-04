@@ -6,11 +6,8 @@ import AboutPage from './pages/AboutPage'
 import WeddingsPage from './pages/WeddingsPage'
 import GurujiSatsangsPage from './pages/GurujiSatsangsPage'
 import GaneshChaturthiPage from './pages/GaneshChaturthiPage'
-// CreateInvitePage / GeneratedInvitePage (the Invitation Builder's /create
-// and /i/:slug pages) are intentionally not routed yet — they save/load via
-// /api/invites, which has no backend in production. Re-enable the two
-// routes below (and the "Create Invite" nav links in SiteHeader.jsx) once
-// that API + persistent storage exists on the deployed host.
+import CreateInvitePage from './pages/CreateInvitePage'
+import GeneratedInvitePage from './pages/GeneratedInvitePage'
 import ComingSoonPage from './pages/ComingSoonPage'
 import NotFoundPage from './pages/NotFoundPage'
 import InvitationExperience from './components/InvitationExperience'
@@ -125,7 +122,8 @@ function App() {
             <Route path="/satsang/:slug" element={<SatsangRoute />} />
             <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
             <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
-            {/* /create and /i/:slug: see the import comment above. */}
+            <Route path="/create" element={<CreateInvitePage />} />
+            <Route path="/i/:slug" element={<GeneratedInvitePage />} />
             {COMING_SOON_OCCASIONS.map((occasion) => (
               <Route
                 key={occasion.slug}

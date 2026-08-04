@@ -1,0 +1,72 @@
+// POST /api/invites — a Vercel Serverless Function. Production counterpart
+// to the local-dev POST /api/invites route in server/index.js: same
+// validation and slug scheme, but persists to Supabase (see
+// api/_lib/supabase.js) instead of a flat JSON file, since Vercel's runtime
+// has no writable, persistent filesystem to keep one on.
+import { slugify } from '../../src/utils/slugify.js'
+import { getSupabase } from '../_lib/supabase.js'
+import { clean, randomSlugSuffix, rowToInvite } from '../_lib/invites.js'
+
+const MAX_SLUG_ATTEMPTS = 6
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  try {
+    const body = req.body || {}
+
+    const names = clean(body.names, 120)
+    const date = clean(body.date, 20)
+    const venue = clean(body.venue, 200)
+    if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
+    if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
+    if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+
+    const row = {
+      occasion: clean(body.occasion, 40),
+      template_id: clean(body.templateId, 80),
+      template_name: clean(body.templateName, 120),
+      names,
+      date,
+      time: clean(body.time, 10),
+      venue,
+      location_url: clean(body.locationUrl, 500),
+      message: clean(body.message, 2000),
+      amount: Number(body.amount) || 0,
+      payment_id: clean(body.paymentId, 80),
+      payment_status: body.paymentId ? 'paid' : 'pending',
+    }
+
+    const base = slugify(names) || 'invite'
+    const supabase = getSupabase()
+
+    // The `invites` table has a unique constraint on slug — retry on
+    // collision instead of reading every existing invite first (as the
+    // flat-file version had to) to pick a free one.
+    let lastError = null
+    for (let attempt = 0; attempt < MAX_SLUG_ATTEMPTS; attempt++) {
+      const slug = `${base}-${randomSlugSuffix()}`
+      const { data, error } = await supabase
+        .from('invites')
+        .insert({ ...row, slug })
+        .select()
+        .single()
+
+      if (!error) {
+        console.log(`[invites] saved "${slug}" (${row.template_name || row.template_id})`)
+        return res.status(200).json({ ok: true, invite: rowToInvite(data) })
+      }
+
+      lastError = error
+      if (error.code !== '23505') break // not a unique-violation — don't retry
+    }
+
+    throw lastError || new Error('could not generate a unique slug')
+  } catch (err) {
+    console.error('[invites] failed to save:', err)
+    res.status(500).json({ ok: false, error: 'could not save invitation' })
+  }
+}

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { AlertCircle, Heart, Loader2 } from 'lucide-react'
 
-// The Wishes Wall only reads from the Apps Script endpoint (see
-// google-apps-script/Code.gs's doGet) — the local Excel API has no GET-by-slug
-// route, so this stays quiet on the default local-dev setup.
-const ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT
+// Reads from the Apps Script endpoint (see google-apps-script/Code.gs's
+// doGet) when VITE_RSVP_ENDPOINT is configured; otherwise falls back to the
+// bundled local API's GET /api/wishes (see server/index.js), which reads the
+// same data/rsvps.json every RsvpForm submission already writes to. Either
+// way, a Wishes Wall pointed at a real slug always has something to show.
+const REMOTE_ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT
 
 export default function WishesWall({
   slug,
@@ -20,12 +22,16 @@ export default function WishesWall({
   const reduceMotion = useReducedMotion()
 
   useEffect(() => {
-    if (!ENDPOINT || !slug) return
+    if (!slug) return
 
     let cancelled = false
     setStatus('loading')
 
-    fetch(`${ENDPOINT}?slug=${encodeURIComponent(slug)}`)
+    const url = REMOTE_ENDPOINT
+      ? `${REMOTE_ENDPOINT}?slug=${encodeURIComponent(slug)}`
+      : `/api/wishes?slug=${encodeURIComponent(slug)}`
+
+    fetch(url)
       .then((res) => res.json())
       .then((result) => {
         if (cancelled) return
@@ -45,9 +51,9 @@ export default function WishesWall({
     }
   }, [slug])
 
-  // No Apps Script endpoint configured, nothing fetched yet, or the sheet
-  // has no wishes — there's nothing worth showing.
-  if (!ENDPOINT || status === 'idle' || (status === 'success' && wishes.length === 0)) {
+  // Nothing fetched yet, or there are no wishes to show — render nothing
+  // rather than an empty section.
+  if (status === 'idle' || (status === 'success' && wishes.length === 0)) {
     return null
   }
 

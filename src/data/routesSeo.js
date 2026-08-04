@@ -100,6 +100,14 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'Immersive, photo-rich digital invitations to welcome Ganpati Bappa — curtain-opening darshan reveal, puja muhurat, interactive RSVP and a blessing wall.',
   },
+  '/create': {
+    title: 'Invitation Builder | InviteMyPeople',
+    description:
+      'Build your own digital invitation — pick a style for your Wedding, Ganesh Chaturthi or Guruji Satsang, add your names, date and venue, and watch a live preview update instantly.',
+    ogTitle: 'Invitation Builder — InviteMyPeople',
+    ogDescription:
+      'Pick a template style, fill in your details, and watch your invitation come to life in a live preview — then send it to us on WhatsApp to finalize.',
+  },
 }
 
 export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {

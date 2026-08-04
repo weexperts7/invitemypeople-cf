@@ -6,12 +6,21 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ROUTES_SEO, SITE_URL } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
+import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
+import { slugify } from '../src/utils/slugify.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const DATA_DIR = path.join(ROOT, 'data')
 const JSON_FILE = path.join(DATA_DIR, 'rsvps.json')
 const XLSX_FILE = path.join(DATA_DIR, 'rsvps.xlsx')
+// Invitation Builder saves — see POST /api/invites below. A flat JSON file
+// standing in for "a database table" (this project's explicit local-
+// persistence option instead of standing up Supabase): same shape a real
+// table would have, same read-modify-write-via-queue discipline as the RSVP
+// store above, easy to swap for a real DB later without touching callers —
+// only createInvite()/getInviteBySlug() in src/utils/inviteApi.js would change.
+const INVITES_FILE = path.join(DATA_DIR, 'invites.json')
 const DIST_DIR = path.join(ROOT, 'dist')
 
 // `--port N` wins so `npm run dev` can pin the API and never fight the Vite
@@ -92,6 +101,36 @@ function clean(value, max) {
     .slice(0, max)
 }
 
+/** Same read-modify-write-via-queue discipline as the RSVP store, kept as
+ * its own queue/file so a burst of invite saves can never interleave with
+ * (or wait behind) a burst of RSVP saves. */
+let invitesWriteQueue = Promise.resolve()
+function enqueueInvites(task) {
+  const run = invitesWriteQueue.then(task, task)
+  invitesWriteQueue = run.catch(() => {})
+  return run
+}
+
+async function readAllInvites() {
+  try {
+    return JSON.parse(await fsp.readFile(INVITES_FILE, 'utf8'))
+  } catch (err) {
+    if (err.code === 'ENOENT') return []
+    throw err
+  }
+}
+
+async function persistInvites(entries) {
+  await fsp.mkdir(DATA_DIR, { recursive: true })
+  const tmp = `${INVITES_FILE}.tmp`
+  await fsp.writeFile(tmp, JSON.stringify(entries, null, 2), 'utf8')
+  await fsp.rename(tmp, INVITES_FILE)
+}
+
+function randomSlugSuffix() {
+  return Math.random().toString(36).slice(2, 8)
+}
+
 const app = express()
 app.use(express.json({ limit: '64kb' }))
 // Plain-text bodies keep the browser request "simple" (no CORS preflight).
@@ -162,6 +201,92 @@ app.get('/api/rsvps.xlsx', (_req, res) => {
   res.download(XLSX_FILE, 'rsvps.xlsx')
 })
 
+// Wishes Wall, local-persistence path — reads back the same rsvps.json every
+// RsvpForm submission writes to, filtered to one invitation's slug and to
+// entries that actually left a message. Mirrors the shape
+// google-apps-script/Code.gs's doGet returns, so WishesWall.jsx (see its
+// REMOTE_ENDPOINT fallback) doesn't need to know which source it's reading.
+app.get('/api/wishes', async (req, res) => {
+  try {
+    const slug = clean(req.query.slug, 80)
+    const entries = await readAll()
+    const wishes = entries
+      .filter((e) => e.invitationSlug === slug && String(e.message || '').trim())
+      .map((e) => ({ name: e.name, message: e.message, timestamp: e.submittedAt }))
+    res.json({ ok: true, wishes })
+  } catch (err) {
+    console.error('[wishes] failed to read:', err)
+    res.status(500).json({ ok: false, error: 'could not load wishes' })
+  }
+})
+
+// Invitation Builder — see src/pages/CreateInvitePage.jsx. Called once the
+// (currently simulated) Razorpay Test Mode payment succeeds, so every saved
+// entry here represents a "paid" invite. Generates the unique shareable slug
+// (see src/App.jsx's /i/:slug route) from the submitted names plus a random
+// suffix — readable, but not guessable or collision-prone the way a bare
+// name-derived slug would be for two "Rohan & Priya"s.
+app.post('/api/invites', async (req, res) => {
+  try {
+    const body = req.body || {}
+
+    const names = clean(body.names, 120)
+    const date = clean(body.date, 20)
+    const venue = clean(body.venue, 200)
+    if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
+    if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
+    if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+
+    const invite = await enqueueInvites(async () => {
+      const entries = await readAllInvites()
+      const existingSlugs = new Set(entries.map((e) => e.slug))
+      const base = slugify(names) || 'invite'
+      let slug = `${base}-${randomSlugSuffix()}`
+      while (existingSlugs.has(slug)) slug = `${base}-${randomSlugSuffix()}`
+
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        slug,
+        occasion: clean(body.occasion, 40),
+        templateId: clean(body.templateId, 80),
+        templateName: clean(body.templateName, 120),
+        names,
+        date,
+        time: clean(body.time, 10),
+        venue,
+        locationUrl: clean(body.locationUrl, 500),
+        message: clean(body.message, 2000),
+        amount: Number(body.amount) || 0,
+        paymentId: clean(body.paymentId, 80),
+        paymentStatus: body.paymentId ? 'paid' : 'pending',
+        createdAt: new Date().toISOString(),
+      }
+      entries.push(entry)
+      await persistInvites(entries)
+      return entry
+    })
+
+    console.log(`[invites] saved "${invite.slug}" (${invite.templateName || invite.templateId})`)
+    res.json({ ok: true, invite })
+  } catch (err) {
+    console.error('[invites] failed to save:', err)
+    res.status(500).json({ ok: false, error: 'could not save invitation' })
+  }
+})
+
+/** Powers the live /i/:slug page — loads back exactly what was saved above. */
+app.get('/api/invites/:slug', async (req, res) => {
+  try {
+    const entries = await readAllInvites()
+    const invite = entries.find((e) => e.slug === req.params.slug)
+    if (!invite) return res.status(404).json({ ok: false, error: 'invitation not found' })
+    res.json({ ok: true, invite })
+  } catch (err) {
+    console.error('[invites] failed to read:', err)
+    res.status(500).json({ ok: false, error: 'could not load invitation' })
+  }
+})
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -202,6 +327,15 @@ function resolveSeoForPath(pathname) {
     const template = getSatsangTemplateBySlug(decodeURIComponent(satsangMatch[1]))
     if (template) {
       const title = `${template.name} — Guruji Satsang Invitation | InviteMyPeople`
+      return { title, description: template.description, ogTitle: title, ogDescription: template.description }
+    }
+  }
+
+  const ganeshMatch = pathname.match(/^\/templates\/ganesh-chaturthi\/([^/]+)\/?$/)
+  if (ganeshMatch) {
+    const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
+    if (template) {
+      const title = `${template.name} — Ganesh Chaturthi Invitation | InviteMyPeople`
       return { title, description: template.description, ogTitle: title, ogDescription: template.description }
     }
   }

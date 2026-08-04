@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles } from 'lucide-react'
+import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Wand2 } from 'lucide-react'
 import Logo from './Logo'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
+import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 
 const PRIMARY_LINKS = [{ to: '/', label: 'Home', end: true }]
@@ -13,6 +14,7 @@ const SECONDARY_LINKS = [{ to: '/about', label: 'About', end: false }]
 const LIVE_OCCASIONS = [
   { to: '/weddings', label: 'Weddings', icon: Heart },
   { to: '/guruji-satsangs', label: 'Guruji Satsangs', icon: FoldedHandsIcon },
+  { to: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi', icon: GaneshIcon },
 ]
 const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
   to: `/${o.slug}`,
@@ -135,11 +137,19 @@ export default function SiteHeader() {
             </NavLink>
           ))}
 
+          <Link
+            to="/create"
+            className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-gold px-4 py-2 text-sm font-medium text-ink shadow-card transition-transform hover:scale-[1.03]"
+          >
+            <Wand2 className="w-3.5 h-3.5" />
+            Create Invite
+          </Link>
+
           <a
             href={getWhatsAppLink("Hi! I'd like to know more about InviteMyPeople.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-rose px-4 py-2 text-sm font-medium text-ivory shadow-card transition-transform hover:scale-[1.03]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-rose px-4 py-2 text-sm font-medium text-ivory shadow-card transition-transform hover:scale-[1.03]"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             WhatsApp Us
@@ -198,6 +208,15 @@ export default function SiteHeader() {
               </NavLink>
             ))}
           </div>
+
+          <Link
+            to="/create"
+            onClick={() => setOpen(false)}
+            className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-gold px-4 py-2.5 text-sm font-medium text-ink shadow-card"
+          >
+            <Wand2 className="w-3.5 h-3.5" />
+            Create Invite
+          </Link>
 
           <a
             href={getWhatsAppLink("Hi! I'd like to know more about InviteMyPeople.")}

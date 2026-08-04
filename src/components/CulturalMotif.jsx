@@ -193,6 +193,48 @@ const MOTIFS = {
       />
     </pattern>
   ),
+  // Marigold Garland (Ganesh Chaturthi) — a tiled strung marigold bloom.
+  'marigold-garland': (line, accent) => (
+    <pattern id="motif-marigold-garland" width="120" height="120" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke={line} strokeWidth="1.2">
+        <circle cx="60" cy="60" r="10" />
+        <circle cx="60" cy="44" r="7" />
+        <circle cx="76" cy="60" r="7" />
+        <circle cx="60" cy="76" r="7" />
+        <circle cx="44" cy="60" r="7" />
+      </g>
+      <circle cx="60" cy="60" r="3.2" fill={accent} opacity="0.75" />
+    </pattern>
+  ),
+  // Modak Mandala (Ganesh Chaturthi) — a modak dumpling nested in a mandala ring.
+  'modak-mandala': (line, accent) => (
+    <pattern id="motif-modak-mandala" width="110" height="110" patternUnits="userSpaceOnUse">
+      <circle cx="55" cy="55" r="34" fill="none" stroke={line} strokeWidth="1" strokeDasharray="1.5 5" />
+      <path
+        d="M55 38 Q70 44 70 60 Q70 74 55 78 Q40 74 40 60 Q40 44 55 38 Z"
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.3"
+      />
+      <path d="M55 38 L55 30" stroke={accent} strokeWidth="1.3" />
+    </pattern>
+  ),
+  // Royal Durbar (Ganesh Chaturthi) — a small crown flanked by paired flame accents.
+  'royal-durbar': (line, accent) => (
+    <pattern id="motif-royal-durbar" width="130" height="130" patternUnits="userSpaceOnUse">
+      <path d="M55 40 L65 22 L75 40 Z" fill="none" stroke={line} strokeWidth="1.3" />
+      <line x1="55" y1="40" x2="75" y2="40" stroke={line} strokeWidth="1.3" />
+      {[46, 84].map((x) => (
+        <path
+          key={x}
+          d={`M${x} 60 Q${x - 4} 50 ${x} 42 Q${x + 4} 50 ${x} 60 Z`}
+          fill={accent}
+          opacity="0.75"
+        />
+      ))}
+      <path d="M30 90 Q65 78 100 90" fill="none" stroke={line} strokeWidth="1" opacity="0.7" />
+    </pattern>
+  ),
   // Celestial Om (Satsang) — an Om arc adrift among stars and a crescent.
   'celestial-om': (line, accent) => (
     <pattern id="motif-celestial-om" width="100" height="100" patternUnits="userSpaceOnUse">

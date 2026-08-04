@@ -27,12 +27,15 @@ import {
   Gift,
 } from 'lucide-react'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
+import { GaneshIcon } from './icons/GaneshIcon'
 import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
+import { GANESH_TEMPLATES } from '../data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import { ROUTES_SEO } from '../data/routesSeo'
 import TemplateCard from './TemplateCard'
 import SatsangTemplateCard from './SatsangTemplateCard'
+import GaneshTemplateCard from './GaneshTemplateCard'
 import TemplateMarquee from './TemplateMarquee'
 import CustomizeModal from './CustomizeModal'
 import SiteHeader from './SiteHeader'
@@ -107,7 +110,7 @@ const COMPARISON_ROWS = [
     feature: 'Custom design',
     ours: {
       state: 'yes',
-      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length}+ templates across every occasion + 2 free revisions`,
+      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion + 2 free revisions`,
     },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
@@ -344,6 +347,13 @@ export default function LandingPage() {
               <FoldedHandsIcon className="w-4 h-4" />
               Guruji Satsang Invitations
             </a>
+            <a
+              href="#ganesh-templates"
+              className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3.5 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
+            >
+              <GaneshIcon className="w-4 h-4" />
+              Ganesh Chaturthi Invitations
+            </a>
           </motion.div>
 
           <motion.div
@@ -519,8 +529,73 @@ export default function LandingPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
+      {/* Ganesh Chaturthi template scroller — same treatment, equal billing */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="ganesh-templates" className="bg-ivory pt-16 sm:pt-20 pb-16 sm:pb-20 scroll-mt-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10 px-6"
+        >
+          <div className="mb-4 flex justify-center">
+            <SectionEyebrow icon={GaneshIcon} tone="gold">Ganesh Chaturthi Invitations</SectionEyebrow>
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
+            Immersive Devotional Templates
+          </h2>
+          <p className="text-ink-soft">
+            {GANESH_TEMPLATES.length} template{GANESH_TEMPLATES.length === 1 ? '' : 's'} —
+            a curtain-opening darshan reveal, full puja muhurat and RSVP built in
+          </p>
+          <Link
+            to="/templates/ganesh-chaturthi"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
+          >
+            View the full Ganesh Chaturthi collection
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </motion.div>
+
+        <TemplateMarquee
+          items={GANESH_TEMPLATES}
+          keyExtractor={(t) => t.slug}
+          itemWidth={300}
+          secondsPerItem={7}
+          renderItem={(template) => (
+            <GaneshTemplateCard
+              template={template}
+              onExplore={(slug) => navigate(`/templates/ganesh-chaturthi/${slug}`)}
+              whatsappHref={getWhatsAppLink(
+                `Hi! I'd like to create a "${template.name}" Ganesh Chaturthi invitation.`,
+              )}
+            />
+          )}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-8 flex justify-center px-6"
+        >
+          <a
+            href={getWhatsAppLink("Hi! I'd like to start a Ganesh Chaturthi invitation.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
+          >
+            <Eye className="w-4 h-4" />
+            Not sure which one? Ask us on WhatsApp
+          </a>
+        </motion.div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
       {/* More celebrations, coming soon — signals this is a platform for   */}
-      {/* every occasion, not just the two categories live today            */}
+      {/* every occasion, not just the three categories live today          */}
       {/* ---------------------------------------------------------------- */}
       <section className="bg-ivory px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-4xl text-center">
@@ -538,8 +613,9 @@ export default function LandingPage() {
               More Celebrations, Coming Soon
             </h2>
             <p className="text-ink-soft max-w-xl mx-auto">
-              Weddings and Guruji Satsangs are live today — we&rsquo;re building
-              digital invitations for every celebration next.
+              Weddings, Guruji Satsangs and Ganesh Chaturthi are live
+              today — we&rsquo;re building digital invitations for every
+              celebration next.
             </p>
           </motion.div>
 

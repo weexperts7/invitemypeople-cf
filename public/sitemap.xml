@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://invitemypeople.com/templates/ganesh-chaturthi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://invitemypeople.com/birthdays</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

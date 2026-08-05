@@ -6,9 +6,13 @@ import {
   Check,
   CheckCircle2,
   Copy,
+  Flower,
+  Heart,
   Loader2,
   MessageCircle,
+  Music,
   PartyPopper,
+  Sparkle,
 } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -16,10 +20,76 @@ import SEO from '../components/SEO'
 import RsvpForm from '../components/RsvpForm'
 import WishesWall from '../components/WishesWall'
 import InvitePreviewCard from '../components/builder/InvitePreviewCard'
+import InvitationExperience from '../components/InvitationExperience'
 import { getBuilderTemplateById } from '../data/builderTemplates'
 import { getInviteBySlug } from '../utils/inviteApi'
-import { formatInviteDate } from '../utils/formatInviteDateTime'
+import { formatInviteDate, formatInviteTime, mapsSearchUrl } from '../utils/formatInviteDateTime'
 import { SITE_URL } from '../data/routesSeo'
+
+// Picks an icon by keyword in the event's own title — mirrors the variety
+// the pre-built templates' own hardcoded ceremony lists already use
+// (Flower/Music/Sparkle/Heart/PartyPopper) instead of every entry in a
+// multi-event schedule showing the same icon.
+function iconForEventTitle(title) {
+  const t = (title || '').toLowerCase()
+  if (t.includes('haldi')) return Flower
+  if (t.includes('sangeet') || t.includes('dance')) return Music
+  if (t.includes('mehndi') || t.includes('mehendi')) return Sparkle
+  if (t.includes('reception') || t.includes('party')) return PartyPopper
+  return Heart
+}
+
+// Formats one buyer-submitted event (main or additional) into the shape
+// EventTimeline.jsx expects.
+function toCeremony({ title, date, time, venue, locationUrl }) {
+  return {
+    icon: iconForEventTitle(title),
+    title,
+    date: formatInviteDate(date),
+    time: formatInviteTime(time),
+    venue,
+    mapHref: locationUrl?.trim() || mapsSearchUrl(venue),
+  }
+}
+
+// Wedding invites get the same full envelope/scratch-card/timeline/gallery
+// experience every pre-built template uses (see InvitationExperience.jsx),
+// built from a merged object: palette/motif/fonts/etc. from the selected
+// builder template, but names/date/venue/message overridden with what the
+// buyer actually submitted. The timeline shows the buyer's own real
+// event(s) — the main one plus any "Additional Events" they added (see
+// CreateInvitePage.jsx) — not the stock multi-ceremony schedule those
+// templates ship with as a demo.
+// Real uploaded photos (see CreateInvitePage.jsx) win over the template's
+// stock "Our Moments" gallery when the buyer added any — but deliberately
+// NOT the circular hero-photo medallion: that frame's tight circular crop
+// was designed around specific pre-vetted stock photos, and forcing an
+// arbitrary upload into it crops faces/framing unpredictably. The hero
+// medallion stays whatever the template itself ships (often nothing).
+function buildWeddingExperienceTemplate(invite, template) {
+  const photos = invite.photos?.length ? invite.photos : []
+  const mainEvent = toCeremony({
+    title: invite.eventTitle?.trim() || 'Wedding Ceremony',
+    date: invite.date,
+    time: invite.time,
+    venue: invite.venue,
+    locationUrl: invite.locationUrl,
+  })
+  const additionalEvents = (invite.events ?? []).map(toCeremony)
+
+  return {
+    ...template,
+    couple: {
+      names: invite.names,
+      invitationLine: invite.message?.trim() || template.connective,
+      people: [],
+    },
+    ceremoniesHeading: 'Event Details',
+    ceremonies: [mainEvent, ...additionalEvents],
+    weddingDate: invite.time ? `${invite.date}T${invite.time}:00` : `${invite.date}T00:00:00`,
+    photos,
+  }
+}
 
 // Where a paid Invitation Builder submission (CreateInvitePage.jsx) lands —
 // a real, shareable /i/:slug page loaded back from the local invites API
@@ -101,14 +171,43 @@ export default function GeneratedInvitePage() {
     }
   }
 
+  const seo = (
+    <SEO
+      title={`${invite.names} — Live Invitation | InviteMyPeople`}
+      description={`${invite.names}'s live invitation, generated with InviteMyPeople.`}
+      path={`/i/${invite.slug}`}
+      noindex
+    />
+  )
+
+  // Wedding invites: the shareable link is what GUESTS open — it should be
+  // exactly the same self-contained envelope/scratch-card/timeline/gallery
+  // experience every pre-built template's link already is (see
+  // SatsangRoute/GaneshRoute in App.jsx), with no site nav or "copy your
+  // link" chrome around it. It owns its own RSVP form and Wishes Wall
+  // internally (both keyed to invite.slug via invitationSlug). The buyer's
+  // own copy-link/WhatsApp-share moment lives on CreateInvitePage's success
+  // step instead, not on the link guests actually receive.
+  if (invite.occasion === 'wedding') {
+    return (
+      <>
+        {seo}
+        <InvitationExperience
+          template={buildWeddingExperienceTemplate(invite, template)}
+          invitationSlug={invite.slug}
+        />
+      </>
+    )
+  }
+
+  // Ganesh Chaturthi / Guruji Satsang invites keep the lighter preview-card
+  // treatment (plus the copy-link/share banner) for now — those templates
+  // route through several bespoke per-template layout components (see
+  // GaneshExperience.jsx / SatsangExperience.jsx) that don't yet support an
+  // external slug override the way InvitationExperience now does.
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO
-        title={`${invite.names} — Live Invitation | InviteMyPeople`}
-        description={`${invite.names}'s live invitation, generated with InviteMyPeople.`}
-        path={`/i/${invite.slug}`}
-        noindex
-      />
+      {seo}
       <SiteHeader />
 
       <main>

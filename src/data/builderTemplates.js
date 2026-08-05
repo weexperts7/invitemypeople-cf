@@ -11,7 +11,11 @@
 // and adds only what the builder itself needs: a generic `example` (the
 // placeholder content shown in the live preview before a user types
 // anything) and a `connective` line (the "invite you to..." sentence,
-// reused verbatim from that template's own copy).
+// reused verbatim from that template's own copy). Wedding entries also
+// borrow `weddingType`/`heroPhoto` — GeneratedInvitePage.jsx renders a paid
+// wedding invite through the full InvitationExperience (not just the
+// lightweight preview card these two fields alone would suggest), and
+// InvitationExperience needs them for the photo gallery / hero image.
 import { Heart } from 'lucide-react'
 import { GaneshIcon } from '../components/icons/GaneshIcon'
 import { FoldedHandsIcon } from '../components/icons/FoldedHandsIcon'
@@ -76,6 +80,8 @@ export const BUILDER_TEMPLATES = [
       motif: src.motif,
       motifAccent: src.motifAccent,
       fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
       greeting: src.greeting,
       connective: src.couple.invitationLine,
       example: {
@@ -99,6 +105,8 @@ export const BUILDER_TEMPLATES = [
       motif: src.motif,
       motifAccent: src.motifAccent,
       fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
       greeting: src.greeting,
       connective: src.couple.invitationLine,
       example: {
@@ -122,6 +130,8 @@ export const BUILDER_TEMPLATES = [
       motif: src.motif,
       motifAccent: src.motifAccent,
       fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
       greeting: src.greeting,
       connective: src.couple.invitationLine,
       example: {
@@ -144,6 +154,8 @@ export const BUILDER_TEMPLATES = [
       motif: src.motif,
       motifAccent: src.motifAccent,
       fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
       greeting: src.greeting,
       connective: src.couple.invitationLine,
       example: {

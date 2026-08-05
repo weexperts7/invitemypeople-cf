@@ -6,6 +6,8 @@
 import { slugify } from '../../src/utils/slugify.js'
 import { getSupabase } from '../_lib/supabase.js'
 import { clean, randomSlugSuffix, rowToInvite } from '../_lib/invites.js'
+import { MAX_PHOTOS } from '../../src/utils/photoUpload.js'
+import { cleanEvents } from '../../src/utils/cleanEvents.js'
 
 const MAX_SLUG_ATTEMPTS = 6
 
@@ -38,6 +40,11 @@ export default async function handler(req, res) {
       amount: Number(body.amount) || 0,
       payment_id: clean(body.paymentId, 80),
       payment_status: body.paymentId ? 'paid' : 'pending',
+      photos: Array.isArray(body.photos)
+        ? body.photos.filter((p) => typeof p === 'string').slice(0, MAX_PHOTOS).map((p) => clean(p, 500))
+        : [],
+      event_title: clean(body.eventTitle, 80),
+      events: cleanEvents(body.events, clean),
     }
 
     const base = slugify(names) || 'invite'

@@ -48,6 +48,35 @@ create table public.invites (
 alter table public.invites enable row level security;
 ```
 
+Already have this table from before? Add the `photos` column (Invitation
+Builder photo uploads, see `api/photos.js`) with:
+
+```sql
+alter table public.invites add column photos text[] default '{}';
+```
+
+Add the `event_title`/`events` columns (multiple event/function support,
+see `CreateInvitePage.jsx`'s "Additional Events" section) with:
+
+```sql
+alter table public.invites add column event_title text;
+alter table public.invites add column events jsonb default '[]'::jsonb;
+```
+
+### 1b. Create the `invite-photos` Storage bucket
+
+Buyers can optionally upload their own photos (see `CreateInvitePage.jsx`) —
+these are stored in Supabase Storage, not the `invites` table itself (which
+only holds the resulting public URLs).
+
+In the same Supabase project → **Storage** → **New bucket**:
+
+- Name: `invite-photos`
+- **Public bucket**: on (so `/i/:slug` pages, viewed by anyone, can load the
+  images directly — nothing else about this bucket is public: only the
+  service-role key, used server-side by `api/photos.js`, can *write* to it,
+  same trust model as the `invites` table above)
+
 ### 2. Add two environment variables in Vercel
 
 **Project → Settings → Environment Variables** (Production — and Preview, if

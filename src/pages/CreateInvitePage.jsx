@@ -4,6 +4,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 import {
   AlertCircle,
   Calendar,
+  CalendarPlus,
+  Camera,
   Clock,
   CreditCard,
   Eye,
@@ -19,6 +21,8 @@ import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateStyleSelector from '../components/builder/TemplateStyleSelector'
 import InvitePreviewCard from '../components/builder/InvitePreviewCard'
+import PhotoUploader from '../components/builder/PhotoUploader'
+import EventsListEditor from '../components/builder/EventsListEditor'
 import PaymentModal from '../components/builder/PaymentModal'
 import {
   OCCASIONS,
@@ -30,7 +34,15 @@ import { PRICING } from '../data/templatesData'
 import { createInvite } from '../utils/inviteApi'
 import { ROUTES_SEO } from '../data/routesSeo'
 
-const EMPTY_FORM = { names: '', date: '', time: '', venue: '', locationUrl: '', message: '' }
+const EMPTY_FORM = {
+  names: '',
+  eventTitle: '',
+  date: '',
+  time: '',
+  venue: '',
+  locationUrl: '',
+  message: '',
+}
 
 // Phase 2 of the self-service Invitation Builder: pick a template style,
 // fill in the details, watch the live preview update as you type, then pay
@@ -46,6 +58,8 @@ export default function CreateInvitePage() {
     () => getBuilderTemplatesForOccasion(OCCASIONS[0].id)[0].id,
   )
   const [form, setForm] = useState(EMPTY_FORM)
+  const [photos, setPhotos] = useState([])
+  const [events, setEvents] = useState([])
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -86,6 +100,7 @@ export default function CreateInvitePage() {
           templateId: template.id,
           templateName: template.name,
           names: form.names.trim(),
+          eventTitle: form.eventTitle.trim(),
           date: form.date,
           time: form.time,
           venue: form.venue.trim(),
@@ -93,6 +108,8 @@ export default function CreateInvitePage() {
           message: form.message.trim(),
           amount: PRICING.shagunPrice,
           paymentId,
+          photos,
+          events,
         })
         navigate(`/i/${invite.slug}`)
       } catch (err) {
@@ -104,7 +121,7 @@ export default function CreateInvitePage() {
         setSaving(false)
       }
     },
-    [occasionId, template, form, navigate],
+    [occasionId, template, form, photos, events, navigate],
   )
 
   return (
@@ -195,6 +212,22 @@ export default function CreateInvitePage() {
                       />
                     </div>
 
+                    {occasionId === 'wedding' && (
+                      <div>
+                        <label htmlFor="eventTitle" className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          Function Name <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <input
+                          id="eventTitle"
+                          type="text"
+                          value={form.eventTitle}
+                          onChange={handleField('eventTitle')}
+                          placeholder="e.g. Wedding Ceremony"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div>
                         <label htmlFor="date" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
@@ -270,6 +303,30 @@ export default function CreateInvitePage() {
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft resize-none"
                       />
                     </div>
+
+                    {occasionId === 'wedding' && (
+                      <div>
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Camera className="h-3.5 w-3.5 text-rose" />
+                          Your Photos <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <PhotoUploader photos={photos} onChange={setPhotos} />
+                      </div>
+                    )}
+
+                    {occasionId === 'wedding' && (
+                      <div>
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <CalendarPlus className="h-3.5 w-3.5 text-rose" />
+                          Additional Events <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <p className="mb-3 text-xs text-ink-soft">
+                          Add other functions — Haldi, Sangeet, Mehndi,
+                          Reception — each with its own date, time and venue.
+                        </p>
+                        <EventsListEditor events={events} onChange={setEvents} />
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -179,6 +179,16 @@ export default function EventTimeline({ events, weddingDate, heading = 'Our Cele
                   {event.date} &middot; {event.time}
                 </p>
                 <p className="text-sm text-ink-soft">{event.venue}</p>
+                {event.mapHref && (
+                  <a
+                    href={event.mapHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium text-rose underline underline-offset-2"
+                  >
+                    View on Map
+                  </a>
+                )}
               </motion.li>
             )
           })}

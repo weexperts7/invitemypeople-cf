@@ -1,4 +1,5 @@
 import express from 'express'
+import formidable from 'formidable'
 import writeXlsxFile from 'write-excel-file/node'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
@@ -9,6 +10,13 @@ import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
+import {
+  MAX_PHOTO_BYTES,
+  MAX_PHOTOS,
+  ALLOWED_MIME_TYPES,
+  randomPhotoFilename,
+} from '../src/utils/photoUpload.js'
+import { cleanEvents } from '../src/utils/cleanEvents.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -22,6 +30,11 @@ const XLSX_FILE = path.join(DATA_DIR, 'rsvps.xlsx')
 // store above, easy to swap for a real DB later without touching callers —
 // only createInvite()/getInviteBySlug() in src/utils/inviteApi.js would change.
 const INVITES_FILE = path.join(DATA_DIR, 'invites.json')
+// Invitation Builder photo uploads — see POST /api/photos below. Local-dev
+// counterpart to api/photos.js's Supabase Storage upload: files saved
+// straight to disk here and served back statically, same "flat file instead
+// of a real bucket" tradeoff INVITES_FILE makes for the invites table.
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads')
 const DIST_DIR = path.join(ROOT, 'dist')
 
 // `--port N` wins so `npm run dev` can pin the API and never fight the Vite
@@ -260,6 +273,11 @@ app.post('/api/invites', async (req, res) => {
         amount: Number(body.amount) || 0,
         paymentId: clean(body.paymentId, 80),
         paymentStatus: body.paymentId ? 'paid' : 'pending',
+        photos: Array.isArray(body.photos)
+          ? body.photos.filter((p) => typeof p === 'string').slice(0, MAX_PHOTOS).map((p) => clean(p, 500))
+          : [],
+        eventTitle: clean(body.eventTitle, 80),
+        events: cleanEvents(body.events, clean),
         createdAt: new Date().toISOString(),
       }
       entries.push(entry)
@@ -285,6 +303,42 @@ app.get('/api/invites/:slug', async (req, res) => {
   } catch (err) {
     console.error('[invites] failed to read:', err)
     res.status(500).json({ ok: false, error: 'could not load invitation' })
+  }
+})
+
+// Serves back whatever POST /api/photos below just saved — same-origin, no
+// separate proxy rule needed since it's already under /api (see vite.config.js).
+app.use('/api/uploads', express.static(UPLOADS_DIR))
+
+// Invitation Builder photo uploads — see src/pages/CreateInvitePage.jsx.
+// One file per request; local-dev counterpart to api/photos.js's Supabase
+// Storage upload. Doesn't collide with the express.json()/express.text()
+// middlewares above — neither matches multipart/form-data, so formidable
+// still gets the untouched raw stream.
+app.post('/api/photos', async (req, res) => {
+  try {
+    const form = formidable({ maxFileSize: MAX_PHOTO_BYTES, maxFiles: 1 })
+    const [, files] = await form.parse(req)
+    const file = Array.isArray(files.photo) ? files.photo[0] : files.photo
+    if (!file) return res.status(400).json({ ok: false, error: 'no file uploaded' })
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      return res
+        .status(400)
+        .json({ ok: false, error: 'only JPEG, PNG, or WebP images are allowed' })
+    }
+
+    await fsp.mkdir(UPLOADS_DIR, { recursive: true })
+    const filename = randomPhotoFilename(file.mimetype)
+    await fsp.copyFile(file.filepath, path.join(UPLOADS_DIR, filename))
+    await fsp.unlink(file.filepath).catch(() => {})
+
+    res.json({ ok: true, url: `/api/uploads/${filename}` })
+  } catch (err) {
+    console.error('[photos] upload failed:', err)
+    if (/maxFileSize/i.test(err.message || '')) {
+      return res.status(400).json({ ok: false, error: 'file is too large (max 4MB)' })
+    }
+    res.status(500).json({ ok: false, error: 'could not upload photo' })
   }
 })
 

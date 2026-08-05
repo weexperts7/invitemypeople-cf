@@ -30,6 +30,9 @@ export function rowToInvite(row) {
     amount: row.amount,
     paymentId: row.payment_id,
     paymentStatus: row.payment_status,
+    photos: row.photos ?? [],
+    eventTitle: row.event_title,
+    events: row.events ?? [],
     createdAt: row.created_at,
   }
 }

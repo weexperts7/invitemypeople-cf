@@ -6,9 +6,26 @@ const CARD_MAX_WIDTH = 300
 const CARD_ASPECT = 0.66 // height / width
 const REVEAL_THRESHOLD = 0.55
 const TOUCH_DECISION_PX = 8
-const DATE = { month: 'JULY', day: '01', year: '2026' }
+const DEFAULT_DATE = { month: 'JULY', day: '01', year: '2026' }
+const MONTHS = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+]
 
-function ScratchCard({ width, height, onRevealed, palette }) {
+// Accepts a Date or an ISO-ish string ("2026-12-12" / "2026-12-12T09:00:00")
+// — falls back to the demo date if it's missing or unparseable, so every
+// existing caller that doesn't pass one keeps today's behavior exactly.
+function formatScratchDate(date) {
+  const d = date instanceof Date ? date : new Date(date)
+  if (!date || Number.isNaN(d.getTime())) return DEFAULT_DATE
+  return {
+    month: MONTHS[d.getMonth()],
+    day: String(d.getDate()).padStart(2, '0'),
+    year: String(d.getFullYear()),
+  }
+}
+
+function ScratchCard({ width, height, onRevealed, palette, date }) {
   const canvasRef = useRef(null)
   const isScratching = useRef(false)
   const lastPoint = useRef(null)
@@ -21,6 +38,7 @@ function ScratchCard({ width, height, onRevealed, palette }) {
 
   // Brush scales with the card so a small card still takes a few strokes.
   const brushRadius = Math.max(9, width * 0.09)
+  const displayDate = formatScratchDate(date)
 
   const drawFoil = useCallback(
     (ctx) => {
@@ -179,13 +197,13 @@ function ScratchCard({ width, height, onRevealed, palette }) {
             className="font-serif text-rose leading-none"
             style={{ fontSize: Math.round(width * 0.15) }}
           >
-            {DATE.month} {DATE.day}
+            {displayDate.month} {displayDate.day}
           </span>
           <span
             className="font-serif text-ink-soft leading-none"
             style={{ fontSize: Math.round(width * 0.09) }}
           >
-            {DATE.year}
+            {displayDate.year}
           </span>
         </motion.div>
 
@@ -218,7 +236,7 @@ function ScratchCard({ width, height, onRevealed, palette }) {
   )
 }
 
-export default function ScratchCardSection({ palette }) {
+export default function ScratchCardSection({ palette, date }) {
   const rowRef = useRef(null)
   const [burst, setBurst] = useState(null)
   // Card is sized from the row's real width so it always fits within the section.
@@ -268,6 +286,7 @@ export default function ScratchCardSection({ palette }) {
             height={cardHeight}
             onRevealed={handleRevealed}
             palette={palette}
+            date={date}
           />
         )}
       </div>

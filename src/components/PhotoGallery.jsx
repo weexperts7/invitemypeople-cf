@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   AnimatePresence,
   motion,
@@ -21,23 +21,34 @@ const CULTURE_PHOTOS = {
 }
 const DEFAULT_PHOTOS = CULTURE_PHOTOS.Hindu
 
-function getCouplePhoto(culture, index) {
-  const photos = CULTURE_PHOTOS[culture] ?? DEFAULT_PHOTOS
-  return photos[index % photos.length]
-}
-
-const PHOTOS = [
-  { seed: 'p1', alt: 'The couple sharing a joyful moment', ratio: '3 / 4', position: 'center 20%' },
-  { seed: 'p2', alt: 'Engagement portrait of the couple', ratio: '1 / 1', position: 'center 15%' },
-  { seed: 'p3', alt: 'The couple together', ratio: '4 / 5', position: 'center 25%' },
-  { seed: 'p4', alt: 'A candid moment between the couple', ratio: '3 / 4', position: 'center 30%' },
-  { seed: 'p5', alt: 'The couple at golden hour', ratio: '1 / 1', position: 'center 10%' },
-  { seed: 'p6', alt: 'Close-up portrait of the couple', ratio: '4 / 5', position: 'center 18%' },
-  { seed: 'p7', alt: 'The couple sharing a quiet moment', ratio: '3 / 4', position: 'center 22%' },
-  { seed: 'p8', alt: 'The couple celebrating together', ratio: '1 / 1', position: 'center 12%' },
+// Layout metadata (aspect ratio / crop position / fallback alt text) for up
+// to 8 stacked cards — cycled via index % LAYOUTS.length regardless of how
+// many photos are actually shown, so any card count still gets varied
+// framing instead of every card looking identical.
+const LAYOUTS = [
+  { alt: 'The couple sharing a joyful moment', ratio: '3 / 4', position: 'center 20%' },
+  { alt: 'Engagement portrait of the couple', ratio: '1 / 1', position: 'center 15%' },
+  { alt: 'The couple together', ratio: '4 / 5', position: 'center 25%' },
+  { alt: 'A candid moment between the couple', ratio: '3 / 4', position: 'center 30%' },
+  { alt: 'The couple at golden hour', ratio: '1 / 1', position: 'center 10%' },
+  { alt: 'Close-up portrait of the couple', ratio: '4 / 5', position: 'center 18%' },
+  { alt: 'The couple sharing a quiet moment', ratio: '3 / 4', position: 'center 22%' },
+  { alt: 'The couple celebrating together', ratio: '1 / 1', position: 'center 12%' },
 ]
 
-function GalleryPhoto({ photo, index, onOpen, culture }) {
+// `photos` (real buyer uploads, see CreateInvitePage.jsx) replaces the stock
+// set one-for-one when provided — exactly as many cards as real photos, no
+// padding/repeats. Without real photos, keeps today's stock behavior: a
+// fixed 8 cards cycling through the culture's 2-photo stock set.
+function buildSlots(culture, photos) {
+  if (photos?.length) {
+    return photos.map((src, index) => ({ src, ...LAYOUTS[index % LAYOUTS.length] }))
+  }
+  const source = CULTURE_PHOTOS[culture] ?? DEFAULT_PHOTOS
+  return LAYOUTS.map((layout, index) => ({ ...layout, src: source[index % source.length] }))
+}
+
+function GalleryPhoto({ slot, index, onOpen }) {
   const stackRef = useRef(null)
   const frameRef = useRef(null)
   const reduceMotion = useReducedMotion()
@@ -67,7 +78,7 @@ function GalleryPhoto({ photo, index, onOpen, culture }) {
       <motion.button
         type="button"
         onClick={() => onOpen(index)}
-        aria-label={`View photo: ${photo.alt}`}
+        aria-label={`View photo: ${slot.alt}`}
         initial={{ opacity: 0, y: 64 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.35 }}
@@ -80,17 +91,17 @@ function GalleryPhoto({ photo, index, onOpen, culture }) {
         <div
           ref={frameRef}
           className="relative w-full overflow-hidden rounded-sm border border-champagne-deep/50"
-          style={{ aspectRatio: photo.ratio }}
+          style={{ aspectRatio: slot.ratio }}
         >
           <motion.div
             style={reduceMotion ? { scale: 1 } : { y: parallax, scale: 1.16 }}
             className="absolute inset-0 h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.24]"
           >
             <img
-              src={getCouplePhoto(culture, index)}
-              alt={photo.alt}
+              src={slot.src}
+              alt={slot.alt}
               className="h-full w-full object-cover"
-              style={{ objectPosition: photo.position }}
+              style={{ objectPosition: slot.position }}
             />
           </motion.div>
           <span className="pointer-events-none absolute inset-0 bg-rose/0 transition-colors duration-500 group-hover:bg-rose/10" />
@@ -107,14 +118,20 @@ function GalleryPhoto({ photo, index, onOpen, culture }) {
   )
 }
 
-export default function PhotoGallery({ culture }) {
+export default function PhotoGallery({ culture, photos }) {
+  const slots = buildSlots(culture, photos)
   const [activeIndex, setActiveIndex] = useState(null)
   const isOpen = activeIndex !== null
 
-  const close = () => setActiveIndex(null)
-  const showPrev = () =>
-    setActiveIndex((i) => (i - 1 + PHOTOS.length) % PHOTOS.length)
-  const showNext = () => setActiveIndex((i) => (i + 1) % PHOTOS.length)
+  const close = useCallback(() => setActiveIndex(null), [])
+  const showPrev = useCallback(
+    () => setActiveIndex((i) => (i - 1 + slots.length) % slots.length),
+    [slots.length],
+  )
+  const showNext = useCallback(
+    () => setActiveIndex((i) => (i + 1) % slots.length),
+    [slots.length],
+  )
 
   useEffect(() => {
     if (!isOpen) return
@@ -125,7 +142,7 @@ export default function PhotoGallery({ culture }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [isOpen])
+  }, [isOpen, close, showPrev, showNext])
 
   return (
     <section className="px-6 py-20 text-center">
@@ -149,14 +166,10 @@ export default function PhotoGallery({ culture }) {
       </motion.p>
 
       <div className="relative mx-auto max-w-md">
-        {PHOTOS.map((photo, index) => (
-          <GalleryPhoto
-            key={photo.seed}
-            photo={photo}
-            index={index}
-            onOpen={setActiveIndex}
-            culture={culture}
-          />
+        {slots.map((slot, index) => (
+          // index, not slot.src, as the key: stock mode repeats the same 2
+          // photo URLs across all 8 slots, which would collide as keys.
+          <GalleryPhoto key={index} slot={slot} index={index} onOpen={setActiveIndex} />
         ))}
       </div>
 
@@ -179,7 +192,7 @@ export default function PhotoGallery({ culture }) {
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={PHOTOS[activeIndex].seed}
+                  key={activeIndex}
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
@@ -187,10 +200,10 @@ export default function PhotoGallery({ culture }) {
                   className="max-h-[80svh] w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-soft"
                 >
                   <img
-                    src={getCouplePhoto(culture, activeIndex)}
-                    alt={PHOTOS[activeIndex].alt}
+                    src={slots[activeIndex].src}
+                    alt={slots[activeIndex].alt}
                     className="h-full w-full object-cover"
-                    style={{ objectPosition: PHOTOS[activeIndex].position }}
+                    style={{ objectPosition: slots[activeIndex].position }}
                   />
                 </motion.div>
               </AnimatePresence>

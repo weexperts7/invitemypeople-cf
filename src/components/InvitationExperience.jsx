@@ -48,11 +48,14 @@ function themeToCssVars(template) {
 
 const MUSIC_VOLUME = 0.7
 
-export default function InvitationExperience({ template, onBack, isPreview = false }) {
-  // Every invitation is identified by a slug derived from the couple's names
-  // (e.g. "Meenal & Avinash" -> "meenal-avinash") — RSVPs and Wishes Wall
-  // entries for this invitation live in the Google Sheet tab of that name.
-  const invitationSlug = slugify(template?.couple?.names)
+export default function InvitationExperience({ template, onBack, isPreview = false, invitationSlug: slugOverride }) {
+  // Every invitation is identified by a slug — by default one derived from
+  // the couple's names (e.g. "Meenal & Avinash" -> "meenal-avinash"), which
+  // is what every gallery preview still uses. A Builder-generated invite
+  // (see GeneratedInvitePage.jsx) already has its own stable, persisted slug
+  // and passes it in via `invitationSlug` instead, so its RSVPs/Wishes Wall
+  // entries land under the same slug the invite itself was saved under.
+  const invitationSlug = slugOverride || slugify(template?.couple?.names)
   const [isOpened, setIsOpened] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef(null)
@@ -217,13 +220,13 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                 couple={template?.couple}
                 heroPhoto={template?.heroPhoto}
               />
-              <ScratchCardSection palette={template?.palette} />
+              <ScratchCardSection palette={template?.palette} date={template?.weddingDate} />
               <EventTimeline
                 events={template?.ceremonies}
                 weddingDate={template?.weddingDate}
                 heading={template?.ceremoniesHeading}
               />
-              <PhotoGallery culture={template?.weddingType} />
+              <PhotoGallery culture={template?.weddingType} photos={template?.photos} />
               <RsvpForm palette={template?.palette} slug={invitationSlug} />
               <WishesWall slug={invitationSlug} />
               <motion.footer

@@ -3,9 +3,7 @@ import { Flower, Gem, Heart, Landmark, Moon, Music, PartyPopper, Sparkle } from 
 // Same price across every template today, so it's one shared constant
 // rather than a per-template field — add per-template pricing later only
 // if templates actually start to differ in price.
-// TEMP: shagunPrice dropped to ₹1 to test a real live-mode checkout end to
-// end in production. Revert to 2100 once that test is done.
-export const PRICING = { price: 2500, shagunPrice: 1 }
+export const PRICING = { price: 2500, shagunPrice: 2100 }
 
 // Every color key mirrors a CSS custom property from src/index.css's
 // @theme block (ivory -> --color-ivory, champagneDeep -> --color-champagne-deep,

@@ -8,6 +8,7 @@ import { ROUTES_SEO, SITE_URL } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 import { slugify } from '../src/utils/slugify.js'
+import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -284,6 +285,61 @@ app.get('/api/invites/:slug', async (req, res) => {
   } catch (err) {
     console.error('[invites] failed to read:', err)
     res.status(500).json({ ok: false, error: 'could not load invitation' })
+  }
+})
+
+// Razorpay Standard Checkout — see src/components/builder/PaymentModal.jsx
+// for the Checkout.js widget these two routes support, and
+// src/utils/razorpay.js for the order-creation/signature logic they share
+// with their Vercel Serverless counterparts (api/create-order.js,
+// api/verify-payment.js).
+app.post('/api/create-order', async (req, res) => {
+  try {
+    const body = req.body || {}
+    const amount = Math.round(Number(body.amount))
+    if (!Number.isFinite(amount) || amount < MIN_AMOUNT_PAISE) {
+      return res
+        .status(400)
+        .json({ ok: false, error: `amount must be at least ${MIN_AMOUNT_PAISE} paise` })
+    }
+
+    const receipt = clean(body.receipt, 60) || `receipt_${Date.now()}`
+    const order = await createOrder({
+      amount,
+      currency: clean(body.currency, 3) || 'INR',
+      receipt,
+    })
+    res.json({ ok: true, ...order })
+  } catch (err) {
+    console.error('[razorpay] failed to create order:', err)
+    if (err.statusCode === 401) {
+      return res.status(401).json({ ok: false, error: 'Razorpay authentication failed' })
+    }
+    res.status(500).json({ ok: false, error: 'could not create payment order' })
+  }
+})
+
+// Called once Checkout.js's handler fires with the razorpay_* fields —
+// nothing downstream (see CreateInvitePage.jsx's handlePaymentSuccess)
+// should treat an invite as paid until this returns ok:true.
+app.post('/api/verify-payment', (req, res) => {
+  try {
+    const body = req.body || {}
+    const orderId = clean(body.razorpay_order_id, 100)
+    const paymentId = clean(body.razorpay_payment_id, 100)
+    const signature = clean(body.razorpay_signature, 200)
+    if (!orderId || !paymentId || !signature) {
+      return res.status(400).json({ ok: false, error: 'missing payment fields' })
+    }
+
+    if (!verifySignature({ orderId, paymentId, signature })) {
+      return res.status(400).json({ ok: false, error: 'signature mismatch' })
+    }
+
+    res.json({ ok: true, paymentId })
+  } catch (err) {
+    console.error('[razorpay] failed to verify payment:', err)
+    res.status(500).json({ ok: false, error: 'could not verify payment' })
   }
 })
 

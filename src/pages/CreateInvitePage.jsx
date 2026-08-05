@@ -34,7 +34,7 @@ const EMPTY_FORM = { names: '', date: '', time: '', venue: '', locationUrl: '', 
 
 // Phase 2 of the self-service Invitation Builder: pick a template style,
 // fill in the details, watch the live preview update as you type, then pay
-// (Razorpay Test Mode — simulated for now, see PaymentModal.jsx) and land on
+// (Razorpay Standard Checkout — see PaymentModal.jsx) and land on
 // a real, shareable /i/:slug invitation page with working RSVP + Wishes Wall
 // (see GeneratedInvitePage.jsx). Phase 1 handed this off to WhatsApp instead
 // — that flow still exists everywhere else on the site (see CustomizeModal.jsx).
@@ -73,8 +73,9 @@ export default function CreateInvitePage() {
     setPaymentOpen(true)
   }
 
-  // Fires once PaymentModal's (simulated) Razorpay flow confirms payment —
-  // save the invite, then send the user straight to their new live page.
+  // Fires once PaymentModal's Razorpay Checkout flow confirms and verifies
+  // payment — save the invite, then send the user straight to their new
+  // live page.
   const handlePaymentSuccess = useCallback(
     async (paymentId) => {
       setSaving(true)

@@ -17,6 +17,8 @@ import {
   randomPhotoFilename,
 } from '../src/utils/photoUpload.js'
 import { cleanEvents } from '../src/utils/cleanEvents.js'
+import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../src/utils/email.js'
+import { randomBytes } from 'node:crypto'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -50,6 +52,7 @@ const COLUMNS = [
   { key: 'submittedAt', header: 'Timestamp', width: 22 },
   { key: 'invitationSlug', header: 'Invitation', width: 20 },
   { key: 'name', header: 'Name', width: 24 },
+  { key: 'email', header: 'Email', width: 26 },
   { key: 'attending', header: 'Attending', width: 15 },
   { key: 'guests', header: 'Guests', width: 9 },
   { key: 'song', header: 'Song Request', width: 34 },
@@ -147,8 +150,6 @@ function randomSlugSuffix() {
 
 const app = express()
 app.use(express.json({ limit: '64kb' }))
-// Plain-text bodies keep the browser request "simple" (no CORS preflight).
-app.use(express.text({ type: ['text/plain', 'text/*'], limit: '64kb' }))
 
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*')
@@ -158,10 +159,9 @@ app.use((req, res, next) => {
   next()
 })
 
-app.post('/api/rsvp', async (req, res) => {
+app.post('/api/rsvps', async (req, res) => {
   try {
-    const body =
-      typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
+    const body = req.body || {}
 
     // Honeypot: real guests never see this field. Pretend success so bots
     // don't retry, but store nothing.
@@ -170,12 +170,22 @@ app.post('/api/rsvp', async (req, res) => {
     const name = clean(body.guestName, 120)
     if (!name) return res.status(400).json({ ok: false, error: 'guestName is required' })
 
+    const slug = clean(body.invitationSlug, 80)
+    const invites = await readAllInvites()
+    // Parity with the production (Supabase) route, which can only insert an
+    // rsvps row against a real invite_id foreign key — reject unknown slugs
+    // here too instead of silently accepting orphaned RSVPs.
+    if (!invites.some((i) => i.slug === slug)) {
+      return res.status(404).json({ ok: false, error: 'invitation not found' })
+    }
+
     const isAttending = body.attendanceStatus === 'joyfully'
     const entry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       submittedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      invitationSlug: clean(body.invitationSlug, 80),
+      invitationSlug: slug,
       name,
+      email: clean(body.guestEmail, 200),
       attending: isAttending ? 'Attending' : 'Not attending',
       guests: isAttending ? Number(body.guests) || 1 : 0,
       song: clean(body.song, 300),
@@ -190,10 +200,10 @@ app.post('/api/rsvp', async (req, res) => {
       return entries.length
     })
 
-    console.log(`[rsvp] ${entry.name} — ${entry.attending} (${total} total)`)
+    console.log(`[rsvps] ${entry.name} — ${entry.attending} (${total} total)`)
     res.json({ ok: true })
   } catch (err) {
-    console.error('[rsvp] failed to save:', err)
+    console.error('[rsvps] failed to save:', err)
     res.status(500).json({ ok: false, error: 'could not save RSVP' })
   }
 })
@@ -247,9 +257,13 @@ app.post('/api/invites', async (req, res) => {
     const names = clean(body.names, 120)
     const date = clean(body.date, 20)
     const venue = clean(body.venue, 200)
+    const hostName = clean(body.hostName, 120)
+    const hostEmail = clean(body.hostEmail, 200)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+    if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
+    if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
 
     const invite = await enqueueInvites(async () => {
       const entries = await readAllInvites()
@@ -278,6 +292,10 @@ app.post('/api/invites', async (req, res) => {
           : [],
         eventTitle: clean(body.eventTitle, 80),
         events: cleanEvents(body.events, clean),
+        hostName,
+        hostEmail,
+        hostToken: randomBytes(24).toString('base64url'),
+        reminderSentAt: null,
         createdAt: new Date().toISOString(),
       }
       entries.push(entry)
@@ -286,6 +304,23 @@ app.post('/api/invites', async (req, res) => {
     })
 
     console.log(`[invites] saved "${invite.slug}" (${invite.templateName || invite.templateId})`)
+    // hostToken is returned only here, once, at creation — see the strip in
+    // GET /api/invites/:slug below, which mirrors rowToInvite()'s allowlist
+    // in api/_lib/invites.js (the production/Supabase equivalent).
+
+    // Order-confirmation email — same non-blocking, awaited-try/catch
+    // contract as the Vercel counterpart (api/invites/index.js), kept
+    // symmetric so both runtimes behave identically.
+    try {
+      await sendTransactionalEmail({
+        to: invite.hostEmail,
+        toName: invite.hostName,
+        ...buildOrderConfirmationEmail(invite),
+      })
+    } catch (emailErr) {
+      console.error('[invites] confirmation email failed:', emailErr)
+    }
+
     res.json({ ok: true, invite })
   } catch (err) {
     console.error('[invites] failed to save:', err)
@@ -293,16 +328,76 @@ app.post('/api/invites', async (req, res) => {
   }
 })
 
-/** Powers the live /i/:slug page — loads back exactly what was saved above. */
+/** Powers the live /i/:slug page — loads back exactly what was saved above,
+ * minus the host-only fields (hostToken/hostEmail/hostName never leave this
+ * route — same PII boundary rowToInvite() enforces in production). */
 app.get('/api/invites/:slug', async (req, res) => {
   try {
     const entries = await readAllInvites()
     const invite = entries.find((e) => e.slug === req.params.slug)
     if (!invite) return res.status(404).json({ ok: false, error: 'invitation not found' })
-    res.json({ ok: true, invite })
+    const { hostToken: _hostToken, hostEmail: _hostEmail, hostName: _hostName, reminderSentAt: _reminderSentAt, ...publicInvite } = invite
+    res.json({ ok: true, invite: publicInvite })
   } catch (err) {
     console.error('[invites] failed to read:', err)
     res.status(500).json({ ok: false, error: 'could not load invitation' })
+  }
+})
+
+/** Dev mirror of api/invites/[slug]/host.js — the token-gated Host
+ * Dashboard's data source. */
+app.get('/api/invites/:slug/host', async (req, res) => {
+  try {
+    const entries = await readAllInvites()
+    const invite = entries.find((e) => e.slug === req.params.slug)
+    const token = clean(req.query.token, 200)
+    if (!invite || !invite.hostToken || invite.hostToken !== token) {
+      return res.status(403).json({ ok: false, error: 'invalid host link' })
+    }
+
+    const rsvpEntries = await readAll()
+    const rsvps = rsvpEntries
+      .filter((e) => e.invitationSlug === invite.slug)
+      .map((e) => ({
+        id: e.id,
+        guestName: e.name,
+        guestEmail: e.email || null,
+        attendance: e.attending === 'Attending' ? 'joyfully' : 'regretfully',
+        guestCount: e.guests,
+        song: e.song,
+        advice: e.advice,
+        message: e.message,
+        createdAt: e.submittedAt,
+      }))
+      .reverse()
+
+    const attending = rsvps.filter((r) => r.attendance === 'joyfully')
+    const declining = rsvps.filter((r) => r.attendance !== 'joyfully')
+
+    res.json({
+      ok: true,
+      invite: {
+        slug: invite.slug,
+        names: invite.names,
+        eventTitle: invite.eventTitle,
+        date: invite.date,
+        time: invite.time,
+        venue: invite.venue,
+        hostName: invite.hostName,
+        hostEmail: invite.hostEmail,
+        createdAt: invite.createdAt,
+      },
+      rsvps,
+      summary: {
+        totalResponses: rsvps.length,
+        attendingCount: attending.length,
+        decliningCount: declining.length,
+        totalGuests: attending.reduce((sum, r) => sum + (Number(r.guestCount) || 0), 0),
+      },
+    })
+  } catch (err) {
+    console.error('[invites] failed to load host dashboard:', err)
+    res.status(500).json({ ok: false, error: 'could not load dashboard' })
   }
 })
 

@@ -63,6 +63,21 @@ alter table public.invites add column event_title text;
 alter table public.invites add column events jsonb default '[]'::jsonb;
 ```
 
+Add the `host_name`/`host_email`/`host_token`/`reminder_sent_at` columns
+(host contact capture, the private Host Dashboard, and the 4-hour reminder
+email — see `RSVPS-AND-REMINDERS-SETUP.md`) with:
+
+```sql
+alter table public.invites
+  add column if not exists host_name text,
+  add column if not exists host_email text,
+  add column if not exists host_token text unique,
+  add column if not exists reminder_sent_at timestamptz;
+```
+
+All four are nullable — invites created before this migration simply have
+no host contact info and no dashboard link; there's no backfill for them.
+
 ### 1b. Create the `invite-photos` Storage bucket
 
 Buyers can optionally upload their own photos (see `CreateInvitePage.jsx`) —

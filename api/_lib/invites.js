@@ -5,6 +5,8 @@
 // columns but everything else in this codebase (inviteApi.js,
 // GeneratedInvitePage.jsx) speaks camelCase.
 
+import { randomBytes, timingSafeEqual } from 'node:crypto'
+
 export function clean(value, max) {
   return String(value ?? '')
     .trim()
@@ -13,6 +15,28 @@ export function clean(value, max) {
 
 export function randomSlugSuffix() {
   return Math.random().toString(36).slice(2, 8)
+}
+
+// A private, unguessable per-invite token — the only thing standing between
+// "anyone with the shareable /i/:slug link" and "the host, who can see every
+// guest's email and RSVP details on /i/:slug/host/:hostToken". There's no
+// login system anywhere in this app, so this token *is* the auth model for
+// the dashboard: long enough (24 random bytes, base64url-encoded) that
+// guessing it is infeasible, and never returned by any GET endpoint — only
+// the one-time POST /api/invites response that creates it.
+export function generateHostToken() {
+  return randomBytes(24).toString('base64url')
+}
+
+// Constant-time comparison for the host-token check (api/invites/[slug]/host.js)
+// — a plain `===` would let response timing leak how many leading characters
+// of a guessed token were correct. Mismatched lengths are handled explicitly
+// since timingSafeEqual throws instead of returning false for those.
+export function tokensMatch(a, b) {
+  const bufA = Buffer.from(String(a ?? ''))
+  const bufB = Buffer.from(String(b ?? ''))
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
 }
 
 export function rowToInvite(row) {

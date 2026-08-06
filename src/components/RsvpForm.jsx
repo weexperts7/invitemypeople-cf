@@ -10,14 +10,17 @@ import {
 } from 'lucide-react'
 import Celebration from './Celebration'
 
-// Defaults to the bundled RSVP API (server/index.js), which appends every
-// submission to data/rsvps.xlsx. Override to post to a Google Apps Script
-// endpoint instead — see RSVP-SETUP.md.
-const ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT || '/api/rsvp'
+// Supabase-backed in production (api/rsvps/index.js) and the flat-file
+// counterpart in local dev (server/index.js) — see
+// RSVPS-AND-REMINDERS-SETUP.md. Same-origin, so a plain JSON POST works with
+// no CORS setup, unlike the old external Google Apps Script endpoint this
+// replaced.
+const ENDPOINT = '/api/rsvps'
 
 export default function RsvpForm({ palette, slug }) {
   const [form, setForm] = useState({
     name: '',
+    email: '',
     attending: 'joyfully',
     guests: '1',
     song: '',
@@ -43,14 +46,11 @@ export default function RsvpForm({ palette, slug }) {
       const isAttending = form.attending === 'joyfully'
       const response = await fetch(ENDPOINT, {
         method: 'POST',
-        // text/plain + a string body keeps this a "simple" CORS request (no
-        // preflight), which is what Apps Script web apps can answer without
-        // extra setup; e.postData.contents still parses fine as JSON.
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        redirect: 'follow',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           invitationSlug: slug,
           guestName: form.name,
+          guestEmail: form.email,
           attendanceStatus: form.attending,
           guests: isAttending ? Number(form.guests) || 1 : 0,
           song: form.song,
@@ -186,6 +186,23 @@ export default function RsvpForm({ palette, slug }) {
                   value={form.name}
                   onChange={handleChange('name')}
                   placeholder="Full name"
+                  className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2"
+                >
+                  Email <span className="normal-case text-ink-soft/70">(optional)</span>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange('email')}
+                  placeholder="you@example.com"
                   className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                 />
               </div>

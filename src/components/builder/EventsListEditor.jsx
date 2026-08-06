@@ -71,7 +71,7 @@ export default function EventsListEditor({ events, onChange }) {
           />
 
           <input
-            type="url"
+            type="text"
             value={event.locationUrl}
             onChange={updateEvent(index, 'locationUrl')}
             placeholder="Location URL (optional)"

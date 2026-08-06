@@ -6,13 +6,18 @@ import {
   Calendar,
   CalendarPlus,
   Camera,
+  Check,
   Clock,
+  Copy,
   CreditCard,
   Eye,
   Link as LinkIcon,
   Loader2,
+  Mail,
   MapPin,
   MessageSquareText,
+  ShieldCheck,
+  User,
   Wand2,
 } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
@@ -42,6 +47,80 @@ const EMPTY_FORM = {
   venue: '',
   locationUrl: '',
   message: '',
+  hostName: '',
+  hostEmail: '',
+}
+
+// Shown once, right after a successful payment — the ONLY moment the host
+// dashboard link (with its one-time host_token, see api/invites/index.js)
+// is ever available. There's no login system in this app and no "resend my
+// dashboard link" flow, so the copy here is deliberately blunt about saving
+// it now.
+function SuccessPanel({ invite, onCopy, copiedLink, onContinue }) {
+  const inviteUrl = `${window.location.origin}/i/${invite.slug}`
+  const hostUrl = `${window.location.origin}/i/${invite.slug}/host/${invite.hostToken}`
+
+  return (
+    <div className="mx-auto max-w-xl rounded-3xl border border-white/60 bg-ivory/70 backdrop-blur-xl p-6 shadow-card sm:p-10 text-center">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blush">
+        <Check className="h-6 w-6 text-rose" strokeWidth={2} />
+      </div>
+      <h2 className="font-serif text-2xl sm:text-3xl text-ink">Your Invitation Is Live!</h2>
+      <p className="mt-2 text-ink-soft">
+        Save both links below before continuing — the dashboard link in
+        particular is shown only once and can&apos;t be recovered later.
+      </p>
+
+      <div className="mt-6 space-y-3 text-left">
+        <div className="rounded-xl border border-champagne-deep/50 bg-ivory/80 p-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-1.5">
+            Share this with guests
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="flex-1 truncate text-sm text-ink">{inviteUrl}</span>
+            <button
+              type="button"
+              onClick={() => onCopy('invite', inviteUrl)}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-rose px-3 py-1.5 text-xs font-medium text-ivory"
+            >
+              {copiedLink === 'invite' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copiedLink === 'invite' ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-gold/50 bg-blush/40 p-4">
+          <p className="flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] text-ink-soft mb-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-rose" />
+            Your private host dashboard — save this!
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="flex-1 truncate text-sm text-ink">{hostUrl}</span>
+            <button
+              type="button"
+              onClick={() => onCopy('host', hostUrl)}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-rose px-3 py-1.5 text-xs font-medium text-ivory"
+            >
+              {copiedLink === 'host' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copiedLink === 'host' ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-ink-soft">
+            See live RSVPs, download a guest-list CSV, and get an email
+            summary before your event. Never share this link with guests.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onContinue}
+        className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-3 text-sm font-semibold text-ink shadow-soft"
+      >
+        Continue to My Invitation
+      </button>
+    </div>
+  )
 }
 
 // Phase 2 of the self-service Invitation Builder: pick a template style,
@@ -64,6 +143,8 @@ export default function CreateInvitePage() {
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  const [createdInvite, setCreatedInvite] = useState(null)
+  const [copiedLink, setCopiedLink] = useState(null) // 'invite' | 'host' | null
 
   const occasion = getOccasion(occasionId)
   const template = getBuilderTemplateById(templateId)
@@ -77,19 +158,23 @@ export default function CreateInvitePage() {
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const missingRequired =
-    submitAttempted && (!form.names.trim() || !form.date || !form.venue.trim())
+    submitAttempted &&
+    (!form.names.trim() || !form.date || !form.venue.trim() || !form.hostName.trim() || !form.hostEmail.trim())
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitAttempted(true)
     setSaveError(null)
-    if (!form.names.trim() || !form.date || !form.venue.trim()) return
+    if (!form.names.trim() || !form.date || !form.venue.trim() || !form.hostName.trim() || !form.hostEmail.trim())
+      return
     setPaymentOpen(true)
   }
 
   // Fires once PaymentModal's Razorpay Checkout flow confirms and verifies
-  // payment — save the invite, then send the user straight to their new
-  // live page.
+  // payment — save the invite, then show the one-time success panel below
+  // (not an automatic navigate — the host dashboard link/token is only ever
+  // returned in this one response, see api/invites/index.js, so the user
+  // needs a moment to actually see and save it before moving on).
   const handlePaymentSuccess = useCallback(
     async (paymentId) => {
       setSaving(true)
@@ -106,12 +191,16 @@ export default function CreateInvitePage() {
           venue: form.venue.trim(),
           locationUrl: form.locationUrl.trim(),
           message: form.message.trim(),
+          hostName: form.hostName.trim(),
+          hostEmail: form.hostEmail.trim(),
           amount: PRICING.shagunPrice,
           paymentId,
           photos,
           events,
         })
-        navigate(`/i/${invite.slug}`)
+        setCreatedInvite(invite)
+        setPaymentOpen(false)
+        setSaving(false)
       } catch (err) {
         console.error('[Invitation Builder] failed to save invite after payment:', err)
         setSaveError(
@@ -121,8 +210,18 @@ export default function CreateInvitePage() {
         setSaving(false)
       }
     },
-    [occasionId, template, form, photos, events, navigate],
+    [occasionId, template, form, photos, events],
   )
+
+  const handleCopyLink = async (kind, url) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedLink(kind)
+      setTimeout(() => setCopiedLink((current) => (current === kind ? null : current)), 2000)
+    } catch (err) {
+      console.error('[Invitation Builder] clipboard copy failed:', err)
+    }
+  }
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
@@ -155,6 +254,14 @@ export default function CreateInvitePage() {
         </section>
 
         <section className="bg-ivory px-6 py-12 sm:py-16">
+          {createdInvite ? (
+            <SuccessPanel
+              invite={createdInvite}
+              onCopy={handleCopyLink}
+              copiedLink={copiedLink}
+              onContinue={() => navigate(`/i/${createdInvite.slug}`)}
+            />
+          ) : (
           <form onSubmit={handleSubmit} className="mx-auto max-w-6xl">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
               {/* Preview comes first in the DOM so mobile visitors see the
@@ -281,13 +388,51 @@ export default function CreateInvitePage() {
                       </label>
                       <input
                         id="locationUrl"
-                        type="url"
+                        type="text"
                         value={form.locationUrl}
                         onChange={handleField('locationUrl')}
                         placeholder="Paste your Google Maps link"
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                       />
                     </div>
+
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 border-t border-champagne-deep/30 pt-5">
+                      <div>
+                        <label htmlFor="hostName" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <User className="h-3.5 w-3.5 text-rose" />
+                          Your Name
+                        </label>
+                        <input
+                          id="hostName"
+                          type="text"
+                          required
+                          value={form.hostName}
+                          onChange={handleField('hostName')}
+                          placeholder="Who's organizing this invite?"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="hostEmail" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Mail className="h-3.5 w-3.5 text-rose" />
+                          Your Email
+                        </label>
+                        <input
+                          id="hostEmail"
+                          type="email"
+                          required
+                          value={form.hostEmail}
+                          onChange={handleField('hostEmail')}
+                          placeholder="you@example.com"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                      </div>
+                    </div>
+                    <p className="-mt-2 text-xs text-ink-soft/80">
+                      Private — used only for your host dashboard link and a
+                      guest-list reminder email before your event. Never shown
+                      to guests.
+                    </p>
 
                     <div>
                       <label htmlFor="message" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
@@ -342,8 +487,8 @@ export default function CreateInvitePage() {
                     <div className="mb-4 flex gap-2 rounded-xl border border-rose/40 bg-blush/50 px-4 py-3 text-sm text-ink">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose" />
                       <span>
-                        Please add your names, event date and venue before
-                        generating your invite.
+                        Please add your names, event date, venue, and your own
+                        name and email before generating your invite.
                       </span>
                     </div>
                   )}
@@ -383,6 +528,7 @@ export default function CreateInvitePage() {
               </div>
             </div>
           </form>
+          )}
         </section>
       </main>
 

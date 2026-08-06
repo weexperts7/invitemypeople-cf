@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { AlertCircle, Heart, Loader2 } from 'lucide-react'
 
-// Reads from the Apps Script endpoint (see google-apps-script/Code.gs's
-// doGet) when VITE_RSVP_ENDPOINT is configured; otherwise falls back to the
-// bundled local API's GET /api/wishes (see server/index.js), which reads the
-// same data/rsvps.json every RsvpForm submission already writes to. Either
-// way, a Wishes Wall pointed at a real slug always has something to show.
-const REMOTE_ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT
+// Reads GET /api/wishes — Supabase-backed in production (api/wishes.js),
+// the flat-file counterpart in local dev (server/index.js), same response
+// shape either way. See RSVPS-AND-REMINDERS-SETUP.md; this replaced the old
+// Google Apps Script / VITE_RSVP_ENDPOINT dependency.
 
 export default function WishesWall({
   slug,
@@ -27,9 +25,7 @@ export default function WishesWall({
     let cancelled = false
     setStatus('loading')
 
-    const url = REMOTE_ENDPOINT
-      ? `${REMOTE_ENDPOINT}?slug=${encodeURIComponent(slug)}`
-      : `/api/wishes?slug=${encodeURIComponent(slug)}`
+    const url = `/api/wishes?slug=${encodeURIComponent(slug)}`
 
     fetch(url)
       .then((res) => res.json())

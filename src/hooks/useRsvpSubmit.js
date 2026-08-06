@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react'
 
-// Defaults to the bundled RSVP API (server/index.js), which appends every
-// submission to data/rsvps.xlsx. Override to post to a Google Apps Script
-// endpoint instead — see RSVP-SETUP.md.
-const ENDPOINT = import.meta.env.VITE_RSVP_ENDPOINT || '/api/rsvp'
+// Supabase-backed in production (api/rsvps/index.js) and the flat-file
+// counterpart in local dev (server/index.js) — see
+// RSVPS-AND-REMINDERS-SETUP.md. Same-origin JSON POST, no CORS setup needed
+// (the old external Google Apps Script endpoint this replaced required the
+// text/plain trick this hook used to use).
+const ENDPOINT = '/api/rsvps'
 
 // The fetch/status-machine core shared by every RSVP form in the app,
 // regardless of how differently each one is styled. `fields` is whatever
@@ -21,11 +23,7 @@ export function useRsvpSubmit(slug) {
       try {
         const response = await fetch(ENDPOINT, {
           method: 'POST',
-          // text/plain + a string body keeps this a "simple" CORS request (no
-          // preflight), which is what Apps Script web apps can answer without
-          // extra setup; e.postData.contents still parses fine as JSON.
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          redirect: 'follow',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ invitationSlug: slug, website: honeypot, ...fields }),
         })
 

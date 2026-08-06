@@ -5,9 +5,10 @@
 // has no writable, persistent filesystem to keep one on.
 import { slugify } from '../../src/utils/slugify.js'
 import { getSupabase } from '../_lib/supabase.js'
-import { clean, randomSlugSuffix, rowToInvite } from '../_lib/invites.js'
+import { clean, randomSlugSuffix, rowToInvite, generateHostToken } from '../_lib/invites.js'
 import { MAX_PHOTOS } from '../../src/utils/photoUpload.js'
 import { cleanEvents } from '../../src/utils/cleanEvents.js'
+import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../../src/utils/email.js'
 
 const MAX_SLUG_ATTEMPTS = 6
 
@@ -23,9 +24,13 @@ export default async function handler(req, res) {
     const names = clean(body.names, 120)
     const date = clean(body.date, 20)
     const venue = clean(body.venue, 200)
+    const hostName = clean(body.hostName, 120)
+    const hostEmail = clean(body.hostEmail, 200)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+    if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
+    if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
 
     const row = {
       occasion: clean(body.occasion, 40),
@@ -45,6 +50,9 @@ export default async function handler(req, res) {
         : [],
       event_title: clean(body.eventTitle, 80),
       events: cleanEvents(body.events, clean),
+      host_name: hostName,
+      host_email: hostEmail,
+      host_token: generateHostToken(),
     }
 
     const base = slugify(names) || 'invite'
@@ -64,7 +72,27 @@ export default async function handler(req, res) {
 
       if (!error) {
         console.log(`[invites] saved "${slug}" (${row.template_name || row.template_id})`)
-        return res.status(200).json({ ok: true, invite: rowToInvite(data) })
+        // hostToken is deliberately spread in ONLY here, once, at creation —
+        // rowToInvite() is an explicit allowlist that never includes it, so
+        // every other endpoint that returns an invite (GET /api/invites/:slug,
+        // the public wishes/rsvps reads) can never leak it back out.
+        const invite = { ...rowToInvite(data), hostToken: data.host_token }
+
+        // Order-confirmation email — must never fail or delay the response;
+        // sendTransactionalEmail() itself never throws, but this is awaited
+        // (not fire-and-forget) since Vercel can freeze the function's
+        // execution context right after the response is sent.
+        try {
+          await sendTransactionalEmail({
+            to: row.host_email,
+            toName: row.host_name,
+            ...buildOrderConfirmationEmail(invite),
+          })
+        } catch (emailErr) {
+          console.error('[invites] confirmation email failed:', emailErr)
+        }
+
+        return res.status(200).json({ ok: true, invite })
       }
 
       lastError = error

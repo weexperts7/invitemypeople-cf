@@ -67,9 +67,9 @@ export default function GoldenTrunkBlessingExperience({ template }) {
             <p className="text-xs tracking-[0.35em] uppercase text-ink-soft mb-4">
               {greeting?.line ?? 'Ganpati Bappa Morya'}
             </p>
-            <p className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
+            <h1 className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
               {host?.familyName}
-            </p>
+            </h1>
             <p className="max-w-sm text-sm sm:text-base text-ink-soft leading-relaxed">
               {host?.hostLine}
             </p>

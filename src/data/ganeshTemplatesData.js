@@ -29,6 +29,11 @@ export const GANESH_TEMPLATES = [
     tagline: 'Vibrant marigold & gold, a curtain-reveal mandap',
     description:
       'A vivid marigold-and-gold mandap unfolds as five sequential chapters — sacred red curtains part on tap to reveal Bappa, framed by a marigold garland border, with the full puja muhurat, interactive RSVP and a blessing wall.',
+    // Shorter, SEO-specific override for the meta description tag — see
+    // ganeshSeo() in routesSeo.js. The `description` above is on-page
+    // marketing copy and runs well past a meta description's ~155-char budget.
+    metaDescription:
+      'Vivid marigold & gold Ganesh Chaturthi invitation with a tap-to-reveal curtain, full puja muhurat, interactive RSVP and a blessing wall.',
     tags: ['Marigold', 'Curtain Reveal', 'Storybook'],
     motif: 'marigold-garland',
     motifAccent: '#c2410c',
@@ -71,6 +76,8 @@ export const GANESH_TEMPLATES = [
     tagline: 'Deep vermilion & gold, tap-to-open modak blessing',
     description:
       'Bappa’s photo takes center stage inside a golden symmetric panel, framed by a modak-and-mandala border. A tap-to-open golden modak box reveals a personal blessing, alongside the full puja muhurat, RSVP and blessing wall.',
+    metaDescription:
+      'Golden Ganesh Chaturthi invitation with a modak-and-mandala border and a tap-to-open blessing box, plus full puja muhurat, RSVP and blessing wall.',
     tags: ['Vermilion', 'Modak Reveal', 'Symmetric Panel'],
     motif: 'modak-mandala',
     motifAccent: '#9a1f2b',
@@ -112,6 +119,8 @@ export const GANESH_TEMPLATES = [
     tagline: 'Radiant vermilion-red & gold, lotus-lit aarti',
     description:
       'A radiant vermilion-red canvas glowing with gold lotus accents — a warm, aarti-lit welcome to Bappa’s ten-day stay, with a tap-to-reveal curtain, full puja muhurat, RSVP and a blessing wall.',
+    metaDescription:
+      'Radiant vermilion & gold Ganesh Chaturthi invitation for Bappa’s ten-day stay, with a tap-to-reveal curtain, puja muhurat, RSVP and blessing wall.',
     tags: ['Vermilion', 'Lotus', 'Radiant'],
     motif: 'marigold-garland',
     motifAccent: '#b3122a',
@@ -153,6 +162,8 @@ export const GANESH_TEMPLATES = [
     tagline: 'Emerald green & gold, sacred doob-grass calm',
     description:
       'A serene emerald-green canvas edged in gold, honoring the sacred doob grass offered to Bappa — a peaceful, grounded welcome with a tap-to-reveal curtain, full puja muhurat, RSVP and a blessing wall.',
+    metaDescription:
+      'Serene emerald-green Ganesh Chaturthi invitation honoring sacred doob grass, with a tap-to-reveal curtain, puja muhurat, RSVP and a blessing wall.',
     tags: ['Emerald', 'Doob Grass', 'Serene'],
     motif: 'modak-mandala',
     motifAccent: '#2f6d3f',
@@ -195,6 +206,8 @@ export const GANESH_TEMPLATES = [
     tagline: 'Regal maroon & gold, a full-bleed photographic durbar',
     description:
       'A cinematic, photo-led welcome fit for a king — Bappa’s portrait rises inside a crowned jharokha niche over a full-bleed festival photograph, followed by a scrollable gallery of real festival moments and an unfurling parchment scroll of the puja muhurat, with interactive RSVP and a blessing wall.',
+    metaDescription:
+      'Cinematic, photo-led Ganesh Chaturthi invitation with a festival photo gallery, an unfurling puja-muhurat scroll, interactive RSVP and a blessing wall.',
     tags: ['Royal', 'Photo Gallery', 'Scroll Reveal'],
     motif: 'royal-durbar',
     motifAccent: '#7a1230',

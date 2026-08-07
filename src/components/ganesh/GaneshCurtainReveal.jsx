@@ -42,9 +42,9 @@ export default function GaneshCurtainReveal({ palette, greeting, host }) {
           <p className="text-xs tracking-[0.3em] uppercase text-ink-soft mb-3">
             {greeting?.line ?? 'Ganpati Bappa Morya'}
           </p>
-          <p className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
+          <h1 className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
             {host?.familyName}
-          </p>
+          </h1>
           <p className="max-w-xs text-sm sm:text-base text-ink-soft leading-relaxed">
             {host?.hostLine}
           </p>

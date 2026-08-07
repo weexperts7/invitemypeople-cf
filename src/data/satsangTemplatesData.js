@@ -24,6 +24,11 @@ export const SATSANG_TEMPLATES = [
     tagline: 'Majestic peacock blues, greens & glowing gold',
     description:
       'Majestic deep peacock-blue and emerald behind a continuous gold frame, glowing gold accents, an archway niche, and intricate peacock feather motifs — a regal, devotional welcome to Guruji\'s Satsang, bordered like a physical luxury invitation card.',
+    // Shorter, SEO-specific override for the meta description tag — see
+    // satsangSeo() in routesSeo.js. The `description` above is on-page
+    // marketing copy and runs well past a meta description's ~155-char budget.
+    metaDescription:
+      "Regal peacock-blue & gold Guruji Satsang invitation, bordered like a luxury card with an archway niche and peacock feather motifs, plus built-in RSVP.",
     tags: ['Peacock', 'Regal', 'Bordered Frame'],
     motif: 'peacock-feather',
     motifAccent: '#0f6e5c',
@@ -64,6 +69,8 @@ export const SATSANG_TEMPLATES = [
     tagline: 'Warm saffron & ivory, minimalist lotus line art',
     description:
       'Warm saffron over soft ivory and cream, modern minimalist lotus line art, and parchment-style card containers laid out with editorial whitespace and asymmetrical offsets — a peaceful, radiant invitation to Guruji\'s Satsang.',
+    metaDescription:
+      'Warm saffron & ivory Guruji Satsang invitation with minimalist lotus line art and an editorial, parchment-style layout, plus built-in RSVP.',
     tags: ['Saffron', 'Lotus', 'Editorial'],
     motif: 'saffron-lotus',
     motifAccent: '#c25a1e',
@@ -104,6 +111,8 @@ export const SATSANG_TEMPLATES = [
     tagline: 'Vintage gold, sepia & maroon, altar aesthetics',
     description:
       'Vintage gold, sepia and rich maroon over a symmetrical altar aesthetic, with sacred lamp and diya elements — Guruji\'s Satsang unfolds as five sequential chapters, blessing revealed inside a tap-to-open envelope.',
+    metaDescription:
+      'Vintage gold & maroon Guruji Satsang invitation styled as a sacred temple altar, unfolding across five chapters inside a tap-to-open envelope.',
     tags: ['Altar', 'Diya', 'Storybook'],
     motif: 'temple-gold',
     motifAccent: '#c28a3a',

@@ -88,14 +88,14 @@ export default function RoyalPeacockExperience({ template }) {
               <span className="h-px w-10" style={{ background: `${gold}90` }} />
             </div>
 
-            <motion.p
+            <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.6 }}
               className="font-script text-4xl sm:text-5xl text-rose leading-tight mb-4"
             >
               {host?.familyName}
-            </motion.p>
+            </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 16 }}

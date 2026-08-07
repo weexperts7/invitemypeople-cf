@@ -20,6 +20,7 @@ import { getTemplateById } from './data/templatesData'
 import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
 import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from './data/occasionsData'
+import { satsangSeo, ganeshSeo } from './data/routesSeo'
 
 // A Satsang invitation is a shareable, directly-linkable page — see
 // satsangTemplatesData.js — rather than only living behind in-app preview
@@ -31,13 +32,7 @@ function SatsangRoute() {
 
   return (
     <>
-      {template && (
-        <SEO
-          title={`${template.name} — Guruji Satsang Invitation | InviteMyPeople`}
-          description={template.description}
-          path={`/satsang/${slug}`}
-        />
-      )}
+      {template && <SEO {...satsangSeo(template)} path={`/satsang/${slug}`} />}
       <SatsangExperience template={template} />
     </>
   )
@@ -52,11 +47,7 @@ function GaneshRoute() {
   return (
     <>
       {template && (
-        <SEO
-          title={`${template.name} — Ganesh Chaturthi Invitation | InviteMyPeople`}
-          description={template.description}
-          path={`/templates/ganesh-chaturthi/${slug}`}
-        />
+        <SEO {...ganeshSeo(template)} path={`/templates/ganesh-chaturthi/${slug}`} />
       )}
       <GaneshExperience template={template} />
     </>

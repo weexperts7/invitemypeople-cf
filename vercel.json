@@ -1,5 +1,11 @@
 {
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/" }
-  ]
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/((?!api/).*)", "destination": "/api/render" }
+  ],
+  "functions": {
+    "api/render.js": {
+      "includeFiles": "dist/index.html"
+    }
+  }
 }

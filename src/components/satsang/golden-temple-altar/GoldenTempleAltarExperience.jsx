@@ -64,9 +64,9 @@ export default function GoldenTempleAltarExperience({ template }) {
               <p className="text-xs tracking-[0.35em] uppercase text-ink-soft mb-4">
                 {greeting?.line ?? 'Jai Guruji'}
               </p>
-              <p className="font-script text-4xl sm:text-5xl text-rose leading-tight mb-4">
+              <h1 className="font-script text-4xl sm:text-5xl text-rose leading-tight mb-4">
                 {host?.familyName}
-              </p>
+              </h1>
               <p className="max-w-sm text-sm sm:text-base text-ink-soft leading-relaxed">
                 {host?.hostLine}
               </p>

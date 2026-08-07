@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
 
+# Private per-host RSVP dashboards — gated by a one-time token in the URL
+# itself (see src/pages/HostDashboardPage.jsx). Already noindex'd via meta
+# robots too; disallowing here additionally keeps crawlers from ever
+# requesting these guest-list pages at all.
+Disallow: /i/*/host/*
+
+# JSON/API endpoints — not content, nothing here for a crawler to index.
+Disallow: /api/
+
 Sitemap: https://invitemypeople.com/sitemap.xml

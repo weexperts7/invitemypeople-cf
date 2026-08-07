@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ROUTES_SEO, SITE_URL } from '../src/data/routesSeo.js'
+import { ROUTES_SEO, SITE_URL, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 import { slugify } from '../src/utils/slugify.js'
@@ -530,19 +530,13 @@ function resolveSeoForPath(pathname) {
   const satsangMatch = pathname.match(/^\/satsang\/([^/]+)\/?$/)
   if (satsangMatch) {
     const template = getSatsangTemplateBySlug(decodeURIComponent(satsangMatch[1]))
-    if (template) {
-      const title = `${template.name} — Guruji Satsang Invitation | InviteMyPeople`
-      return { title, description: template.description, ogTitle: title, ogDescription: template.description }
-    }
+    if (template) return satsangSeo(template)
   }
 
   const ganeshMatch = pathname.match(/^\/templates\/ganesh-chaturthi\/([^/]+)\/?$/)
   if (ganeshMatch) {
     const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
-    if (template) {
-      const title = `${template.name} — Ganesh Chaturthi Invitation | InviteMyPeople`
-      return { title, description: template.description, ogTitle: title, ogDescription: template.description }
-    }
+    if (template) return ganeshSeo(template)
   }
 
   return null

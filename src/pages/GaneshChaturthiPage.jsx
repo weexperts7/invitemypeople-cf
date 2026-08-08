@@ -41,7 +41,7 @@ export default function GaneshChaturthiPage() {
               <SectionEyebrow icon={GaneshIcon} tone="gold">Ganesh Chaturthi Invitations</SectionEyebrow>
             </div>
             <h1 className="font-serif text-3xl sm:text-5xl leading-[1.1] text-ink mb-4">
-              Immersive Invitations to Welcome Bappa
+              Immersive Ganesh Chaturthi Invitations to Welcome Bappa
             </h1>
             <p className="mx-auto max-w-xl text-ink-soft">
               {GANESH_TEMPLATES.length} template{GANESH_TEMPLATES.length === 1 ? '' : 's'} —

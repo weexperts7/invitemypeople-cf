@@ -304,7 +304,7 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mt-6 font-serif text-4xl sm:text-6xl leading-[1.1] text-ink"
           >
-            Invitations as unforgettable
+            Digital Invitations as unforgettable
             <br className="hidden sm:block" /> as your{' '}
             <span className="font-script text-rose text-5xl sm:text-7xl">celebration</span>
           </motion.h1>

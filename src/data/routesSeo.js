@@ -67,6 +67,17 @@ export const COMING_SOON_ROUTES = [
   },
 ]
 
+// `h1` mirrors the literal on-page headline for each route (see
+// LandingPage.jsx, AboutPage.jsx, WeddingsPage.jsx, etc.) — kept here so the
+// server-side HTML injection below (setRootH1, used by server/index.js and
+// api/render.js) can stamp a real, crawlable <h1> into the *raw* HTML
+// response, matching what React renders after mount. Without this, a
+// non-JS-executing crawler or SEO auditor sees only an empty
+// `<div id="root"></div>` — the SPA shell has no heading at all until
+// client-side JS runs. Keep each value in sync with its component's actual
+// heading text word-for-word, so bots and JS-rendering visitors always see
+// identical content (never drift into showing crawlers something different
+// from what users see).
 const STATIC_ROUTES_SEO = {
   '/': {
     title: 'InviteMyPeople | Digital Invites for Weddings & Events',
@@ -75,6 +86,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'InviteMyPeople | Stunning Interactive Digital Invitations',
     ogDescription:
       'Budget-friendly, interactive digital invitations for weddings, Guruji Satsangs, birthdays, engagements, baby showers, housewarmings, corporate events & anniversaries — delivered on WhatsApp in 30 minutes.',
+    h1: 'Digital Invitations as unforgettable as your celebration',
   },
   '/about': {
     title: 'About Us | InviteMyPeople',
@@ -83,6 +95,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'About InviteMyPeople — Invitations, Reinvented',
     ogDescription:
       'The story behind InviteMyPeople and what makes our digital invitations different — interactive envelopes, scratch-to-reveal cards, live RSVP tracking, and a wishes wall.',
+    h1: 'Invitations, the way they should’ve always felt.',
   },
   '/weddings': {
     title: 'Digital Wedding Invitations | InviteMyPeople',
@@ -91,6 +104,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'Digital Wedding Invitations — InviteMyPeople',
     ogDescription:
       'Interactive digital wedding invitations across every tradition — envelope reveal, scratch-to-reveal cards, and built-in RSVP tracking.',
+    h1: 'Digital Wedding Invitations for Every Tradition',
   },
   '/guruji-satsangs': {
     title: 'Guruji Satsang Invitations | InviteMyPeople',
@@ -99,6 +113,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'Guruji Satsang Invitations — InviteMyPeople',
     ogDescription:
       'Devotional digital invitations for Guruji Satsangs, complete with a Divine Blessing scratch card and built-in RSVP tracking.',
+    h1: 'Devotional Invitations for Guruji’s Satsang',
   },
   '/templates/ganesh-chaturthi': {
     title: 'Ganesh Chaturthi Invitations | InviteMyPeople',
@@ -107,6 +122,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'Ganesh Chaturthi Invitations — InviteMyPeople',
     ogDescription:
       'Immersive, photo-rich digital invitations to welcome Ganpati Bappa — curtain-opening darshan reveal, puja muhurat, interactive RSVP and a blessing wall.',
+    h1: 'Immersive Ganesh Chaturthi Invitations to Welcome Bappa',
   },
   '/create': {
     title: 'Invitation Builder | InviteMyPeople',
@@ -115,6 +131,7 @@ const STATIC_ROUTES_SEO = {
     ogTitle: 'Invitation Builder — InviteMyPeople',
     ogDescription:
       'Pick a template style, fill in your details, and watch your invitation come to life in a live preview — then send it to us on WhatsApp to finalize.',
+    h1: 'Build Your Invitation, Live',
   },
 }
 
@@ -124,6 +141,9 @@ export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
     description: occasion.description,
     ogTitle: occasion.title.replace(' | InviteMyPeople', ''),
     ogDescription: occasion.description,
+    // Matches ComingSoonPage.jsx's own `Digital {occasion.label} Invitations`
+    // heading exactly — see the STATIC_ROUTES_SEO comment above for why.
+    h1: `Digital ${occasion.label} Invitations`,
   }
   return acc
 }, { ...STATIC_ROUTES_SEO })

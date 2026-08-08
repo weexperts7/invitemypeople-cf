@@ -521,6 +521,16 @@ function setTitle(html, title) {
   return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
 }
 
+// Mirrors api/render.js's setRootH1 exactly — see its comment for why this
+// is safe (createRoot, not hydrateRoot) and why it exists (a non-JS-executing
+// crawler otherwise only ever sees an empty `<div id="root"></div>`).
+function setRootH1(html, h1) {
+  return html.replace(
+    '<div id="root"></div>',
+    `<div id="root"><h1>${escapeHtml(h1)}</h1></div>`,
+  )
+}
+
 // Resolves per-route SEO copy for any URL the SPA router recognizes —
 // static routes come straight from routesSeo.js; /satsang/:slug is dynamic,
 // so its title/description come from the matched template itself.
@@ -568,7 +578,7 @@ function renderSeoHtml(pathname) {
   }
 
   const url = `${SITE_URL}${pathname}`
-  return [
+  const steps = [
     [setTitle, seo.title],
     [setMetaContent, 'name="description"', seo.description],
     [setCanonical, url],
@@ -577,7 +587,10 @@ function renderSeoHtml(pathname) {
     [setMetaContent, 'property="og:url"', url],
     [setMetaContent, 'name="twitter:title"', seo.ogTitle || seo.title],
     [setMetaContent, 'name="twitter:description"', seo.ogDescription || seo.description],
-  ].reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
+  ]
+  // Only static routes carry an `h1` — see api/render.js's identical comment.
+  if (seo.h1) steps.push([setRootH1, seo.h1])
+  return steps.reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
 }
 
 // When a production build exists, serve the site from this same server.

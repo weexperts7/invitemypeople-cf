@@ -13,12 +13,15 @@
 // itself, mirroring server/index.js exactly (see routesSeo.js, which is the
 // shared source of truth both read from).
 //
-// Deliberately conservative: any route this function doesn't recognize
-// (an actual 404, or a dynamic /i/:slug page whose content lives in
-// Supabase, not in this function) falls through with the HTML returned
-// UNCHANGED — i.e. today's status quo — rather than guessing. A bug in the
-// lookup below can only leave a page's tags as they already are; it can
-// never corrupt or de-index a page that already worked.
+// Any route this function doesn't recognize (an actual 404, or a dynamic
+// /i/:slug or /i/:slug/host/:hostToken page whose content lives in Supabase,
+// not in this function) gets its <meta name="robots"> flipped to
+// "noindex, follow" rather than guessing at a title/description. Mirrors
+// server/index.js exactly, and matches what those pages already declare
+// themselves once JS mounts (see GeneratedInvitePage.jsx/HostDashboardPage.jsx's
+// own <SEO noindex />) — without this, a non-JS crawler hitting one of them
+// directly saw the default "index, follow" straight through, since
+// src/components/SEO.jsx only patches that meta tag after React mounts.
 import fs from 'node:fs'
 import path from 'node:path'
 import { ROUTES_SEO, SITE_URL, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
@@ -50,6 +53,20 @@ function setCanonical(html, href) {
 
 function setTitle(html, title) {
   return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
+}
+
+// The SPA renders via `createRoot(...).render()` (see src/main.jsx), not
+// `hydrateRoot` — so it fully replaces #root's children on mount rather than
+// reconciling against them. That makes it safe to seed #root with real
+// markup here: non-JS crawlers and SEO auditors that only ever see this raw
+// response get an actual semantic <h1> instead of an empty div, while
+// JS-executing visitors see it swapped for React's own (matching) heading
+// within milliseconds, with no hydration warnings either way.
+function setRootH1(html, h1) {
+  return html.replace(
+    '<div id="root"></div>',
+    `<div id="root"><h1>${escapeHtml(h1)}</h1></div>`,
+  )
 }
 
 function resolveSeoForPath(pathname) {
@@ -84,10 +101,10 @@ function getIndexHtmlTemplate() {
 function renderSeoHtml(pathname) {
   const html = getIndexHtmlTemplate()
   const seo = resolveSeoForPath(pathname)
-  if (!seo) return html
+  if (!seo) return setMetaContent(html, 'name="robots"', 'noindex, follow')
 
   const url = `${SITE_URL}${pathname}`
-  return [
+  const steps = [
     [setTitle, seo.title],
     [setMetaContent, 'name="description"', seo.description],
     [setCanonical, url],
@@ -96,7 +113,14 @@ function renderSeoHtml(pathname) {
     [setMetaContent, 'property="og:url"', url],
     [setMetaContent, 'name="twitter:title"', seo.ogTitle || seo.title],
     [setMetaContent, 'name="twitter:description"', seo.ogDescription || seo.description],
-  ].reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
+  ]
+  // Only the static routes (routesSeo.js's STATIC_ROUTES_SEO/COMING_SOON_ROUTES)
+  // carry an `h1` — satsangSeo()/ganeshSeo() don't, since those dynamic
+  // template pages already render their own real <h1> client-side and
+  // duplicating their bespoke per-template hero copy here would risk drifting
+  // out of sync with it.
+  if (seo.h1) steps.push([setRootH1, seo.h1])
+  return steps.reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
 }
 
 export default function handler(req, res) {

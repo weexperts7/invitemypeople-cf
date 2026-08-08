@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ROUTES_SEO, SITE_URL, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
+import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 import { slugify } from '../src/utils/slugify.js'
@@ -521,14 +521,27 @@ function setTitle(html, title) {
   return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
 }
 
-// Mirrors api/render.js's setRootH1 exactly — see its comment for why this
-// is safe (createRoot, not hydrateRoot) and why it exists (a non-JS-executing
-// crawler otherwise only ever sees an empty `<div id="root"></div>`).
-function setRootH1(html, h1) {
+// Mirrors api/render.js's setRootContent exactly — see its comment for why
+// this is safe (createRoot, not hydrateRoot) and why it exists (a
+// non-JS-executing crawler otherwise only ever sees an empty
+// `<div id="root"></div>`).
+function setRootContent(html, { h1, body, links }) {
+  const paragraphs = (body || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('')
+  const nav = links && links.length
+    ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
+    : ''
   return html.replace(
     '<div id="root"></div>',
-    `<div id="root"><h1>${escapeHtml(h1)}</h1></div>`,
+    `<div id="root"><h1>${escapeHtml(h1)}</h1>${paragraphs}${nav}</div>`,
   )
+}
+
+// Mirrors api/render.js's normalizePathname exactly — see its comment for
+// why trailing-slash requests need collapsing before both route lookup and
+// the canonical URL it produces.
+function normalizePathname(pathname) {
+  if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
+  return pathname
 }
 
 // Resolves per-route SEO copy for any URL the SPA router recognizes —
@@ -574,17 +587,20 @@ function getIndexHtmlTemplate() {
 // swaps in the right title/description/canonical/OG tags per route before
 // sending index.html, so link previews and search snippets are correct for
 // every page, not just "/".
-function renderSeoHtml(pathname) {
-  const seo = resolveSeoForPath(pathname)
+function renderSeoHtml(rawPathname) {
   const html = getIndexHtmlTemplate()
+  const pathname = normalizePathname(rawPathname)
+  const seo = resolveSeoForPath(pathname)
+  const url = `${SITE_URL}${pathname}`
 
   if (!seo) {
     // Unknown route — the SPA renders its 404 page client-side; keep
-    // crawlers from indexing this URL as a duplicate of the homepage.
-    return setMetaContent(html, 'name="robots"', 'noindex, follow')
+    // crawlers from indexing this URL as a duplicate of the homepage. Still
+    // self-canonicalize (see api/render.js's identical comment) rather than
+    // leaving the shell's baked-in homepage canonical in place.
+    return setCanonical(setMetaContent(html, 'name="robots"', 'noindex, follow'), url)
   }
 
-  const url = `${SITE_URL}${pathname}`
   const steps = [
     [setTitle, seo.title],
     [setMetaContent, 'name="description"', seo.description],
@@ -596,7 +612,7 @@ function renderSeoHtml(pathname) {
     [setMetaContent, 'name="twitter:description"', seo.ogDescription || seo.description],
   ]
   // Only static routes carry an `h1` — see api/render.js's identical comment.
-  if (seo.h1) steps.push([setRootH1, seo.h1])
+  if (seo.h1) steps.push([setRootContent, { h1: seo.h1, body: seo.body, links: SITE_NAV_LINKS }])
   return steps.reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
 }
 

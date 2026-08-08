@@ -1,8 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Eye, Wand2, BadgeCheck } from 'lucide-react'
 import SatsangShowcase from './SatsangShowcase'
+import { buildCreateLink } from '../utils/createLink'
 
-export default function SatsangTemplateCard({ template, onExplore, whatsappHref }) {
+export default function SatsangTemplateCard({ template, onExplore }) {
   const reduceMotion = useReducedMotion()
 
   return (
@@ -57,17 +59,19 @@ export default function SatsangTemplateCard({ template, onExplore, whatsappHref 
             <Eye className="w-3.5 h-3.5" />
             Preview
           </motion.button>
-          <motion.a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
+          <motion.div
             whileHover={reduceMotion ? undefined : { scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-champagne-deep/60 bg-ivory/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-champagne/40"
+            className="flex flex-1"
           >
-            <Wand2 className="w-3.5 h-3.5" />
-            Customize
-          </motion.a>
+            <Link
+              to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-champagne-deep/60 bg-ivory/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-champagne/40"
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              Customize
+            </Link>
+          </motion.div>
         </div>
       </div>
     </motion.article>

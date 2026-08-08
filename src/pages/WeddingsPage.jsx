@@ -6,7 +6,6 @@ import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateCard from '../components/TemplateCard'
-import CustomizeModal from '../components/CustomizeModal'
 import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
 import { ROUTES_SEO } from '../data/routesSeo'
 import { usePreview } from '../hooks/usePreview'
@@ -24,7 +23,6 @@ export default function WeddingsPage() {
   const reduceMotion = useReducedMotion()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
-  const [customizeTarget, setCustomizeTarget] = useState(null)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -39,11 +37,6 @@ export default function WeddingsPage() {
       return matchesWeddingType && matchesSearch
     })
   }, [search, activeWeddingType])
-
-  const handleCustomizePreview = (id) => {
-    setCustomizeTarget(null)
-    onPreview(id)
-  }
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
@@ -127,7 +120,6 @@ export default function WeddingsPage() {
                     key={template.id}
                     template={template}
                     onPreview={onPreview}
-                    onCustomize={setCustomizeTarget}
                   />
                 ))}
               </motion.div>
@@ -170,12 +162,6 @@ export default function WeddingsPage() {
       </main>
 
       <SiteFooter />
-
-      <CustomizeModal
-        template={customizeTarget}
-        onClose={() => setCustomizeTarget(null)}
-        onPreview={handleCustomizePreview}
-      />
     </div>
   )
 }

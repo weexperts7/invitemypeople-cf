@@ -37,7 +37,6 @@ import TemplateCard from './TemplateCard'
 import SatsangTemplateCard from './SatsangTemplateCard'
 import GaneshTemplateCard from './GaneshTemplateCard'
 import TemplateMarquee from './TemplateMarquee'
-import CustomizeModal from './CustomizeModal'
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
 import SEO from './SEO'
@@ -238,7 +237,6 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
-  const [customizeTarget, setCustomizeTarget] = useState(null)
   const [openFaq, setOpenFaq] = useState(0)
   const reduceMotion = useReducedMotion()
 
@@ -255,11 +253,6 @@ export default function LandingPage() {
       return matchesWeddingType && matchesSearch
     })
   }, [search, activeWeddingType])
-
-  const handleCustomizePreview = (id) => {
-    setCustomizeTarget(null)
-    onPreview(id)
-  }
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
@@ -455,7 +448,6 @@ export default function LandingPage() {
               <TemplateCard
                 template={template}
                 onPreview={onPreview}
-                onCustomize={setCustomizeTarget}
               />
             )}
           />
@@ -502,9 +494,6 @@ export default function LandingPage() {
             <SatsangTemplateCard
               template={template}
               onExplore={(slug) => navigate(`/satsang/${slug}`)}
-              whatsappHref={getWhatsAppLink(
-                `Hi! I'd like to create a "${template.name}" Satsang invitation.`,
-              )}
             />
           )}
         />
@@ -567,9 +556,6 @@ export default function LandingPage() {
             <GaneshTemplateCard
               template={template}
               onExplore={(slug) => navigate(`/templates/ganesh-chaturthi/${slug}`)}
-              whatsappHref={getWhatsAppLink(
-                `Hi! I'd like to create a "${template.name}" Ganesh Chaturthi invitation.`,
-              )}
             />
           )}
         />
@@ -1048,12 +1034,6 @@ export default function LandingPage() {
       </main>
 
       <SiteFooter />
-
-      <CustomizeModal
-        template={customizeTarget}
-        onClose={() => setCustomizeTarget(null)}
-        onPreview={handleCustomizePreview}
-      />
 
       <motion.a
         href={getWhatsAppLink("Hi! I'd like to know more about InviteMyPeople.")}

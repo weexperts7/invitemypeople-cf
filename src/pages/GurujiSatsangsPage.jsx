@@ -60,9 +60,6 @@ export default function GurujiSatsangsPage() {
                   key={template.slug}
                   template={template}
                   onExplore={(slug) => navigate(`/satsang/${slug}`)}
-                  whatsappHref={getWhatsAppLink(
-                    `Hi! I'd like to create a "${template.name}" Satsang invitation.`,
-                  )}
                 />
               ))}
             </motion.div>

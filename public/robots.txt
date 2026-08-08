@@ -10,4 +10,4 @@ Disallow: /i/*/host/*
 # JSON/API endpoints — not content, nothing here for a crawler to index.
 Disallow: /api/
 
-Sitemap: https://invitemypeople.com/sitemap.xml
+Sitemap: https://www.invitemypeople.com/sitemap.xml

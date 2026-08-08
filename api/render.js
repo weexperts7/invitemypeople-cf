@@ -92,8 +92,8 @@ function setRootContent(html, { h1, body, links }) {
 // crawlers, SEO auditors and old backlinks reach a page) missed every exact
 // key in ROUTES_SEO, fell through to the noindex/no-canonical-update branch
 // in renderSeoHtml, and served the *unmodified shell's* canonical — which
-// always says "https://invitemypeople.com/" — pointing a real, indexable
-// page at a completely different URL. Normalizing first means "/about/" and
+// always says the bare homepage URL — pointing a real, indexable page at a
+// completely different URL. Normalizing first means "/about/" and
 // "/about" both resolve to, and both self-canonicalize to, the same
 // trailing-slash-free URL.
 function normalizePathname(pathname) {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion'
 import { ArrowLeft, Heart, Sparkles, Volume2, VolumeX } from 'lucide-react'
 import EnvelopeLanding from './EnvelopeLanding'
@@ -14,6 +15,7 @@ import { FrameCorners } from './TemplateFrame'
 import { PRICING } from '../data/templatesData'
 import { coupleNameTier } from '../utils/coupleNameFit'
 import { slugify } from '../utils/slugify'
+import { buildCreateLink } from '../utils/createLink'
 
 const FOOTER_NAME_SIZES = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg']
 
@@ -166,19 +168,26 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </motion.button>
               )}
-              <motion.a
-                href={`https://wa.me/919877647707?text=${encodeURIComponent(
-                  `Hi! I'd like to buy the "${template?.name ?? 'Template'}" wedding invitation template for myself at the shagun price of ₹${PRICING.shagunPrice.toLocaleString('en-IN')}.`,
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
+                className="flex flex-1"
               >
-                <Heart className="w-4 h-4" />
-                Buy Now — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
-              </motion.a>
+                <Link
+                  to={buildCreateLink({ occasion: 'wedding', sourceId: template?.id })}
+                  // The preview overlay (see App.jsx) renders outside the
+                  // <Routes> tree while previewId is set — a plain Link
+                  // changes the URL but leaves this overlay mounted on top
+                  // of it, so the route change is invisible. Clearing the
+                  // preview first (same as "Back to Templates" does via
+                  // onBack) lets the new route actually show through.
+                  onClick={onBack}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
+                >
+                  <Heart className="w-4 h-4" />
+                  Buy Now — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         </>

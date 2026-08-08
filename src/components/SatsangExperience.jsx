@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, Wand2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { getSatsangLayoutComponent } from './satsang/layoutRegistry'
 import LegacySatsangExperience from './satsang/LegacySatsangExperience'
+import { buildCreateLink } from '../utils/createLink'
 
 // Dispatches a Satsang template to its bespoke experience component (see
 // satsang/layoutRegistry.js) by the template's optional `layout` field,
@@ -44,6 +45,33 @@ export default function SatsangExperience({ template }) {
         <ArrowLeft className="w-4 h-4" />
         All Invitations
       </motion.button>
+
+      {/* Every Satsang template lives at its own directly-linkable page
+          rather than behind an in-app preview overlay (see App.jsx's
+          previewId, used only for wedding templates) — so unlike
+          InvitationExperience.jsx's floating "Buy Now" bar, this CTA never
+          has to fight a preview overlay for the route to actually show. A
+          small floating pill (not a full-width bottom bar) so it never
+          fights each bespoke layout's own footer/RSVP content for space —
+          same floating-over-content pattern as the site-wide WhatsApp
+          button (see LandingPage.jsx). */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.6, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6, ease: 'easeOut' }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-[70]"
+      >
+        <Link
+          to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
+          className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+        >
+          <Wand2 className="w-4 h-4" />
+          Customize This Template
+        </Link>
+      </motion.div>
+
       <Layout template={template} />
     </>
   )

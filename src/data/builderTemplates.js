@@ -1,9 +1,10 @@
-// The curated template list for the self-service Invitation Builder
-// (/create — see pages/CreateInvitePage.jsx). Deliberately a hand-picked
-// subset of TEMPLATES / GANESH_TEMPLATES / SATSANG_TEMPLATES rather than
-// every template in those files — the builder's job is to get a couple/
-// family to a good-looking live preview in a few keystrokes, not to
-// reproduce the full browsing galleries those pages already own.
+// The full template list for the self-service Invitation Builder (/create —
+// see pages/CreateInvitePage.jsx). Every "Buy Now"/"Customize" CTA site-wide
+// now lands here (see utils/createLink.js), so every template a visitor can
+// pick from the browsing galleries (WeddingsPage/GurujiSatsangsPage/
+// GaneshChaturthiPage) needs an entry here too — otherwise clicking
+// "Customize" on a template that's missing silently falls back to the first
+// style for that occasion instead of the one the visitor actually chose.
 //
 // Each entry borrows its palette/motif/fonts/greeting straight from the
 // existing template data (via the from*() helpers below) so the builder's
@@ -73,6 +74,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromWedding('rajasthani-royal')
     return {
       id: 'wedding-rajasthani-royal',
+      sourceId: 'rajasthani-royal',
       occasion: 'wedding',
       name: src.name,
       tagline: 'Palace arches, deep crimson & antique gold',
@@ -98,6 +100,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromWedding('south-indian-temple-gold')
     return {
       id: 'wedding-south-indian-temple-gold',
+      sourceId: 'south-indian-temple-gold',
       occasion: 'wedding',
       name: src.name,
       tagline: 'Temple gopuram gold, jasmine & lotus',
@@ -123,6 +126,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromWedding('punjabi-phulkari')
     return {
       id: 'wedding-punjabi-phulkari',
+      sourceId: 'punjabi-phulkari',
       occasion: 'wedding',
       name: src.name,
       tagline: 'Hand-embroidered phulkari blooms, playful pastel',
@@ -147,6 +151,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromWedding('western-elegant-minimalist')
     return {
       id: 'wedding-western-elegant-minimalist',
+      sourceId: 'western-elegant-minimalist',
       occasion: 'wedding',
       name: src.name,
       tagline: 'Clean typography, restrained floral line-art',
@@ -167,12 +172,163 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromWedding('gujarati-traditional')
+    return {
+      id: 'wedding-gujarati-traditional',
+      sourceId: 'gujarati-traditional',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Pastel ivory, marigold garlands & bandhani dots',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-11-14',
+        time: '10:00',
+        venue: 'Sarovar Portico Lawns, Ahmedabad',
+        message: "Together with our families, we can't wait to celebrate this joyous new beginning with you.",
+      },
+    }
+  })(),
+  (() => {
+    const src = fromWedding('vrindavan-radha-krishna')
+    return {
+      id: 'wedding-vrindavan-radha-krishna',
+      sourceId: 'vrindavan-radha-krishna',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Lotus halo, peacock-feather line-art, soft pastels',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-11-28',
+        time: '09:00',
+        venue: 'Prem Mandir Grounds, Vrindavan',
+        message: "With Radha-Krishna's blessings, we can't wait to celebrate this sacred union with you.",
+      },
+    }
+  })(),
+  (() => {
+    const src = fromWedding('royal-mughal')
+    return {
+      id: 'wedding-royal-mughal',
+      sourceId: 'royal-mughal',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Jaali lattice, arched domes, opulent gold over ivory',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-12-19',
+        time: '19:00',
+        venue: 'Falaknuma Palace, Hyderabad',
+        message: 'Together with our families, we request the honour of your presence to celebrate our Nikah.',
+      },
+    }
+  })(),
+  (() => {
+    const src = fromWedding('bengali-traditional')
+    return {
+      id: 'wedding-bengali-traditional',
+      sourceId: 'bengali-traditional',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Vermillion red & gold, delicate alpona floor-art',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-12-01',
+        time: '09:00',
+        venue: 'Prinsep Ghat Lawns, Kolkata',
+        message: 'With hearts full of joy, we invite you to celebrate our Shubho Bibaho with us.',
+      },
+    }
+  })(),
+  (() => {
+    const src = fromWedding('midnight-noir')
+    return {
+      id: 'wedding-midnight-noir',
+      sourceId: 'midnight-noir',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Black-tie noir, gold Art Deco sunburst & chevrons',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-11-07',
+        time: '19:00',
+        venue: 'The Imperial Ballroom, New Delhi',
+        message: "Black tie requested — join us for an unforgettable night as we say 'I do.'",
+      },
+    }
+  })(),
+  (() => {
+    const src = fromWedding('regal-onyx')
+    return {
+      id: 'wedding-regal-onyx',
+      sourceId: 'regal-onyx',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Heraldic gold crest & laurel over deep emerald-onyx',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-10-24',
+        time: '18:30',
+        venue: 'Taj Falaknuma Palace, Hyderabad',
+        message: 'With love and honor, we invite you to witness our vows.',
+      },
+    }
+  })(),
 
   // ---- Ganesh Chaturthi ----------------------------------------------
   (() => {
     const src = fromGanesh('marigold-mandap')
     return {
       id: 'ganesh-marigold-mandap',
+      sourceId: 'marigold-mandap',
       occasion: 'ganesh-chaturthi',
       name: src.name,
       tagline: src.tagline,
@@ -195,6 +351,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromGanesh('golden-trunk-blessing')
     return {
       id: 'ganesh-golden-trunk-blessing',
+      sourceId: 'golden-trunk-blessing',
       occasion: 'ganesh-chaturthi',
       name: src.name,
       tagline: src.tagline,
@@ -217,6 +374,53 @@ export const BUILDER_TEMPLATES = [
     const src = fromGanesh('royal-durbar-darshan')
     return {
       id: 'ganesh-royal-durbar-darshan',
+      sourceId: 'royal-durbar-darshan',
+      occasion: 'ganesh-chaturthi',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-09-14',
+        time: '19:00',
+        venue: src.event.venue,
+        message: src.puja.note,
+      },
+    }
+  })(),
+  (() => {
+    const src = fromGanesh('vermilion-lotus-aarti')
+    return {
+      id: 'ganesh-vermilion-lotus-aarti',
+      sourceId: 'vermilion-lotus-aarti',
+      occasion: 'ganesh-chaturthi',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-09-14',
+        time: '19:00',
+        venue: src.event.venue,
+        message: src.puja.note,
+      },
+    }
+  })(),
+  (() => {
+    const src = fromGanesh('emerald-doob-grace')
+    return {
+      id: 'ganesh-emerald-doob-grace',
+      sourceId: 'emerald-doob-grace',
       occasion: 'ganesh-chaturthi',
       name: src.name,
       tagline: src.tagline,
@@ -241,6 +445,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromSatsang('divine-peacock')
     return {
       id: 'satsang-divine-peacock',
+      sourceId: 'divine-peacock',
       occasion: 'guruji-satsang',
       name: src.name,
       tagline: src.tagline,
@@ -263,6 +468,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromSatsang('saffron-blossom')
     return {
       id: 'satsang-saffron-blossom',
+      sourceId: 'saffron-blossom',
       occasion: 'guruji-satsang',
       name: src.name,
       tagline: src.tagline,
@@ -285,6 +491,7 @@ export const BUILDER_TEMPLATES = [
     const src = fromSatsang('golden-temple-altar')
     return {
       id: 'satsang-golden-temple-altar',
+      sourceId: 'golden-temple-altar',
       occasion: 'guruji-satsang',
       name: src.name,
       tagline: src.tagline,
@@ -303,6 +510,98 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromSatsang('radiant-sunrise')
+    return {
+      id: 'satsang-radiant-sunrise',
+      sourceId: 'radiant-sunrise',
+      occasion: 'guruji-satsang',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-11-08',
+        time: '07:00',
+        venue: src.event.venue,
+        message: src.mahaprasad.note,
+      },
+    }
+  })(),
+  (() => {
+    const src = fromSatsang('tulsi-serenity')
+    return {
+      id: 'satsang-tulsi-serenity',
+      sourceId: 'tulsi-serenity',
+      occasion: 'guruji-satsang',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-12-06',
+        time: '18:00',
+        venue: src.event.venue,
+        message: src.mahaprasad.note,
+      },
+    }
+  })(),
+  (() => {
+    const src = fromSatsang('diya-ganga')
+    return {
+      id: 'satsang-diya-ganga',
+      sourceId: 'diya-ganga',
+      occasion: 'guruji-satsang',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2027-01-17',
+        time: '18:30',
+        venue: src.event.venue,
+        message: src.mahaprasad.note,
+      },
+    }
+  })(),
+  (() => {
+    const src = fromSatsang('celestial-om')
+    return {
+      id: 'satsang-celestial-om',
+      sourceId: 'celestial-om',
+      occasion: 'guruji-satsang',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2027-02-21',
+        time: '20:00',
+        venue: src.event.venue,
+        message: src.mahaprasad.note,
+      },
+    }
+  })(),
 ]
 
 export function getOccasion(id) {
@@ -315,4 +614,17 @@ export function getBuilderTemplatesForOccasion(occasionId) {
 
 export function getBuilderTemplateById(id) {
   return BUILDER_TEMPLATES.find((t) => t.id === id) ?? BUILDER_TEMPLATES[0]
+}
+
+// Reverse lookup used when a "Customize"/"Buy Now" CTA elsewhere on the site
+// (a template card, a live preview) points at a template from the full
+// TEMPLATES/GANESH_TEMPLATES/SATSANG_TEMPLATES catalogs rather than the
+// builder's own id — see utils/createLink.js. Every catalog template has a
+// matching entry above, but this still returns undefined safely if that
+// ever drifts (a new catalog template added without its builder entry);
+// callers fall back to just the occasion in that case.
+export function findBuilderTemplateBySource(occasionId, sourceId) {
+  return BUILDER_TEMPLATES.find(
+    (t) => t.occasion === occasionId && t.sourceId === sourceId,
+  )
 }

@@ -1,9 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Eye, Wand2, BadgeCheck } from 'lucide-react'
 import TemplateShowcase from './TemplateShowcase'
 import { PRICING } from '../data/templatesData'
+import { buildCreateLink } from '../utils/createLink'
 
-export default function TemplateCard({ template, onPreview, onCustomize }) {
+export default function TemplateCard({ template, onPreview }) {
   const reduceMotion = useReducedMotion()
 
   return (
@@ -64,16 +66,19 @@ export default function TemplateCard({ template, onPreview, onCustomize }) {
             <Eye className="w-3.5 h-3.5" />
             Preview
           </motion.button>
-          <motion.button
-            type="button"
-            onClick={() => onCustomize(template)}
+          <motion.div
             whileHover={reduceMotion ? undefined : { scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-champagne-deep/60 bg-ivory/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-champagne/40"
+            className="flex flex-1"
           >
-            <Wand2 className="w-3.5 h-3.5" />
-            Customize
-          </motion.button>
+            <Link
+              to={buildCreateLink({ occasion: 'wedding', sourceId: template.id })}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-champagne-deep/60 bg-ivory/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-champagne/40"
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              Customize
+            </Link>
+          </motion.div>
         </div>
       </div>
     </motion.article>

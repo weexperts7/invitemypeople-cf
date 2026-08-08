@@ -59,9 +59,6 @@ export default function GaneshChaturthiPage() {
                   key={template.slug}
                   template={template}
                   onExplore={(slug) => navigate(`/templates/ganesh-chaturthi/${slug}`)}
-                  whatsappHref={getWhatsAppLink(
-                    `Hi! I'd like to create a "${template.name}" Ganesh Chaturthi invitation.`,
-                  )}
                 />
               ))}
             </motion.div>

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   AlertCircle,
@@ -128,14 +128,30 @@ function SuccessPanel({ invite, onCopy, copiedLink, onContinue }) {
 // (Razorpay Standard Checkout — see PaymentModal.jsx) and land on
 // a real, shareable /i/:slug invitation page with working RSVP + Wishes Wall
 // (see GeneratedInvitePage.jsx). Phase 1 handed this off to WhatsApp instead
-// — that flow still exists everywhere else on the site (see CustomizeModal.jsx).
+// (see the removed CustomizeModal.jsx) — every "Buy Now"/"Customize" CTA
+// site-wide now links straight here instead (see utils/createLink.js), with
+// the occasion/template pre-selected via ?occasion=&template= when known.
 export default function CreateInvitePage() {
   const reduceMotion = useReducedMotion()
   const navigate = useNavigate()
-  const [occasionId, setOccasionId] = useState(OCCASIONS[0].id)
-  const [templateId, setTemplateId] = useState(
-    () => getBuilderTemplatesForOccasion(OCCASIONS[0].id)[0].id,
-  )
+  const [searchParams] = useSearchParams()
+
+  // Arriving via a "Customize"/"Buy Now" CTA elsewhere on the site (see
+  // utils/createLink.js) pre-selects the occasion — and the exact template,
+  // when the clicked one is among the builder's curated set — instead of
+  // always dropping visitors on the first wedding style.
+  const requestedOccasionId = searchParams.get('occasion')
+  const initialOccasionId = OCCASIONS.some((o) => o.id === requestedOccasionId)
+    ? requestedOccasionId
+    : OCCASIONS[0].id
+
+  const [occasionId, setOccasionId] = useState(initialOccasionId)
+  const [templateId, setTemplateId] = useState(() => {
+    const candidates = getBuilderTemplatesForOccasion(initialOccasionId)
+    const requestedTemplateId = searchParams.get('template')
+    const requested = candidates.find((t) => t.id === requestedTemplateId)
+    return (requested ?? candidates[0]).id
+  })
   const [form, setForm] = useState(EMPTY_FORM)
   const [photos, setPhotos] = useState([])
   const [events, setEvents] = useState([])
@@ -521,8 +537,8 @@ export default function CreateInvitePage() {
                   </motion.button>
                   <p className="mt-3 text-center text-xs text-ink-soft">
                     &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')} via Razorpay
-                    (Test Mode) — then get your own live, shareable invitation
-                    link instantly.
+                    — then get your own live, shareable invitation link
+                    instantly.
                   </p>
                 </div>
               </div>

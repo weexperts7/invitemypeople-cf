@@ -16,7 +16,16 @@
 // (ideally ~150, to leave room for Google's own truncation) — both are hard
 // limits enforced by convention here, not by any runtime check, so keep new
 // entries within budget too.
-export const SITE_URL = 'https://invitemypeople.com'
+// The apex domain (invitemypeople.com) 308-redirects to this www subdomain
+// at the DNS/Vercel level — www is the one that actually serves content
+// (verify with `curl -I https://invitemypeople.com/`). Every canonical/
+// og:url/JSON-LD URL in this codebase has to point at the domain that
+// *doesn't* redirect, or a crawler following the canonical link lands on a
+// different final URL than the one declared — precisely the "canonical
+// link points to a different page" class of error. Keep index.html,
+// public/robots.txt, and api/sitemap.js's own SITE_URL constant in sync
+// with this one if it ever changes.
+export const SITE_URL = 'https://www.invitemypeople.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
 // Real, always-present internal links — stamped into the raw HTML shell

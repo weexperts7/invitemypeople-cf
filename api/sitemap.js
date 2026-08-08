@@ -11,7 +11,9 @@ import { ROUTES_SEO } from '../src/data/routesSeo.js'
 import { SATSANG_TEMPLATES } from '../src/data/satsangTemplatesData.js'
 import { GANESH_TEMPLATES } from '../src/data/ganeshTemplatesData.js'
 
-const SITE_URL = 'https://invitemypeople.com'
+// Kept in sync with routesSeo.js's SITE_URL — see its comment for why this
+// has to be the www subdomain, not the apex domain (which redirects here).
+const SITE_URL = 'https://www.invitemypeople.com'
 
 // changefreq/priority per top-level path — mirrors the previous static
 // sitemap's weighting (homepage highest, coming-soon lowest).

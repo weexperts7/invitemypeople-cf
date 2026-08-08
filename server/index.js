@@ -556,8 +556,15 @@ let indexHtmlTemplate = null
 function getIndexHtmlTemplate() {
   // Cached after the first read — the file on disk doesn't change while the
   // server is running (a fresh deploy restarts the process anyway).
+  // Reads dist/app-shell.html, not dist/index.html: scripts/postbuild.js
+  // renames Vite's build output specifically so no literal "index.html"
+  // exists in DIST_DIR. Without that, express.static's own directory-index
+  // default (below) would serve that file for "/" directly — same file,
+  // but never passed through renderSeoHtml — bypassing this route's
+  // <h1>/meta injection entirely while every other route (having no
+  // matching static file) already correctly reached it.
   if (indexHtmlTemplate === null) {
-    indexHtmlTemplate = fs.readFileSync(path.join(DIST_DIR, 'index.html'), 'utf8')
+    indexHtmlTemplate = fs.readFileSync(path.join(DIST_DIR, 'app-shell.html'), 'utf8')
   }
   return indexHtmlTemplate
 }
@@ -595,7 +602,12 @@ function renderSeoHtml(pathname) {
 
 // When a production build exists, serve the site from this same server.
 if (fs.existsSync(DIST_DIR)) {
-  app.use(express.static(DIST_DIR))
+  // `index: false` is belt-and-suspenders: DIST_DIR has no literal
+  // index.html to begin with (see getIndexHtmlTemplate()'s comment above),
+  // but express.static defaults to serving one for "/" if it ever finds
+  // one — this makes explicit that "/" must always reach the catch-all
+  // route below instead.
+  app.use(express.static(DIST_DIR, { index: false }))
   // Client-side routes (see src/App.jsx) only exist in the SPA's own
   // router, so a direct load or refresh needs index.html served back for
   // any non-API path — the app then reads the URL itself. The HTML is

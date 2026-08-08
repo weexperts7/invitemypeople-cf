@@ -19,6 +19,20 @@
 export const SITE_URL = 'https://invitemypeople.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
+// Real, always-present internal links — stamped into the raw HTML shell
+// alongside `h1`/`body` below (see setRootContent in server/index.js and
+// api/render.js) so a non-JS crawler finds actual <a href> internal links on
+// every static page, not just once React mounts and renders SiteHeader/
+// SiteFooter. Mirrors SiteFooter.jsx's "Quick Links" column — keep the two
+// in sync if that list ever changes.
+export const SITE_NAV_LINKS = [
+  { href: '/weddings', label: 'Wedding Invitations' },
+  { href: '/guruji-satsangs', label: 'Guruji Satsang Invitations' },
+  { href: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi Invitations' },
+  { href: '/create', label: 'Build Your Invitation' },
+  { href: '/about', label: 'About Us' },
+]
+
 // "Coming soon" celebration categories — no live templates yet, but each
 // still gets a real, crawlable, linkable URL (see occasionsData.js, which
 // pairs this list with an icon + tagline for on-page display).
@@ -87,6 +101,22 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'Budget-friendly, interactive digital invitations for weddings, Guruji Satsangs, birthdays, engagements, baby showers, housewarmings, corporate events & anniversaries — delivered on WhatsApp in 30 minutes.',
     h1: 'Digital Invitations as unforgettable as your celebration',
+    // Only the homepage carries `body` — real, on-page paragraph copy (see
+    // the matching sections of LandingPage.jsx: hero subtitle, wedding/
+    // Satsang/Ganesh Chaturthi scrollers, comparison and "how it works")
+    // reproduced here word-for-word so the *raw* HTML response a non-JS
+    // crawler or SEO auditor sees already carries 250+ words of genuine,
+    // keyword-relevant content instead of the bare h1 + empty shell they'd
+    // otherwise get before React mounts. Keep in sync with LandingPage.jsx
+    // the same way `h1` above already has to be.
+    body: [
+      'Interactive, mobile-first digital invitations for weddings, Guruji Satsangs, Ganesh Chaturthi and every celebration in between — tap-to-open envelope reveals, scratch-to-reveal cards, and built-in RSVP management. Delivered on WhatsApp, usually within 30 minutes.',
+      'Digital Wedding Invitations for Every Tradition: browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and a live RSVP dashboard that tracks attendance, guest counts and blessings without a single phone call.',
+      "Devotional Invitations for Guruji's Satsang pair Guruji's photo with a Divine Blessing scratch card and built-in RSVP. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, an interactive RSVP and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
+      "Unlike a printed card or a forwarded WhatsApp video, every InviteMyPeople digital invitation stays interactive and editable after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Pricing is all-inclusive, with no per-guest or courier costs added on.",
+      'Getting a personalized invitation takes three simple steps: select a template, connect on WhatsApp with your names, dates and venue — no forms or signup needed — and receive your finished, ready-to-share invitation link back, typically within 30 minutes.',
+      'Every InviteMyPeople invitation ships cost-effective, eco-friendly, mobile-first and ready in 30 minutes, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be.',
+    ],
   },
   '/about': {
     title: 'About Us | InviteMyPeople',

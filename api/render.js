@@ -35,7 +35,7 @@
 // src/components/SEO.jsx only patches that meta tag after React mounts.
 import fs from 'node:fs'
 import path from 'node:path'
-import { ROUTES_SEO, SITE_URL, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
+import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 
@@ -70,14 +70,35 @@ function setTitle(html, title) {
 // `hydrateRoot` — so it fully replaces #root's children on mount rather than
 // reconciling against them. That makes it safe to seed #root with real
 // markup here: non-JS crawlers and SEO auditors that only ever see this raw
-// response get an actual semantic <h1> instead of an empty div, while
-// JS-executing visitors see it swapped for React's own (matching) heading
-// within milliseconds, with no hydration warnings either way.
-function setRootH1(html, h1) {
+// response get an actual semantic <h1> (plus, on the homepage, real
+// paragraph copy and internal links — see `body`/`links` below) instead of
+// an empty div, while JS-executing visitors see it swapped for React's own
+// (matching) content within milliseconds, with no hydration warnings either
+// way.
+function setRootContent(html, { h1, body, links }) {
+  const paragraphs = (body || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('')
+  const nav = links && links.length
+    ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
+    : ''
   return html.replace(
     '<div id="root"></div>',
-    `<div id="root"><h1>${escapeHtml(h1)}</h1></div>`,
+    `<div id="root"><h1>${escapeHtml(h1)}</h1>${paragraphs}${nav}</div>`,
   )
+}
+
+// Collapses "/about/" down to "/about" (root "/" is left alone) before both
+// the route lookup below and the canonical URL it produces. Without this, a
+// trailing-slash request for an otherwise-recognized route (a common way
+// crawlers, SEO auditors and old backlinks reach a page) missed every exact
+// key in ROUTES_SEO, fell through to the noindex/no-canonical-update branch
+// in renderSeoHtml, and served the *unmodified shell's* canonical — which
+// always says "https://invitemypeople.com/" — pointing a real, indexable
+// page at a completely different URL. Normalizing first means "/about/" and
+// "/about" both resolve to, and both self-canonicalize to, the same
+// trailing-slash-free URL.
+function normalizePathname(pathname) {
+  if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
+  return pathname
 }
 
 function resolveSeoForPath(pathname) {
@@ -111,12 +132,22 @@ function getIndexHtmlTemplate() {
   return indexHtmlTemplate
 }
 
-function renderSeoHtml(pathname) {
+function renderSeoHtml(rawPathname) {
   const html = getIndexHtmlTemplate()
+  const pathname = normalizePathname(rawPathname)
   const seo = resolveSeoForPath(pathname)
-  if (!seo) return setMetaContent(html, 'name="robots"', 'noindex, follow')
-
   const url = `${SITE_URL}${pathname}`
+
+  if (!seo) {
+    // An actual 404, or a dynamic /i/:slug or /i/:slug/host/:hostToken page
+    // whose content lives in Supabase, not here. Still self-canonicalize
+    // (rather than leaving the shell's baked-in homepage canonical in
+    // place) so a crawler that reaches this branch — most commonly a
+    // trailing-slash or otherwise-unnormalized variant of a route that
+    // *does* exist — never sees a canonical pointing at an unrelated page.
+    return setCanonical(setMetaContent(html, 'name="robots"', 'noindex, follow'), url)
+  }
+
   const steps = [
     [setTitle, seo.title],
     [setMetaContent, 'name="description"', seo.description],
@@ -131,8 +162,10 @@ function renderSeoHtml(pathname) {
   // carry an `h1` — satsangSeo()/ganeshSeo() don't, since those dynamic
   // template pages already render their own real <h1> client-side and
   // duplicating their bespoke per-template hero copy here would risk drifting
-  // out of sync with it.
-  if (seo.h1) steps.push([setRootH1, seo.h1])
+  // out of sync with it. Every page that gets an h1 also gets the same
+  // site-wide internal nav links; only the homepage additionally carries
+  // `body` (see routesSeo.js's STATIC_ROUTES_SEO['/'] comment).
+  if (seo.h1) steps.push([setRootContent, { h1: seo.h1, body: seo.body, links: SITE_NAV_LINKS }])
   return steps.reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
 }
 

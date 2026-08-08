@@ -1,9 +1,9 @@
 // Production counterpart to server/index.js's renderSeoHtml/getIndexHtmlTemplate
 // (which only ever runs for local `npm start`/dev — Vercel doesn't execute
 // that Express app). vercel.json rewrites every non-API, non-static-file
-// request here instead of straight to the static index.html.
+// request here instead of straight to the static shell.
 //
-// Why this exists: Vite's build produces one static index.html shared by
+// Why this exists: Vite's build produces one static HTML shell shared by
 // every client-side route. Without this function, EVERY page — /about,
 // /weddings, every /satsang/:slug and /templates/ganesh-chaturthi/:slug —
 // serves the homepage's title/meta description to any crawler or SEO
@@ -12,6 +12,17 @@
 // per-route title/description/canonical/OG tags on the raw HTML response
 // itself, mirroring server/index.js exactly (see routesSeo.js, which is the
 // shared source of truth both read from).
+//
+// The template this function reads is dist/app-shell.html, NOT
+// dist/index.html — scripts/postbuild.js renames Vite's build output
+// specifically so no literal "index.html" file exists in the deployed
+// static output. Vercel's rewrites only apply when no static file already
+// matches the request path, so as long as a file named index.html sat at
+// the output root, a request for "/" resolved straight to that static file
+// — completely bypassing this function and its <h1>/meta injection — while
+// every other route (having no matching static file) correctly fell
+// through to the rewrite. Renaming the file closes that one gap, which
+// happened to be the single most important page for this to work on.
 //
 // Any route this function doesn't recognize (an actual 404, or a dynamic
 // /i/:slug or /i/:slug/host/:hostToken page whose content lives in Supabase,
@@ -91,9 +102,11 @@ let indexHtmlTemplate = null
 function getIndexHtmlTemplate() {
   // Bundled into this function's deployment via vercel.json's
   // functions["api/render.js"].includeFiles — Vite's build (which Vercel
-  // runs before bundling functions) produces dist/index.html first.
+  // runs before bundling functions) produces this first, then
+  // scripts/postbuild.js renames it from dist/index.html (see this file's
+  // header comment for why it can't keep that name).
   if (indexHtmlTemplate === null) {
-    indexHtmlTemplate = fs.readFileSync(path.join(process.cwd(), 'dist', 'index.html'), 'utf8')
+    indexHtmlTemplate = fs.readFileSync(path.join(process.cwd(), 'dist', 'app-shell.html'), 'utf8')
   }
   return indexHtmlTemplate
 }

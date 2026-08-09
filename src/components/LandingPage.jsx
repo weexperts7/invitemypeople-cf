@@ -1162,17 +1162,39 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="space-y-6"
           >
-            {HOMEPAGE_SEO_BODY.map((block, i) =>
-              typeof block === 'string' ? (
-                <p key={i} className="text-ink-soft leading-relaxed text-base sm:text-lg">
-                  {block}
-                </p>
-              ) : (
+            {HOMEPAGE_SEO_BODY.map((block, i) => {
+              if (typeof block === 'string') {
+                return (
+                  <p key={i} className="text-ink-soft leading-relaxed text-base sm:text-lg">
+                    {block}
+                  </p>
+                )
+              }
+              if (Array.isArray(block)) {
+                return (
+                  <p key={i} className="text-ink-soft leading-relaxed text-base sm:text-lg">
+                    {block.map((seg, j) =>
+                      typeof seg === 'string' ? (
+                        <span key={j}>{seg}</span>
+                      ) : (
+                        <Link
+                          key={j}
+                          to={seg.href}
+                          className="text-rose underline decoration-rose/40 underline-offset-2 hover:decoration-rose"
+                        >
+                          {seg.text}
+                        </Link>
+                      ),
+                    )}
+                  </p>
+                )
+              }
+              return (
                 <h3 key={i} className="font-serif text-xl sm:text-2xl text-ink pt-2">
                   {block.h2}
                 </h3>
-              ),
-            )}
+              )
+            })}
           </motion.div>
         </div>
       </section>

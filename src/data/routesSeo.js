@@ -28,24 +28,6 @@
 export const SITE_URL = 'https://www.invitemypeople.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
-// Real, always-present internal links — stamped into the raw HTML shell
-// alongside `h1`/`body` below (see setRootContent in server/index.js and
-// api/render.js) so a non-JS crawler finds actual <a href> internal links to
-// every core route on every single static page's *raw* response, not just
-// once React mounts and renders SiteHeader/SiteFooter. Covers the same
-// ground as SiteFooter.jsx's "Quick Links" + "Legal" columns combined —
-// keep the three in sync if this list ever changes.
-export const SITE_NAV_LINKS = [
-  { href: '/weddings', label: 'Wedding Invitations' },
-  { href: '/guruji-satsangs', label: 'Guruji Satsang Invitations' },
-  { href: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi Invitations' },
-  { href: '/create', label: 'Build Your Invitation' },
-  { href: '/about', label: 'About Us' },
-  { href: '/privacy', label: 'Privacy Policy' },
-  { href: '/terms', label: 'Terms of Service' },
-  { href: '/refund', label: 'Refund Policy' },
-]
-
 // "Coming soon" celebration categories — no live templates yet, but each
 // still gets a real, crawlable, linkable URL (see occasionsData.js, which
 // pairs this list with an icon + tagline for on-page display).
@@ -94,6 +76,28 @@ export const COMING_SOON_ROUTES = [
   },
 ]
 
+// Real, always-present internal links — stamped into the raw HTML shell
+// alongside `h1`/`body` below (see setRootContent in server/index.js and
+// api/render.js) so a non-JS crawler finds real <a href> internal links to
+// every core route — live and coming-soon — on every single static page's
+// *raw* response, not just once React mounts and renders SiteHeader/
+// SiteFooter. Deliberately broader than SiteFooter.jsx's own "Quick Links"
+// column (which stays curated to the live occasions, for human visitors) —
+// this list's job is crawlability, not the footer's UX; 14 links here plus
+// the contextual links inside HOMEPAGE_SEO_BODY below comfortably clears
+// the 15+ internal links Seobility expects to find without JS.
+export const SITE_NAV_LINKS = [
+  { href: '/weddings', label: 'Wedding Invitations' },
+  { href: '/guruji-satsangs', label: 'Guruji Satsang Invitations' },
+  { href: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi Invitations' },
+  { href: '/create', label: 'Build Your Invitation' },
+  { href: '/about', label: 'About Us' },
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/refund', label: 'Refund Policy' },
+  ...COMING_SOON_ROUTES.map((o) => ({ href: `/${o.slug}`, label: o.label })),
+]
+
 // `h1` mirrors the literal on-page headline for each route (see
 // LandingPage.jsx, AboutPage.jsx, WeddingsPage.jsx, etc.) — kept here so the
 // server-side HTML injection below (setRootH1, used by server/index.js and
@@ -135,16 +139,47 @@ export const COMING_SOON_ROUTES = [
 // entry page. Deliberately reworded from STEPS/FAQS rather than copied
 // verbatim, so the page doesn't read as literally repeating itself twice
 // to a human visitor scrolling past both sections.
+//
+// A paragraph entry can also be an array of segments instead of a plain
+// string — each segment is either a plain string or a `{ text, href }`
+// internal link. setRootContent (server/index.js, api/render.js) renders
+// those as real <a href> tags inside the <p>; LandingPage.jsx's own
+// section renders them as real react-router <Link>s. This gives the
+// homepage's body copy actual contextual internal links (not just the
+// flat SITE_NAV_LINKS nav above) in both the raw SSR response and the
+// live page — e.g. "digital wedding invitations" linking to /weddings
+// right where that phrase naturally occurs, rather than only in a nav
+// list divorced from the sentence that justifies the link.
 export const HOMEPAGE_SEO_BODY = [
   "InviteMyPeople is the digital wedding invitation maker India families turn to for digital invites for weddings & events. A printed card can't update itself. A forwarded WhatsApp video isn't interactive. Every InviteMyPeople invitation is different: mobile-first, genuinely unforgettable, and built to open like a story rather than be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration, one link does it all. It becomes a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
   { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
-  'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions. Each one opens with an envelope-reveal animation and a gold-foil scratch card. Each one ships with interactive RSVP tracking built in, recording attendance, guest counts, song requests and blessings — without a single phone call. As the digital wedding invitation maker India hosts trust, we cover every function: Haldi, Sangeet, the wedding ceremony, Reception. Each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
+  [
+    'Browse interactive ',
+    { text: 'digital wedding invitations', href: '/weddings' },
+    ' across Hindu, Muslim, Sikh and more traditions. Each one opens with an envelope-reveal animation and a gold-foil scratch card. Each one ships with interactive RSVP tracking built in, recording attendance, guest counts, song requests and blessings — without a single phone call. As the digital wedding invitation maker India hosts trust, we cover every function: Haldi, Sangeet, the wedding ceremony, Reception. Each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
+  ],
   { h2: 'A Guruji Satsang Invite Online, With a Devotional Touch' },
-  "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card. They use the same interactive RSVP tracking as every other template, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open differently: a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign. Every template stays fully interactive and mobile-first.",
+  [
+    'Looking for a ',
+    { text: 'Guruji Satsang invite online', href: '/guruji-satsangs' },
+    " that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card. They use the same interactive RSVP tracking as every other template, so hosts always know who's attending before the day arrives. ",
+    { text: 'Ganesh Chaturthi invitations', href: '/templates/ganesh-chaturthi' },
+    ' open differently: a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign. Every template stays fully interactive and mobile-first.',
+  ],
   { h2: 'More Than a Card — A Wedding Website Builder With a Live Dashboard' },
-  "Unlike a static card, InviteMyPeople doubles as a wedding website builder. Pick a template in our Invitation Builder. Fill in your names, dates and venue. Watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent. Update any detail instantly, and everyone holding the link sees the change right away — no reprinting, no re-recording. Behind every link sits a private host dashboard with real-time interactive RSVP tracking and downloadable guest lists. Automated pre-event summaries mean nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
+  [
+    'Unlike a static card, InviteMyPeople doubles as a ',
+    { text: 'wedding website builder', href: '/weddings' },
+    '. Ready to ',
+    { text: 'create your own custom invite', href: '/create' },
+    "? Pick a template in our Invitation Builder. Fill in your names, dates and venue. Watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent. Update any detail instantly, and everyone holding the link sees the change right away — no reprinting, no re-recording. Behind every link sits a private host dashboard with real-time interactive RSVP tracking and downloadable guest lists. Automated pre-event summaries mean nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
+  ],
   { h2: 'Why Hosts Choose InviteMyPeople' },
-  "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first. It's backed by ready-made templates across every tradition, plus 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on. A celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
+  [
+    "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first. It's backed by ready-made templates across every tradition, plus 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on. A celebration that's as unforgettable as the day itself never has to start with a complicated setup. Curious how it all started? Read more ",
+    { text: 'about our platform', href: '/about' },
+    '.',
+  ],
   { h2: 'How Digital Invites for Weddings & Events Work' },
   'Getting your own digital invitation takes four simple steps, from picking a template to sharing a live link with your guests.',
   { h2: 'Step 1: Pick a Template' },

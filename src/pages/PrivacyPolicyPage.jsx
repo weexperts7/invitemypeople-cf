@@ -62,6 +62,7 @@ export default function PrivacyPolicyPage() {
         updated="August 2026"
         intro={[
           'At InviteMyPeople, accessible from invitemypeople.com, one of our main priorities is the privacy of our visitors and users. This Privacy Policy document contains types of information that is collected and recorded by InviteMyPeople and how we use it.',
+          "InviteMyPeople is a digital wedding invitation maker and guest management platform, used by hosts planning weddings, a Guruji Satsang invite online, Ganesh Chaturthi celebrations and more across India. This policy applies to everyone who uses our site — whether you're browsing templates, building your own invitation in our wedding website builder, or submitting an RSVP through another host's interactive RSVP tracking link.",
         ]}
         sections={SECTIONS}
       />

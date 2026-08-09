@@ -45,6 +45,7 @@ export default function TermsOfServicePage() {
         intro={[
           'Welcome to InviteMyPeople!',
           "These terms and conditions outline the rules and regulations for the use of InviteMyPeople's Website, located at https://invitemypeople.com. By accessing this website and utilizing our self-service invitation builder, you accept these terms and conditions. Do not continue to use InviteMyPeople if you do not agree to all of the terms stated on this page.",
+          'These terms govern your use of our Invitation Builder, our published invitation links, our host dashboards, and every other feature of the InviteMyPeople platform — whether you\'re browsing templates as a digital wedding invitation maker, building a wedding website of your own, or managing RSVPs for a Guruji Satsang or Ganesh Chaturthi celebration.',
         ]}
         sections={SECTIONS}
       />

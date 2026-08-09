@@ -30,16 +30,20 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
 // Real, always-present internal links — stamped into the raw HTML shell
 // alongside `h1`/`body` below (see setRootContent in server/index.js and
-// api/render.js) so a non-JS crawler finds actual <a href> internal links on
-// every static page, not just once React mounts and renders SiteHeader/
-// SiteFooter. Mirrors SiteFooter.jsx's "Quick Links" column — keep the two
-// in sync if that list ever changes.
+// api/render.js) so a non-JS crawler finds actual <a href> internal links to
+// every core route on every single static page's *raw* response, not just
+// once React mounts and renders SiteHeader/SiteFooter. Covers the same
+// ground as SiteFooter.jsx's "Quick Links" + "Legal" columns combined —
+// keep the three in sync if this list ever changes.
 export const SITE_NAV_LINKS = [
   { href: '/weddings', label: 'Wedding Invitations' },
   { href: '/guruji-satsangs', label: 'Guruji Satsang Invitations' },
   { href: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi Invitations' },
   { href: '/create', label: 'Build Your Invitation' },
   { href: '/about', label: 'About Us' },
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/refund', label: 'Refund Policy' },
 ]
 
 // "Coming soon" celebration categories — no live templates yet, but each
@@ -258,6 +262,21 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'How InviteMyPeople collects, uses, and protects your personal information, event details, and guest RSVP data.',
     h1: 'Privacy Policy',
+    // Condensed, prose-form mirror of PrivacyPolicyPage.jsx's own
+    // intro/SECTIONS content (bullet lists flattened into a paragraph each,
+    // since setRootContent only renders <p>/<h2> — the real page still
+    // shows the nicer bulleted layout to any JS-rendering visitor).
+    body: [
+      "At InviteMyPeople, accessible from invitemypeople.com, one of our main priorities is the privacy of our visitors and users. InviteMyPeople is a digital wedding invitation maker and guest management platform used by hosts planning weddings, a Guruji Satsang invite online, and Ganesh Chaturthi celebrations across India. This Privacy Policy explains the types of information we collect, whether you're a host building an invitation or a guest submitting an RSVP, and how we use it.",
+      { h2: 'Information We Collect' },
+      'Personal information such as your name, email address, phone number, and payment details — processed securely via Razorpay — when you create an account or purchase an invitation package. Event and guest data such as event titles, dates, venue locations, host details, and guest RSVP submissions, including names, attendance statuses, headcounts, song requests, and wishes, stored securely in our database. And automatically collected data such as browser type, IP address, device information, and usage analytics, gathered via tools like Google Analytics and Microsoft Clarity to help us improve the experience for every visitor.',
+      { h2: 'How We Use Your Information' },
+      'We use the information we collect to provide, operate, and maintain our digital invitation builder and hosting services; to process your transactions securely and send order confirmations; to send automated event reminders, host summaries, and RSVP notifications — including the pre-event guest list summary sent to the main host as part of our interactive RSVP tracking; and to analyze website traffic and user behavior so we can keep improving our templates and features.',
+      { h2: 'How We Protect Your Information' },
+      'We implement robust security measures — including encrypted database storage and secure payment gateways — to protect your personal information and event data against unauthorized access, alteration, or disclosure.',
+      { h2: 'Contact Us' },
+      'If you have additional questions or require more information about our Privacy Policy, our digital wedding invitation maker, or how your guest data is handled, contact us at invitemypeople@gmail.com and we will get back to you.',
+    ],
   },
   '/terms': {
     title: 'Terms & Conditions | InviteMyPeople',
@@ -267,6 +286,19 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'The rules and regulations for using InviteMyPeople’s self-service digital invitation builder and hosting platform.',
     h1: 'Terms & Conditions',
+    // See '/privacy' above for why this mirrors TermsOfServicePage.jsx's
+    // own content in condensed prose form rather than word-for-word.
+    body: [
+      "Welcome to InviteMyPeople! These terms and conditions outline the rules and regulations for the use of InviteMyPeople's website. By accessing this website and utilizing our self-service invitation builder, you accept these terms — they govern your use of the Invitation Builder itself, our published invitation links, our host dashboards, and every other feature of the platform, whether you're browsing templates as a digital wedding invitation maker, building a wedding website of your own, or managing RSVPs for a Guruji Satsang or Ganesh Chaturthi celebration.",
+      { h2: 'Using Our Platform' },
+      'You must be at least 18 years old, or possess legal parental or guardian consent, to use this platform and make purchases. You agree to provide accurate, current, and complete information during the invitation creation and checkout process. And you are solely responsible for the content, text, images, and media you upload or display through your customized digital invitations, whether that invitation is a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration.',
+      { h2: 'Intellectual Property' },
+      'Unless otherwise stated, InviteMyPeople and its licensors own the intellectual property rights for all templates, designs, graphics, and source code on the website. All intellectual property rights are reserved, and you may not copy, redistribute, or resell our core template designs without our explicit written permission.',
+      { h2: 'Service Availability' },
+      'InviteMyPeople provides digital invitation hosting and guest management services on an "as is" basis. While we strive for 99.9% uptime and reliable automated delivery, including WhatsApp links and pre-event emails, we are not liable for third-party service interruptions such as payment gateway downtime or mobile network delivery failures.',
+      { h2: 'Changes to These Terms' },
+      'We reserve the right to amend these terms at any time. By continuing to use the platform — our wedding website builder, our interactive RSVP tracking, or any Guruji Satsang invite online you generate through it — after changes are posted, you agree to be bound by the updated terms.',
+    ],
   },
   '/refund': {
     title: 'Refund & Cancellation Policy | InviteMyPeople',
@@ -276,6 +308,17 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'When a refund applies for InviteMyPeople digital invitation purchases, including technical failures and duplicate charges.',
     h1: 'Refund & Cancellation Policy',
+    // See '/privacy' above for why this mirrors RefundPolicyPage.jsx's own
+    // content in condensed prose form rather than word-for-word.
+    body: [
+      "Thank you for choosing InviteMyPeople for your special celebrations. This policy covers every paid purchase made through InviteMyPeople's Invitation Builder — whether you're generating a digital wedding invitation, a Guruji Satsang invite online, or a Ganesh Chaturthi invitation — deployed to its own unique, live link the instant payment succeeds, with interactive RSVP tracking already switched on and ready for your guests.",
+      { h2: 'Our Policy' },
+      'Because our platform provides instant, digital, self-service software generation — where unique interactive invitation links and database slots are deployed immediately upon successful payment — our refund policy is structured accordingly. Once an invitation has been successfully paid for, generated, and published to a unique link, the service is considered fully rendered and consumed, so digital purchases and custom invitation fees are generally non-refundable.',
+      { h2: 'Exceptions' },
+      'We want you to be completely satisfied with your experience, so a refund may still be considered under two exceptional circumstances: a technical failure, where a system error or proven technical glitch on our end entirely prevented the generation of your invitation link after a successful payment transaction; or duplicate charges, where an accidental double charge processed by our payment gateway, Razorpay, will be fully refunded to your original payment method.',
+      { h2: 'Requesting a Refund' },
+      'If you experience any technical difficulties during your invitation creation or believe you qualify for an exception under our policy, please reach out to us immediately at support@invitemypeople.com with your payment transaction ID and event details — we are always happy to help resolve issues promptly, and we aim to respond within a few business days, keeping you updated by email throughout. This applies across every occasion we support, whether your invitation was built as a digital wedding invitation maker template, a Guruji Satsang invite online, or a Ganesh Chaturthi celebration — the same policy and the same support inbox handle all of them.',
+    ],
   },
 }
 

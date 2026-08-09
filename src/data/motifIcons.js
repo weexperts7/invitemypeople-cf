@@ -6,6 +6,7 @@ import { Flower2, Gem, Landmark, Sparkle, Heart, Diamond, Crown, Feather } from 
 
 export const MOTIF_ICONS = {
   jharokha: Landmark,
+  'rani-mandala': Gem,
   'swastik-mandala': Gem,
   'lotus-peacock': Flower2,
   'floral-line-art': Heart,

@@ -75,6 +75,20 @@
       radial-gradient(circle at 90% 80%, rgba(240, 226, 200, 0.4) 0, transparent 45%);
   }
 
+  /* A moodier counterpart to .bg-petals for dark/jewel-tone templates (only
+     Punjabi Phulkari uses this today — see isPhulkari in
+     InvitationExperience.jsx). .bg-petals lightens toward cream, which
+     reads as a washed-out, low-contrast fog over a deep maroon palette;
+     this keeps the same ambient "glow" but in low-opacity warm gold/maroon
+     tones so it adds richness without lifting the background enough to
+     hurt text contrast. */
+  .bg-petals-royal {
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(242, 210, 122, 0.12) 0, transparent 45%),
+      radial-gradient(circle at 85% 5%, rgba(219, 165, 58, 0.14) 0, transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(122, 26, 40, 0.4) 0, transparent 45%);
+  }
+
   /* Hides the scrollbar on drag-to-scroll rows (e.g. the Invitation
      Builder's template style slider — see TemplateStyleSelector.jsx) while
      keeping native scroll/swipe/keyboard behavior intact. */

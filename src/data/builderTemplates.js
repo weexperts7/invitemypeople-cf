@@ -97,6 +97,31 @@ export const BUILDER_TEMPLATES = [
     }
   })(),
   (() => {
+    const src = fromWedding('royal-festive-vibrant')
+    return {
+      id: 'wedding-royal-festive-vibrant',
+      sourceId: 'royal-festive-vibrant',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Crimson, marigold, rani pink & emerald over shimmering gold',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-12-14',
+        time: '09:00',
+        venue: 'City Palace Gardens, Udaipur',
+        message: "Come dressed in colour — we can't wait to dance, feast and celebrate with you.",
+      },
+    }
+  })(),
+  (() => {
     const src = fromWedding('south-indian-temple-gold')
     return {
       id: 'wedding-south-indian-temple-gold',

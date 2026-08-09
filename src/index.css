@@ -74,6 +74,17 @@
       radial-gradient(circle at 80% 0%, rgba(221, 193, 134, 0.3) 0, transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(240, 226, 200, 0.4) 0, transparent 45%);
   }
+
+  /* Hides the scrollbar on drag-to-scroll rows (e.g. the Invitation
+     Builder's template style slider — see TemplateStyleSelector.jsx) while
+     keeping native scroll/swipe/keyboard behavior intact. */
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/WebKit */
+  }
 }
 
 /* Continuous petal drift — CSS-driven so it never costs a JS frame. */

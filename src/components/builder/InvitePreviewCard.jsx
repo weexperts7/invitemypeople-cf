@@ -9,7 +9,7 @@ import CulturalMotif from '../CulturalMotif'
 import { FrameCorners } from '../TemplateFrame'
 import { formatInviteDate, formatInviteTime, mapsSearchUrl } from '../../utils/formatInviteDateTime'
 
-export default function InvitePreviewCard({ template, values }) {
+export default function InvitePreviewCard({ template, values, bare = false }) {
   const { palette, motif, motifAccent, fonts, greeting, name, connective, example } = template
 
   const names = values.names.trim() || example.names
@@ -25,9 +25,9 @@ export default function InvitePreviewCard({ template, values }) {
   return (
     <motion.div
       layout
-      className="relative w-full overflow-hidden rounded-[2rem] border shadow-soft"
+      className={`relative w-full overflow-hidden ${bare ? '' : 'rounded-[2rem] border shadow-soft'}`}
       style={{
-        borderColor: `${palette.goldSoft}80`,
+        borderColor: bare ? undefined : `${palette.goldSoft}80`,
         background: `linear-gradient(160deg, ${palette.linen} 0%, ${palette.champagne} 55%, ${palette.blush} 100%)`,
       }}
     >

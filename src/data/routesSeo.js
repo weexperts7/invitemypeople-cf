@@ -128,13 +128,23 @@ const STATIC_ROUTES_SEO = {
     ],
   },
   '/about': {
-    title: 'About Us | InviteMyPeople',
+    title: 'About InviteMyPeople | Guest Management, Reinvented',
     description:
-      'Why we built InviteMyPeople — tired of lost phone numbers and hand-tallied RSVPs, we made interactive, WhatsApp-delivered digital invitations instead.',
-    ogTitle: 'About InviteMyPeople — Invitations, Reinvented',
+      'Why we built InviteMyPeople — a real-time guest management dashboard for weddings and events, wrapped in a beautiful, mobile-first invitation experience.',
+    ogTitle: 'About InviteMyPeople — Invitations That Bring Everyone Together',
     ogDescription:
-      'The story behind InviteMyPeople and what makes our digital invitations different — interactive envelopes, scratch-to-reveal cards, live RSVP tracking, and a wishes wall.',
-    h1: 'Invitations, the way they should’ve always felt.',
+      'The story behind InviteMyPeople — why we built a real-time guest management dashboard wrapped in a beautiful, mobile-first invitation experience.',
+    h1: 'Invitations That Bring Everyone Together',
+    // Mirrors AboutPage.jsx's own paragraph copy word-for-word (see
+    // STATIC_ROUTES_SEO['/']'s identical comment above) so a non-JS crawler
+    // reading the raw HTML shell sees the same story a visitor does, not a
+    // bare h1 with no supporting content.
+    body: [
+      'InviteMyPeople turns the headache of event coordination into a seamless experience. We move beyond simple digital cards to give you a full-fledged guest management system, wrapped in a beautiful, custom-branded experience that works perfectly on every smartphone.',
+      'Why we started: Managing guest lists, tracking who’s actually coming, and getting final headcounts shouldn’t be a full-time job. We were tired of spreadsheet chaos and fragmented WhatsApp chats. We built InviteMyPeople to bridge the gap between "sending an invite" and "managing an event"—offering hosts a real-time dashboard to track RSVPs, gather wishes, and download clean guest lists, all while giving guests a stunning, personalized experience.',
+      'What you get: a complete guest management system with a live dashboard tracking every RSVP, headcount, and song request; one polished, mobile-first invitation page holding every event function—Haldi, Sangeet, Wedding, Reception—each with its own date, time, and venue; a live preview that updates instantly as you enter your details, so you see exactly what your guests will see before you publish; and finalized guest lists you can download from your private host dashboard for catering and planning.',
+      'What we believe: your time is better spent celebrating than chasing RSVPs. We obsess over making the behind-the-scenes of your event effortless, so you can focus on the big day. Hosts trust us to manage the logistics of their most important moments.',
+    ],
   },
   '/weddings': {
     title: 'Digital Wedding Invitations | InviteMyPeople',
@@ -171,6 +181,33 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'Pick a template style, fill in your details, and watch your invitation come to life in a live preview — then send it to us on WhatsApp to finalize.',
     h1: 'Build Your Invitation, Live',
+  },
+  '/privacy': {
+    title: 'Privacy Policy | InviteMyPeople',
+    description:
+      'How InviteMyPeople collects, uses, and protects your personal information, event details, and guest RSVP data.',
+    ogTitle: 'Privacy Policy — InviteMyPeople',
+    ogDescription:
+      'How InviteMyPeople collects, uses, and protects your personal information, event details, and guest RSVP data.',
+    h1: 'Privacy Policy',
+  },
+  '/terms': {
+    title: 'Terms & Conditions | InviteMyPeople',
+    description:
+      'The rules and regulations for using InviteMyPeople’s self-service digital invitation builder and hosting platform.',
+    ogTitle: 'Terms & Conditions — InviteMyPeople',
+    ogDescription:
+      'The rules and regulations for using InviteMyPeople’s self-service digital invitation builder and hosting platform.',
+    h1: 'Terms & Conditions',
+  },
+  '/refund': {
+    title: 'Refund & Cancellation Policy | InviteMyPeople',
+    description:
+      'When a refund applies for InviteMyPeople digital invitation purchases, including technical failures and duplicate charges.',
+    ogTitle: 'Refund & Cancellation Policy — InviteMyPeople',
+    ogDescription:
+      'When a refund applies for InviteMyPeople digital invitation purchases, including technical failures and duplicate charges.',
+    h1: 'Refund & Cancellation Policy',
   },
 }
 

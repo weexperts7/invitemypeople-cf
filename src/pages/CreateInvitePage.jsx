@@ -25,7 +25,7 @@ import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateStyleSelector from '../components/builder/TemplateStyleSelector'
-import InvitePreviewCard from '../components/builder/InvitePreviewCard'
+import LiveInvitePreview from '../components/builder/LiveInvitePreview'
 import PhotoUploader from '../components/builder/PhotoUploader'
 import EventsListEditor from '../components/builder/EventsListEditor'
 import PaymentModal from '../components/builder/PaymentModal'
@@ -139,11 +139,14 @@ export default function CreateInvitePage() {
   // Arriving via a "Customize"/"Buy Now" CTA elsewhere on the site (see
   // utils/createLink.js) pre-selects the occasion — and the exact template,
   // when the clicked one is among the builder's curated set — instead of
-  // always dropping visitors on the first wedding style.
+  // always dropping visitors on the first wedding style. When that's how
+  // they got here, they've already implicitly picked a category (by
+  // Customizing a wedding/Ganesh/Satsang template specifically), so
+  // TemplateStyleSelector skips the occasion tabs entirely rather than
+  // inviting them to go browse a category they didn't ask for.
   const requestedOccasionId = searchParams.get('occasion')
-  const initialOccasionId = OCCASIONS.some((o) => o.id === requestedOccasionId)
-    ? requestedOccasionId
-    : OCCASIONS[0].id
+  const occasionPreselected = OCCASIONS.some((o) => o.id === requestedOccasionId)
+  const initialOccasionId = occasionPreselected ? requestedOccasionId : OCCASIONS[0].id
 
   const [occasionId, setOccasionId] = useState(initialOccasionId)
   const [templateId, setTemplateId] = useState(() => {
@@ -288,14 +291,20 @@ export default function CreateInvitePage() {
                   <Eye className="h-3.5 w-3.5 text-rose" />
                   Live Preview
                 </div>
-                <InvitePreviewCard template={template} values={form} />
+                <LiveInvitePreview
+                  template={template}
+                  values={form}
+                  occasionId={occasionId}
+                  photos={photos}
+                  events={events}
+                />
                 <p className="mt-3 text-center text-xs text-ink-soft/80">
-                  Updates instantly as you type — this is exactly how your
-                  invitation will look.
+                  Updates instantly as you type — scroll inside the phone to
+                  see the whole page, exactly how your guests will.
                 </p>
               </div>
 
-              <div className="order-2 lg:order-1 space-y-8">
+              <div className="order-2 lg:order-1 min-w-0 space-y-8">
                 <div className="rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl p-6 shadow-card sm:p-8">
                   <div className="mb-5 flex items-center gap-2">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose text-xs font-semibold text-ivory">
@@ -308,6 +317,7 @@ export default function CreateInvitePage() {
                     templateId={templateId}
                     onOccasionChange={handleOccasionChange}
                     onTemplateChange={setTemplateId}
+                    showOccasionPicker={!occasionPreselected}
                   />
                 </div>
 

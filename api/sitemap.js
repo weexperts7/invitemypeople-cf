@@ -24,6 +24,9 @@ const STATIC_META = {
   '/guruji-satsangs': { changefreq: 'weekly', priority: '0.8' },
   '/templates/ganesh-chaturthi': { changefreq: 'weekly', priority: '0.8' },
   '/create': { changefreq: 'monthly', priority: '0.8' },
+  '/privacy': { changefreq: 'yearly', priority: '0.3' },
+  '/terms': { changefreq: 'yearly', priority: '0.3' },
+  '/refund': { changefreq: 'yearly', priority: '0.3' },
 }
 const COMING_SOON_META = { changefreq: 'weekly', priority: '0.7' }
 const TEMPLATE_META = { changefreq: 'monthly', priority: '0.6' }

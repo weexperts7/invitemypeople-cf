@@ -157,7 +157,7 @@ const DEVICE_HEIGHT = 812
 const FRAME_SCREEN_WIDTH = 292
 const DEVICE_SCALE = FRAME_SCREEN_WIDTH / DEVICE_WIDTH
 
-export default function LiveInvitePreview({ template, values, occasionId, photos = [], events = [] }) {
+export default function LiveInvitePreview({ template, values, occasionId, photos = [], events = [], song = null }) {
   const isWedding = occasionId === 'wedding'
 
   // The iframe's own first mount — fetching/parsing its JS, then React
@@ -204,10 +204,18 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
         message: values.message,
         events,
         photos,
+        // Background Music Selection (see builder/SongSearchPicker.jsx) —
+        // same camelCase field names buildWeddingExperienceTemplate.js
+        // reads from a real saved invite, so this draft needs no separate
+        // mapping to preview correctly.
+        bgSongTitle: song?.title || '',
+        bgSongArtist: song?.artist || '',
+        bgSongAlbumArt: song?.albumArt || '',
+        bgSongPreviewUrl: song?.previewUrl || '',
       })
     }, 300)
     return () => clearTimeout(draftTimer.current)
-  }, [isWedding, template, values, events, photos])
+  }, [isWedding, template, values, events, photos, song])
 
   const showIframe = isWedding && iframeReady
 

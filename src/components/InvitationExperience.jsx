@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion'
-import { ArrowLeft, Heart, Sparkles, Volume2, VolumeX } from 'lucide-react'
+import { ArrowLeft, Heart, Sparkles } from 'lucide-react'
 import EnvelopeLanding from './EnvelopeLanding'
 import FallingPetals from './FallingPetals'
 import WelcomeSplash from './WelcomeSplash'
@@ -11,6 +11,7 @@ import EventTimeline from './EventTimeline'
 import RsvpForm from './RsvpForm'
 import WishesWall from './WishesWall'
 import CulturalMotif from './CulturalMotif'
+import AudioToggle from './AudioToggle'
 import { FrameCorners } from './TemplateFrame'
 import { PRICING } from '../data/templatesData'
 import { coupleNameTier } from '../utils/coupleNameFit'
@@ -63,6 +64,15 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   // fog and hurts text contrast over a dark palette (see .bg-petals-royal
   // in index.css). Every other template keeps using .bg-petals unchanged.
   const isPhulkari = template?.motif === 'phulkari'
+  // Host-selected background music — see builder/SongSearchPicker.jsx
+  // (search + preview) and buildWeddingExperienceTemplate.js (where a real
+  // invite's confirmed Spotify track becomes this `bgMusic` shape). null
+  // whenever the host skipped that step, which is the normal/default case
+  // — no <audio> element is rendered at all then (see below), and the mute
+  // toggle never appears, rather than either playing nothing or erroring
+  // on a missing source.
+  const bgMusic = template?.bgMusic ?? null
+  const hasMusic = Boolean(bgMusic?.previewUrl)
   const [isOpened, setIsOpened] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef(null)
@@ -79,17 +89,40 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   function openEnvelope() {
     setIsOpened(true)
     const audio = audioRef.current
-    if (audio && !isMuted) {
+    if (audio && hasMusic && !isMuted) {
       audio.volume = 0
       audio.play().catch(() => {})
     }
   }
 
-  // Fades the pad in once opened, and handles pause/resume whenever the
+  // A real guest's `template` never changes after mount, so this is a
+  // no-op for them — but the Invitation Builder's live preview (see
+  // LiveDraftPreviewPage.jsx) re-renders this same mounted component as
+  // the buyer confirms/changes their song (see SongSearchPicker.jsx),
+  // updating the <audio> element's <source> without remounting it. A
+  // browser only re-runs its source-selection algorithm on an explicit
+  // .load() call; without this, it silently keeps playing whichever track
+  // it originally locked onto, ignoring every subsequent song change.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !isOpened || !hasMusic) return
+    audio.load()
+    if (!isMuted) {
+      audio.volume = 0
+      audio.play().catch(() => {})
+    }
+    // Deliberately keyed on bgMusic?.previewUrl alone — isOpened/isMuted are
+    // read here but must NOT be dependencies, or this would also re-fire
+    // (and reload/restart the track from 0:00) on every mute toggle, which
+    // the effect below already handles via pause()/play() without a reload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bgMusic?.previewUrl])
+
+  // Fades the clip in once opened, and handles pause/resume whenever the
   // mute button is toggled after that.
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio || !isOpened) return
+    if (!audio || !isOpened || !hasMusic) return
     if (isMuted) {
       audio.pause()
       return
@@ -104,20 +137,28 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
     }
     step()
     return () => cancelAnimationFrame(raf)
-  }, [isOpened, isMuted])
+  }, [isOpened, isMuted, hasMusic])
 
   return (
     <div
       className="min-h-svh w-full bg-linen flex justify-center sm:py-8"
       style={themeToCssVars(template)}
     >
-      {/* Drop a licensed track at public/audio/background-music.mp3 and it
-          takes over automatically — no code change needed. Falls back to
-          the synthesized placeholder pad if that file isn't present. */}
-      <audio ref={audioRef} loop preload="auto">
-        <source src="/audio/background-music.mp3" type="audio/mpeg" />
-        <source src="/audio/soothing-romantic.wav" type="audio/wav" />
-      </audio>
+      {/* Only rendered at all when the host actually confirmed a song (see
+          SongSearchPicker.jsx) — no element, no fallback track, no attempt
+          to play anything, when they skipped that step. `loop`: the preview
+          clip is a fixed ~30s, and guests routinely stay on the page well
+          past that. No `type` on the <source>: previewUrl is an MP3 on the
+          rare track Spotify itself still serves one for, but an M4A/AAC
+          clip from the iTunes fallback (see utils/itunesPreview.js) for
+          everything else — a hardcoded type would be wrong for whichever
+          one it isn't, so the browser sniffs the actual format instead. */}
+      {hasMusic && (
+        // eslint-disable-next-line jsx-a11y/media-has-caption
+        <audio ref={audioRef} loop preload="auto">
+          <source src={bgMusic.previewUrl} />
+        </audio>
+      )}
 
       {isOpened && <FallingPetals palette={template?.palette} />}
 
@@ -161,18 +202,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
             className="fixed inset-x-0 bottom-0 z-[70] flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 bg-gradient-to-t from-ink/20 via-ink/5 to-transparent"
           >
             <div className="flex w-full max-w-md items-center gap-3">
-              {isOpened && (
-                <motion.button
-                  type="button"
-                  onClick={() => setIsMuted((m) => !m)}
-                  aria-label={isMuted ? 'Unmute background music' : 'Mute background music'}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full border border-white/30 bg-ivory/80 text-ink shadow-soft backdrop-blur-xl"
-                >
-                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </motion.button>
-              )}
+              {isOpened && hasMusic && <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />}
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -196,6 +226,24 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
             </div>
           </motion.div>
         </>
+      )}
+
+      {/* The preview overlay above already gets a mute control (paired
+          with its "Create Your Own" CTA bar). This floating corner widget
+          gives a real, live invitation — what a guest actually opens from
+          a shared link — the same control once the envelope's opened,
+          without disturbing the preview overlay's own layout. Both are
+          gated on hasMusic: a host who skipped Background Music Selection
+          gets no mute button controlling nothing. */}
+      {!isPreview && isOpened && hasMusic && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+          className="fixed bottom-5 right-5 z-40"
+        >
+          <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
+        </motion.div>
       )}
 
       <div className="relative w-full max-w-md min-h-svh bg-ivory overflow-hidden sm:rounded-[2.5rem] sm:shadow-soft sm:border sm:border-champagne-deep/40">

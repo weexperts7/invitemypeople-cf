@@ -78,6 +78,19 @@ alter table public.invites
 All four are nullable — invites created before this migration simply have
 no host contact info and no dashboard link; there's no backfill for them.
 
+Add the `bg_song_*` columns (Background Music Selection — a host's
+Spotify pick, played on `/i/:slug` when the envelope opens, see
+`MUSIC-SETUP.md` for the full setup including the required Spotify API
+credentials) with:
+
+```sql
+alter table public.invites
+  add column if not exists bg_song_title text,
+  add column if not exists bg_song_artist text,
+  add column if not exists bg_song_album_art text,
+  add column if not exists bg_song_preview_url text;
+```
+
 ### 1b. Create the `invite-photos` Storage bucket
 
 Buyers can optionally upload their own photos (see `CreateInvitePage.jsx`) —

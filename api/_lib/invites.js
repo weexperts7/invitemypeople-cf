@@ -57,6 +57,10 @@ export function rowToInvite(row) {
     photos: row.photos ?? [],
     eventTitle: row.event_title,
     events: row.events ?? [],
+    bgSongTitle: row.bg_song_title,
+    bgSongArtist: row.bg_song_artist,
+    bgSongAlbumArt: row.bg_song_album_art,
+    bgSongPreviewUrl: row.bg_song_preview_url,
     createdAt: row.created_at,
   }
 }

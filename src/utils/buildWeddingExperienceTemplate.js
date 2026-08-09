@@ -59,5 +59,18 @@ export function buildWeddingExperienceTemplate(invite, template) {
     ceremonies: [mainEvent, ...additionalEvents],
     weddingDate: invite.time ? `${invite.date}T${invite.time}:00` : `${invite.date}T00:00:00`,
     photos,
+    // Background Music Selection (see builder/SongSearchPicker.jsx) — null
+    // when the host never confirmed a song, so InvitationExperience.jsx
+    // renders no <audio> element at all rather than a silent one. Gated on
+    // bgSongPreviewUrl specifically: that's the one field playback actually
+    // needs, and it's only ever set together with the other three.
+    bgMusic: invite.bgSongPreviewUrl
+      ? {
+          title: invite.bgSongTitle,
+          artist: invite.bgSongArtist,
+          albumArt: invite.bgSongAlbumArt,
+          previewUrl: invite.bgSongPreviewUrl,
+        }
+      : null,
   }
 }

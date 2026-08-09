@@ -16,6 +16,7 @@ import {
   Mail,
   MapPin,
   MessageSquareText,
+  Music2,
   ShieldCheck,
   User,
   Wand2,
@@ -28,6 +29,7 @@ import TemplateStyleSelector from '../components/builder/TemplateStyleSelector'
 import LiveInvitePreview from '../components/builder/LiveInvitePreview'
 import PhotoUploader from '../components/builder/PhotoUploader'
 import EventsListEditor from '../components/builder/EventsListEditor'
+import SongSearchPicker from '../components/builder/SongSearchPicker'
 import PaymentModal from '../components/builder/PaymentModal'
 import {
   OCCASIONS,
@@ -158,6 +160,11 @@ export default function CreateInvitePage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [photos, setPhotos] = useState([])
   const [events, setEvents] = useState([])
+  // Background Music Selection (see builder/SongSearchPicker.jsx) — null
+  // until the host confirms a Spotify search result; { title, artist,
+  // albumArt, previewUrl } once they do. Optional: skipping it just leaves
+  // the generated invitation silent.
+  const [song, setSong] = useState(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -216,6 +223,10 @@ export default function CreateInvitePage() {
           paymentId,
           photos,
           events,
+          bgSongTitle: song?.title || '',
+          bgSongArtist: song?.artist || '',
+          bgSongAlbumArt: song?.albumArt || '',
+          bgSongPreviewUrl: song?.previewUrl || '',
         })
         setCreatedInvite(invite)
         setPaymentOpen(false)
@@ -229,7 +240,7 @@ export default function CreateInvitePage() {
         setSaving(false)
       }
     },
-    [occasionId, template, form, photos, events],
+    [occasionId, template, form, photos, events, song],
   )
 
   const handleCopyLink = async (kind, url) => {
@@ -297,6 +308,7 @@ export default function CreateInvitePage() {
                   occasionId={occasionId}
                   photos={photos}
                   events={events}
+                  song={song}
                 />
                 <p className="mt-3 text-center text-xs text-ink-soft/80">
                   Updates instantly as you type — scroll inside the phone to
@@ -496,6 +508,24 @@ export default function CreateInvitePage() {
                           Reception — each with its own date, time and venue.
                         </p>
                         <EventsListEditor events={events} onChange={setEvents} />
+                      </div>
+                    )}
+
+                    {occasionId === 'wedding' && (
+                      <div className="border-t border-champagne-deep/30 pt-5">
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Music2 className="h-3.5 w-3.5 text-rose" />
+                          Background Music Selection <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <p className="mb-3 text-xs text-ink-soft">
+                          Search Spotify, preview any track, then confirm one
+                          to play the moment guests open your invitation.
+                        </p>
+                        <SongSearchPicker
+                          value={song}
+                          onConfirm={setSong}
+                          onRemove={() => setSong(null)}
+                        />
                       </div>
                     )}
                   </div>

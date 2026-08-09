@@ -38,6 +38,7 @@ import {
   getOccasion,
 } from '../data/builderTemplates'
 import { PRICING } from '../data/templatesData'
+import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
 import { ROUTES_SEO } from '../data/routesSeo'
 
@@ -162,8 +163,9 @@ export default function CreateInvitePage() {
   const [events, setEvents] = useState([])
   // Background Music Selection (see builder/SongSearchPicker.jsx) — null
   // until the host confirms a Spotify search result; { title, artist,
-  // albumArt, previewUrl } once they do. Optional: skipping it just leaves
-  // the generated invitation silent.
+  // albumArt, previewUrl } once they do. Optional: skipping it just means
+  // the generated invitation plays the standard default track instead of
+  // the host's own pick (see DEFAULT_BG_MUSIC_URL in InvitationExperience.jsx).
   const [song, setSong] = useState(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
@@ -174,6 +176,15 @@ export default function CreateInvitePage() {
 
   const occasion = getOccasion(occasionId)
   const template = getBuilderTemplateById(templateId)
+
+  // The price actually charged this session — the launch-sale price while
+  // it's running, the standing launch price once it ends (see
+  // ../data/sale.js). Every price shown on this page, and the amount
+  // PaymentModal actually charges via Razorpay, reads from this so nothing
+  // here can drift out of sync with what checkout enforces server-side.
+  const activePrice = getActivePrice()
+  const saleLive = isSaleActive()
+  const savingsPercent = getSavingsPercent()
 
   const handleOccasionChange = (nextOccasionId) => {
     setOccasionId(nextOccasionId)
@@ -219,7 +230,7 @@ export default function CreateInvitePage() {
           message: form.message.trim(),
           hostName: form.hostName.trim(),
           hostEmail: form.hostEmail.trim(),
-          amount: PRICING.shagunPrice,
+          amount: activePrice,
           paymentId,
           photos,
           events,
@@ -240,7 +251,7 @@ export default function CreateInvitePage() {
         setSaving(false)
       }
     },
-    [occasionId, template, form, photos, events, song],
+    [occasionId, template, form, photos, events, song, activePrice],
   )
 
   const handleCopyLink = async (kind, url) => {
@@ -575,10 +586,23 @@ export default function CreateInvitePage() {
                       </>
                     )}
                   </motion.button>
-                  <p className="mt-3 text-center text-xs text-ink-soft">
-                    &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')} via Razorpay
-                    — then get your own live, shareable invitation link
-                    instantly.
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-center text-xs text-ink-soft">
+                    <span className="font-semibold text-ink">
+                      &#8377;{activePrice.toLocaleString('en-IN')}
+                    </span>
+                    {saleLive && (
+                      <>
+                        <span className="text-ink-soft/60 line-through">
+                          &#8377;{PRICING.price.toLocaleString('en-IN')}
+                        </span>
+                        <span className="rounded-full bg-blush px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-rose">
+                          Save {savingsPercent}%
+                        </span>
+                      </>
+                    )}
+                    <span>
+                      via Razorpay — then get your own live, shareable invitation link instantly.
+                    </span>
                   </p>
                 </div>
               </div>
@@ -592,7 +616,8 @@ export default function CreateInvitePage() {
 
       <PaymentModal
         open={paymentOpen}
-        amount={PRICING.shagunPrice}
+        amount={activePrice}
+        originalAmount={saleLive ? PRICING.price : null}
         summary={{ templateName: template.name, names: form.names.trim() || occasion.namesPlaceholder }}
         onClose={() => (saving ? null : setPaymentOpen(false))}
         onSuccess={handlePaymentSuccess}

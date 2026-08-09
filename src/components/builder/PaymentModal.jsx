@@ -27,7 +27,7 @@ async function verifyPayment(response) {
   return result.paymentId
 }
 
-export default function PaymentModal({ open, amount, summary, onSuccess, onClose }) {
+export default function PaymentModal({ open, amount, originalAmount, summary, onSuccess, onClose }) {
   const reduceMotion = useReducedMotion()
   const [stage, setStage] = useState('confirm') // confirm | processing | verifying | success | error
   const [errorMessage, setErrorMessage] = useState(null)
@@ -194,9 +194,23 @@ export default function PaymentModal({ open, amount, summary, onSuccess, onClose
                     <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-1">
                       Paying InviteMyPeople
                     </p>
-                    <p className="font-serif text-3xl text-ink mb-4">
-                      &#8377;{amount.toLocaleString('en-IN')}
-                    </p>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <p className="font-serif text-3xl text-ink">
+                          &#8377;{amount.toLocaleString('en-IN')}
+                        </p>
+                        {originalAmount > amount && (
+                          <p className="text-base text-ink-soft/60 line-through">
+                            &#8377;{originalAmount.toLocaleString('en-IN')}
+                          </p>
+                        )}
+                      </div>
+                      {originalAmount > amount && (
+                        <span className="mt-1.5 inline-flex items-center rounded-full bg-blush px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-rose">
+                          Launch Sale — Save {Math.round(((originalAmount - amount) / originalAmount) * 100)}%
+                        </span>
+                      )}
+                    </div>
 
                     <div className="mb-5 space-y-1 rounded-2xl border border-champagne-deep/40 bg-champagne/30 px-4 py-3 text-left text-sm text-ink-soft">
                       <p className="flex justify-between">

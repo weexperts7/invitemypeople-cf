@@ -10,16 +10,23 @@
 // import-safety rule routesSeo.js documents for itself.
 //
 // Each post's `body` uses the same block scheme as routesSeo.js's
-// STATIC_ROUTES_SEO bodies, extended with one more shape: a `{ h3 }` entry
-// renders as an <h3> (routesSeo.js only ever needed <h2>). See
-// api/render.js's renderBodyBlock / server/index.js's renderBodyBlock for
-// the SSR-shell renderer, and BlogPostPage.jsx for the live-page renderer —
-// both read this same array, so a non-JS crawler and a real visitor always
-// see identical article content, just like every other page on this site.
+// STATIC_ROUTES_SEO bodies, extended with three more shapes: a `{ h3 }`
+// entry renders as an <h3> (routesSeo.js only ever needed <h2>), a
+// `{ cta }` entry renders as a real inline button mid-article (rather than
+// a plain text link), and a `{ widget }` entry renders a hand-picked React
+// component in place — currently only 'musicVibe' exists, see
+// ../components/blog/MusicVibeWidget.jsx. See api/render.js's
+// renderBodyBlock / server/index.js's renderBodyBlock for the SSR-shell
+// renderer (both fall back to a plain crawlable <a>/<p> for `cta`/`widget`
+// blocks — there's no server-side React to render the real component with),
+// and BlogPostPage.jsx for the live-page renderer.
 //
 //   - a plain string            -> <p>
 //   - { h2: '...' }             -> <h2>
 //   - { h3: '...' }             -> <h3>
+//   - { cta: { label, href } }  -> a real button <Link>, mid-article
+//   - { widget: 'musicVibe' }   -> <MusicVibeWidget /> (blog-only, see
+//                                  components/blog/MusicVibeWidget.jsx)
 //   - [seg, seg, ...]           -> <p> whose segments are plain text or a
 //                                  { text, href } internal link (<a>/<Link>)
 export const BLOG_POSTS = [
@@ -103,6 +110,109 @@ export const BLOG_POSTS = [
         'Whether you’re planning an intimate Mehndi or a five-function wedding spread across a week, an interactive digital wedding invitation replaces the group-chat guesswork with a real, live guest list. It’s the same interactive RSVP tracking behind every InviteMyPeople wedding invitation — and the same wedding website builder that lets you edit every detail long after the invitation is already in your guests’ hands. Browse ',
         { text: 'digital wedding invitations', href: '/weddings' },
         ' across every tradition, or read more ',
+        { text: 'about how InviteMyPeople works', href: '/about' },
+        ' before you start.',
+      ],
+    ],
+  },
+  {
+    slug: 'add-custom-background-music-digital-invitations',
+    date: '2026-08-09',
+    readingTime: '7 min read',
+    title: 'Set the Vibe: How to Add Custom Background Music to Your Digital Invitations',
+    description:
+      'Learn how to add a custom song to your digital wedding, sangeet or Guruji Satsang invitation on InviteMyPeople — searchable in seconds, with an instant 30-second preview before you apply it.',
+    excerpt:
+      'The first three seconds after a guest opens your invitation are mostly felt, not read. Here’s how to pick the right song — and how InviteMyPeople’s search-and-preview makes it a thirty-second decision.',
+    h1: 'Set the Vibe: How to Add Custom Background Music to Your Digital Invitations',
+    cta: { label: 'Pick your song and start building on /create', href: '/create' },
+    body: [
+      "A guest doesn't read your invitation before they feel it. In the half-second after they tap the envelope open, before a single word registers, sound has already told them something — that this is a wedding, or a Sangeet, or a Guruji Satsang; that it's joyful, or romantic, or reverent. Visuals set the scene, but music is what makes an invitation feel alive instead of looked at. That's the entire idea behind Background Music Selection on InviteMyPeople: a way to search for the exact song that matches your celebration, preview it instantly, and have it play the moment a guest opens your invite — without ever touching an audio file or a line of code.",
+
+      { h2: 'Why Background Music Changes How an Invitation Feels' },
+      "Two invitations can share the same photo, the same gold foil border, the same elegant script font — and still land completely differently, purely because of what a guest hears in the background. Silence reads as a webpage. A song reads as an occasion.",
+
+      { h3: 'The First Three Seconds Guests Actually Feel' },
+      "Attention is shortest in the first moment after a link opens. Before a guest has scrolled, read a date, or found the RSVP button, they've already absorbed the mood of your invitation from whatever's playing underneath it. A soft acoustic track says intimate wedding. A big, familiar Bollywood hook says the Sangeet is going to be loud and fun. A traditional aarti says take a breath, this one's devotional. Getting that first three seconds right does more emotional work than almost any other single design choice on the page.",
+
+      { h3: "No Invitation Ever Opens in Silence" },
+      "It's worth knowing what happens if you skip this step entirely: nothing goes silent. Every InviteMyPeople invitation plays something the moment a guest opens it — a soft, neutral default track steps in automatically if you never pick a song of your own. Choosing your own music isn't switching music on; it's replacing the generic default with something that's actually, unmistakably yours.",
+
+      { h2: 'Choosing the Right Song for Each Kind of Celebration' },
+      "Not every function calls for the same vibe, and a host planning several events under one invitation link often needs to think about this more than once.",
+
+      { h3: 'Weddings — Romantic, Timeless, Personal' },
+      "For the wedding ceremony itself, most hosts lean toward something warm and unhurried — a romantic classic, an instrumental version of a favourite song, or the track that was playing the night of the proposal. It should feel personal enough that a close friend would recognise it as \"so them\" the moment it starts.",
+
+      { h3: 'Sangeets & Baraats — High-Energy, Familiar, Fun' },
+      "A Sangeet or Baraat invitation earns a completely different choice: something high-energy and instantly familiar, a dance-floor hit everyone already knows the words to. This is the one function where a bold, popular pick almost always beats an obscure one — guests should recognise the song before they've even finished reading who's getting married.",
+
+      { h3: 'Guruji Satsangs — Devotional, Calm, Respectful' },
+      "A Guruji Satsang invitation calls for the opposite energy entirely — a traditional bhajan or aarti, calm and reverent, that sets a respectful tone before a guest has read a single detail about the gathering. Getting this one right matters just as much as getting a Sangeet's energy right; it's the same first-three-seconds effect, aimed at a completely different feeling.",
+
+      { h2: 'How Song Search & Preview Works on InviteMyPeople' },
+      [
+        'This is the part hosts worry will be complicated, and it genuinely isn’t. The ',
+        { text: 'Background Music Selection', href: '/create' },
+        ' step inside the Invitation Builder is a single search box — type a song or an artist, and matching tracks appear as you type, each with its own album art and a one-tap 30-second preview, so you can hear a track before you ever commit to it.',
+      ],
+
+      { h3: 'Search Any Song or Artist' },
+      "Start typing a title, an artist, or even part of a lyric, and results start appearing within moments — no separate music library to browse, no file to hunt down and upload from your phone.",
+
+      { h3: 'Preview Before You Commit' },
+      "Every result carries a tap-to-play 30-second preview, right there in the search results. Nothing gets applied to your invitation until you've actually heard it — and heard how it sits against your chosen template's mood, not just in isolation.",
+
+      { h3: 'One Tap to Apply It to Your Invitation' },
+      "Once a preview sounds right, one tap confirms it. That's the entire flow — search, preview, apply — and it's the same thirty-second decision whether you're picking a love song for the wedding page or a bhajan for the Satsang page.",
+
+      { widget: 'musicVibe' },
+
+      { h2: 'Step-by-Step: Adding Custom Music to Your Invitation' },
+      "Here's the exact path from a blank invitation to one that plays your own song the moment a guest opens it.",
+
+      { h3: 'Step 1 — Open the Builder' },
+      [
+        'Start (or open) your invitation in the ',
+        { text: 'Invitation Builder', href: '/create' },
+        ' and get to the Background Music Selection step — it sits alongside your other details like names, dates and venue, in the same guided flow.',
+      ],
+
+      { h3: 'Step 2 — Search for Your Song' },
+      'Type the song or artist you have in mind into the search box. Results, complete with album art, start appearing as you type.',
+
+      { h3: 'Step 3 — Preview and Confirm' },
+      "Tap Preview 30s on any result to hear the clip before deciding. Once you've found the one, a single tap applies it to your invitation.",
+
+      { h3: 'Step 4 — Share Your Invitation' },
+      'Share your link the way you always would — WhatsApp, email, wherever your guests already are. Your song now plays automatically the moment anyone opens it.',
+
+      { h2: 'Common Music Mistakes Hosts Make' },
+      "The most avoidable mistake is picking a song purely from memory, without previewing it first — a track that sounds perfect in your head can feel oddly paced or too loud once it's actually playing under your invitation's design. A close second is using the same song across every function of a multi-event wedding; a Sangeet track playing under your Guruji Satsang invitation undercuts the tone you're trying to set. And it's easy to forget to actually test the invitation on a phone with the sound on before sending it out — the same quick check that catches a typo in the venue name catches a music choice that doesn't land the way you imagined.",
+
+      { cta: { label: 'Try the music search on your own invitation', href: '/create' } },
+
+      { h2: 'Frequently Asked Questions About Invitation Background Music' },
+      { h3: 'Do I Have to Pick a Song?' },
+      "No. Background Music Selection is entirely optional — if you skip it, your invitation still plays a soft, neutral default track automatically, so a guest never opens it to silence.",
+
+      { h3: 'Will the Music Autoplay for Every Guest?' },
+      "Yes. The moment a guest taps to open your invitation, your chosen song begins playing automatically — there's no separate play button they need to find first, and every guest gets muted controls if they'd rather turn it off.",
+
+      { h3: 'Can I Change the Song After Sending the Invitation?' },
+      "Yes. Go back into the Invitation Builder, search for a new track, preview it, and confirm — the change appears instantly for anyone opening your existing link, with nothing to resend.",
+
+      { h3: 'Does Every Song Have a Preview Available?' },
+      "Most searches return several results with a working 30-second preview, but not every track online has one available. Only songs with a preview can be selected, so you'll never end up with a \"song\" applied that turns out to be silent on the day.",
+
+      [
+        'A wedding, a Sangeet and a Guruji Satsang each deserve a completely different first three seconds — and now you can give each one its own. Search, preview, and apply your song directly in the ',
+        { text: 'Invitation Builder', href: '/create' },
+        ', browse ',
+        { text: 'digital wedding invitations', href: '/weddings' },
+        ' or ',
+        { text: 'Guruji Satsang invitations', href: '/guruji-satsangs' },
+        ' for a template to build it on, or read more ',
         { text: 'about how InviteMyPeople works', href: '/about' },
         ' before you start.',
       ],

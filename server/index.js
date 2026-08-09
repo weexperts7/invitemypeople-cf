@@ -572,9 +572,12 @@ function setTitle(html, title) {
 // exists (a non-JS-executing crawler otherwise only ever sees an empty
 // `<div id="root"></div>`). Each `body` entry is a plain string (<p>), a
 // `{ h2 }` object (<h2>), a `{ h3 }` object (<h3> — used by blog posts, see
-// blogPosts.js), or an array of segments — plain text or a `{ text, href }`
-// internal link, rendered as a real <a href> inside the <p> — see
-// routesSeo.js's homepage `body` for why.
+// blogPosts.js), a `{ cta }` object (a plain <a href> here — the live page
+// renders a styled button instead), a `{ widget }` object (a plain <p>
+// naming the demo here — the live page swaps in the real interactive
+// component, see BLOG_WIDGETS in BlogPostPage.jsx), or an array of
+// segments — plain text or a `{ text, href }` internal link, rendered as a
+// real <a href> inside the <p> — see routesSeo.js's homepage `body` for why.
 function renderBodyBlock(block) {
   if (typeof block === 'string') return `<p>${escapeHtml(block)}</p>`
   if (Array.isArray(block)) {
@@ -588,6 +591,8 @@ function renderBodyBlock(block) {
     return `<p>${inner}</p>`
   }
   if (block.h3) return `<h3>${escapeHtml(block.h3)}</h3>`
+  if (block.cta) return `<p><a href="${escapeHtml(block.cta.href)}">${escapeHtml(block.cta.label)}</a></p>`
+  if (block.widget) return `<p>Interactive demo: search for a song and preview a 30-second clip.</p>`
   return `<h2>${escapeHtml(block.h2)}</h2>`
 }
 

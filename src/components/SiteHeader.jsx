@@ -7,7 +7,10 @@ import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 
 const PRIMARY_LINKS = [{ to: '/', label: 'Home', end: true }]
-const SECONDARY_LINKS = [{ to: '/about', label: 'About', end: false }]
+const SECONDARY_LINKS = [
+  { to: '/blog', label: 'Blog', end: false },
+  { to: '/about', label: 'About', end: false },
+]
 
 // The "browse by occasion" list behind the Occasions menu — live categories
 // first, then everything still on the roadmap (see occasionsData.js).

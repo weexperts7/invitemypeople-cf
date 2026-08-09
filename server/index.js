@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
+import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import {
@@ -525,9 +526,10 @@ function setTitle(html, title) {
 // comment for why this is safe (createRoot, not hydrateRoot) and why it
 // exists (a non-JS-executing crawler otherwise only ever sees an empty
 // `<div id="root"></div>`). Each `body` entry is a plain string (<p>), a
-// `{ h2 }` object (<h2>), or an array of segments — plain text or a
-// `{ text, href }` internal link, rendered as a real <a href> inside the
-// <p> — see routesSeo.js's homepage `body` for why.
+// `{ h2 }` object (<h2>), a `{ h3 }` object (<h3> — used by blog posts, see
+// blogPosts.js), or an array of segments — plain text or a `{ text, href }`
+// internal link, rendered as a real <a href> inside the <p> — see
+// routesSeo.js's homepage `body` for why.
 function renderBodyBlock(block) {
   if (typeof block === 'string') return `<p>${escapeHtml(block)}</p>`
   if (Array.isArray(block)) {
@@ -540,6 +542,7 @@ function renderBodyBlock(block) {
       .join('')
     return `<p>${inner}</p>`
   }
+  if (block.h3) return `<h3>${escapeHtml(block.h3)}</h3>`
   return `<h2>${escapeHtml(block.h2)}</h2>`
 }
 
@@ -567,6 +570,9 @@ function normalizePathname(pathname) {
 // so its title/description come from the matched template itself.
 function resolveSeoForPath(pathname) {
   if (ROUTES_SEO[pathname]) return ROUTES_SEO[pathname]
+  // Computed from BLOG_POSTS rather than a ROUTES_SEO entry — see
+  // blogListSeo()'s own comment for why.
+  if (pathname === '/blog') return blogListSeo()
 
   const satsangMatch = pathname.match(/^\/satsang\/([^/]+)\/?$/)
   if (satsangMatch) {
@@ -578,6 +584,12 @@ function resolveSeoForPath(pathname) {
   if (ganeshMatch) {
     const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
     if (template) return ganeshSeo(template)
+  }
+
+  const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/)
+  if (blogMatch) {
+    const post = getBlogPostBySlug(decodeURIComponent(blogMatch[1]))
+    if (post) return blogPostSeo(post)
   }
 
   return null

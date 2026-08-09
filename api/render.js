@@ -38,6 +38,7 @@ import path from 'node:path'
 import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
+import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 
 function escapeHtml(str) {
   return String(str)
@@ -77,10 +78,12 @@ function setTitle(html, title) {
 // warnings either way.
 //
 // Each `body` entry is a plain string (rendered as a <p>), a `{ h2 }`
-// object (rendered as an <h2>), or an array of segments (rendered as a <p>
-// whose segments are either plain text or a `{ text, href }` internal
-// link, rendered as a real <a href>) — see routesSeo.js's homepage `body`
-// for why: it gives a non-JS crawler a real H1 → H2 → paragraph heading
+// object (rendered as an <h2>), a `{ h3 }` object (rendered as an <h3> —
+// added for blog posts, see blogPosts.js, which nest a subheading level
+// beneath each <h2>), or an array of segments (rendered as a <p> whose
+// segments are either plain text or a `{ text, href }` internal link,
+// rendered as a real <a href>) — see routesSeo.js's homepage `body` for
+// why: it gives a non-JS crawler a real H1 → H2 → (H3 →) paragraph heading
 // hierarchy, with real contextual internal links inside that paragraph
 // text, in the raw HTML — not just a flat wall of <p> text under a single
 // heading, and not only links siloed off in the nav below.
@@ -96,6 +99,7 @@ function renderBodyBlock(block) {
       .join('')
     return `<p>${inner}</p>`
   }
+  if (block.h3) return `<h3>${escapeHtml(block.h3)}</h3>`
   return `<h2>${escapeHtml(block.h2)}</h2>`
 }
 
@@ -127,6 +131,9 @@ function normalizePathname(pathname) {
 
 function resolveSeoForPath(pathname) {
   if (ROUTES_SEO[pathname]) return ROUTES_SEO[pathname]
+  // Computed from BLOG_POSTS rather than a ROUTES_SEO entry — see
+  // blogListSeo()'s own comment for why.
+  if (pathname === '/blog') return blogListSeo()
 
   const satsangMatch = pathname.match(/^\/satsang\/([^/]+)\/?$/)
   if (satsangMatch) {
@@ -138,6 +145,17 @@ function resolveSeoForPath(pathname) {
   if (ganeshMatch) {
     const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
     if (template) return ganeshSeo(template)
+  }
+
+  // Unlike satsang/ganesh templates, a blog post's raw SSR shell carries the
+  // full article `body` (see blogPostSeo()) — its live page (BlogPostPage.jsx)
+  // is nothing *but* that article content, so there's no bespoke client-side
+  // hero copy this could drift out of sync with the way there would be for a
+  // template's custom layout.
+  const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/)
+  if (blogMatch) {
+    const post = getBlogPostBySlug(decodeURIComponent(blogMatch[1]))
+    if (post) return blogPostSeo(post)
   }
 
   return null

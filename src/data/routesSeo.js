@@ -125,16 +125,48 @@ export const COMING_SOON_ROUTES = [
 // section (which already has its own <h2> above this content, one level
 // deeper than the flat pre-hydration shell). Either way: a real H1 → H2 →
 // (H3 →) paragraph hierarchy, not a flat wall of text under one heading.
+//
+// The trailing "How Digital Invites for Weddings & Events Work" and
+// "Frequently Asked Questions" entries exist for the same reason as the
+// rest of this array: the real, interactive How It Works/FAQ sections
+// further up the page (STEPS/FAQS below) only render once React mounts,
+// so a non-JS crawler's raw response never saw them — only this array's
+// ~410 words did, still short of Seobility's recommended depth for an
+// entry page. Deliberately reworded from STEPS/FAQS rather than copied
+// verbatim, so the page doesn't read as literally repeating itself twice
+// to a human visitor scrolling past both sections.
 export const HOMEPAGE_SEO_BODY = [
-  "InviteMyPeople is the digital wedding invitation maker India families turn to when a printed card, or a forwarded WhatsApp video, no longer feels like enough. Every invitation is interactive, mobile-first and genuinely unforgettable — built to open like a story, not just be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, a Ganesh Chaturthi celebration or any occasion in between, one link turns into a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
+  "InviteMyPeople is the digital wedding invitation maker India families turn to for digital invites for weddings & events. A printed card can't update itself. A forwarded WhatsApp video isn't interactive. Every InviteMyPeople invitation is different: mobile-first, genuinely unforgettable, and built to open like a story rather than be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration, one link does it all. It becomes a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
   { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
-  'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and interactive RSVP tracking that records attendance, guest counts, song requests and blessings without a single phone call. As a digital wedding invitation maker India hosts trust for every function — Haldi, Sangeet, the wedding ceremony, Reception — each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
+  'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions. Each one opens with an envelope-reveal animation and a gold-foil scratch card. Each one ships with interactive RSVP tracking built in, recording attendance, guest counts, song requests and blessings — without a single phone call. As the digital wedding invitation maker India hosts trust, we cover every function: Haldi, Sangeet, the wedding ceremony, Reception. Each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
   { h2: 'A Guruji Satsang Invite Online, With a Devotional Touch' },
-  "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card and the same interactive RSVP tracking used across the platform, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
+  "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card. They use the same interactive RSVP tracking as every other template, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open differently: a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign. Every template stays fully interactive and mobile-first.",
   { h2: 'More Than a Card — A Wedding Website Builder With a Live Dashboard' },
-  "Unlike a static card, InviteMyPeople doubles as a wedding website builder: pick a template in our Invitation Builder, fill in your names, dates and venue, and watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Behind every link sits a private host dashboard with real-time interactive RSVP tracking, downloadable guest lists for catering and planning, and automated pre-event summaries, so nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
+  "Unlike a static card, InviteMyPeople doubles as a wedding website builder. Pick a template in our Invitation Builder. Fill in your names, dates and venue. Watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent. Update any detail instantly, and everyone holding the link sees the change right away — no reprinting, no re-recording. Behind every link sits a private host dashboard with real-time interactive RSVP tracking and downloadable guest lists. Automated pre-event summaries mean nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
   { h2: 'Why Hosts Choose InviteMyPeople' },
-  "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on, so a celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
+  "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first. It's backed by ready-made templates across every tradition, plus 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on. A celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
+  { h2: 'How Digital Invites for Weddings & Events Work' },
+  'Getting your own digital invitation takes four simple steps, from picking a template to sharing a live link with your guests.',
+  { h2: 'Step 1: Pick a Template' },
+  'Choose a design for a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration. Every template is fully interactive from the moment you open it.',
+  { h2: 'Step 2: Fill In Your Details' },
+  'Add your names, dates and venue in the Invitation Builder. Add every function — Haldi, Sangeet, the ceremony, Reception — each with its own time and place.',
+  { h2: 'Step 3: Watch the Live Preview' },
+  'A phone preview updates the moment you type. You see exactly what your guests will see, before you publish anything.',
+  { h2: 'Step 4: Publish and Share' },
+  'Pay securely online. Your finished, shareable invitation link goes live instantly — ready to send on WhatsApp, or anywhere else your guests are.',
+  { h2: 'Frequently Asked Questions About Our Digital Invites' },
+  'Real answers to the questions hosts ask most before building their own wedding invitation, Guruji Satsang invite, or Ganesh Chaturthi invitation.',
+  { h2: 'Do Guests Need to Install an App?' },
+  'No. Every invitation is a mobile-first web page. It opens straight from the link, in any browser, on any phone.',
+  { h2: 'How Do RSVPs and Guest Tracking Work?' },
+  "Guests tap to respond right on the invitation itself. Their attendance, guest count, and wishes flow straight into your private host dashboard — the same interactive RSVP tracking behind every InviteMyPeople template.",
+  { h2: 'Can Details Change After the Invitation Is Live?' },
+  'Yes. Edit any detail instantly, at any time. Everyone holding the link sees the update immediately, with no reprinting or resending needed.',
+  { h2: 'What Does a Digital Invite Cost?' },
+  'One flat, all-inclusive price covers your whole invitation, every event on it, and 2 free revisions. There are no hidden per-guest or printing fees, on any template for any occasion.',
+  { h2: 'One Platform for Every Celebration' },
+  'Weddings, Guruji Satsangs, and Ganesh Chaturthi celebrations are live today, with birthdays, engagements, baby showers, housewarmings, corporate events, and anniversaries on the way. Every occasion runs on the same live builder, the same interactive RSVP tracking, and the same private host dashboard — one platform, built for celebrations across India.',
 ]
 
 const STATIC_ROUTES_SEO = {

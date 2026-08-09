@@ -19,6 +19,7 @@ import {
 } from '../src/utils/photoUpload.js'
 import { cleanEvents } from '../src/utils/cleanEvents.js'
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../src/utils/email.js'
+import { searchSpotifyTracks } from '../src/utils/spotify.js'
 import { randomBytes } from 'node:crypto'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -245,6 +246,34 @@ app.get('/api/wishes', async (req, res) => {
   }
 })
 
+// Background Music Selection search — see
+// src/components/builder/SongSearchPicker.jsx. Local-dev mirror of
+// api/spotify/search.js; both wrap the shared src/utils/spotify.js helper,
+// which does the actual Client Credentials auth + Spotify API call.
+app.get('/api/spotify/search', async (req, res) => {
+  try {
+    const q = clean(req.query.q, 200)
+    if (!q) return res.json({ ok: true, tracks: [] })
+
+    const tracks = await searchSpotifyTracks(q, 8)
+    res.json({ ok: true, tracks })
+  } catch (err) {
+    // Surfaced as its own status (not the generic 502 below) so
+    // SongSearchPicker.jsx can show "Too many searches, please wait a
+    // second…" instead of a generic error — see spotifyApi.js.
+    if (err.code === 'RATE_LIMITED') {
+      res.set('Retry-After', String(err.retryAfterSeconds))
+      return res.status(429).json({
+        ok: false,
+        error: 'Too many searches — please wait a second and try again.',
+        retryAfterSeconds: err.retryAfterSeconds,
+      })
+    }
+    console.error('[spotify] search failed:', err)
+    res.status(502).json({ ok: false, error: 'could not search Spotify right now' })
+  }
+})
+
 // Invitation Builder — see src/pages/CreateInvitePage.jsx. Called once the
 // (currently simulated) Razorpay Test Mode payment succeeds, so every saved
 // entry here represents a "paid" invite. Generates the unique shareable slug
@@ -293,6 +322,14 @@ app.post('/api/invites', async (req, res) => {
           : [],
         eventTitle: clean(body.eventTitle, 80),
         events: cleanEvents(body.events, clean),
+        // Background Music Selection (see builder/SongSearchPicker.jsx) —
+        // all four travel together and are only ever set once a host
+        // clicks "Confirm & Apply Song" there; bgSongPreviewUrl is what
+        // InvitationExperience.jsx actually plays, the rest are display-only.
+        bgSongTitle: clean(body.bgSongTitle, 200),
+        bgSongArtist: clean(body.bgSongArtist, 200),
+        bgSongAlbumArt: clean(body.bgSongAlbumArt, 500),
+        bgSongPreviewUrl: clean(body.bgSongPreviewUrl, 500),
         hostName,
         hostEmail,
         hostToken: randomBytes(24).toString('base64url'),

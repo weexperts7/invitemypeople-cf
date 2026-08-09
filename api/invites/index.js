@@ -50,6 +50,12 @@ export default async function handler(req, res) {
         : [],
       event_title: clean(body.eventTitle, 80),
       events: cleanEvents(body.events, clean),
+      // Background Music Selection (see builder/SongSearchPicker.jsx) — see
+      // server/index.js's identical block for what each field is for.
+      bg_song_title: clean(body.bgSongTitle, 200),
+      bg_song_artist: clean(body.bgSongArtist, 200),
+      bg_song_album_art: clean(body.bgSongAlbumArt, 500),
+      bg_song_preview_url: clean(body.bgSongPreviewUrl, 500),
       host_name: hostName,
       host_email: hostEmail,
       host_token: generateHostToken(),

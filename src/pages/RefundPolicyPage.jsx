@@ -30,7 +30,7 @@ const SECTIONS = [
   {
     heading: 'Requesting a Refund',
     blocks: [
-      'If you experience any technical difficulties during your invitation creation or believe you qualify for an exception under our policy, please reach out to us immediately at support@invitemypeople.com with your payment transaction ID and event details. We are always happy to help resolve issues promptly!',
+      'If you experience any technical difficulties during your invitation creation or believe you qualify for an exception under our policy, please reach out to us immediately at support@invitemypeople.com with your payment transaction ID and event details. We are always happy to help resolve issues promptly! We aim to respond to every refund request within a few business days, and we will keep you updated by email throughout the process.',
     ],
   },
 ]
@@ -42,7 +42,10 @@ export default function RefundPolicyPage() {
       <LegalPageLayout
         title="Refund & Cancellation Policy"
         updated="August 2026"
-        intro={['Thank you for choosing InviteMyPeople for your special celebrations.']}
+        intro={[
+          'Thank you for choosing InviteMyPeople for your special celebrations.',
+          "This policy covers every paid purchase made through InviteMyPeople's Invitation Builder — whether you're generating a digital wedding invitation, a Guruji Satsang invite online, or a Ganesh Chaturthi invitation — along with any add-on purchased alongside it. Because our platform is a digital wedding invitation maker that deploys your invitation to its own unique, live link the instant payment succeeds, complete with interactive RSVP tracking already switched on, please read this policy carefully before checkout so you know exactly what to expect once your invitation goes live.",
+        ]}
         sections={SECTIONS}
       />
     </>

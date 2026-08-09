@@ -107,6 +107,16 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/templates/ganesh-chaturthi" className="text-ink-soft hover:text-rose transition-colors">
+                  Ganesh Chaturthi Invitations
+                </Link>
+              </li>
+              <li>
+                <Link to="/create" className="text-ink-soft hover:text-rose transition-colors">
+                  Build Your Invitation
+                </Link>
+              </li>
+              <li>
                 <Link to="/about" className="text-ink-soft hover:text-rose transition-colors">
                   About Us
                 </Link>

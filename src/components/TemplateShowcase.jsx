@@ -60,8 +60,15 @@ export default function TemplateShowcase({ template, className = '' }) {
           </p>
         )}
 
+        {/* line-clamp-2 guards this miniature card against a template whose
+            greeting is a full mantra/verse rather than a short 2-3 word
+            tagline (e.g. Rajasthani Royal's) — without it, the wrapped text
+            grows past the card's fixed height and pushes/overflows the rest
+            of the centered layout. Every other template's short one-line
+            greeting is already well under 2 lines, so this is a no-op for
+            them. */}
         <p
-          className="text-[9px] font-medium uppercase tracking-[0.28em]"
+          className="text-[9px] font-medium uppercase tracking-[0.28em] line-clamp-2"
           style={{ color: palette.inkSoft }}
         >
           {greeting?.line ?? name}

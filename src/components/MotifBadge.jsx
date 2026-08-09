@@ -7,6 +7,13 @@
 // without an entry here render nothing, which is itself the right choice
 // for e.g. the Western minimalist template's deliberate restraint.
 const BADGES = {
+  // Royal Festive Vibrant — a jewel-tone mandala medallion.
+  'rani-mandala': (fill, accent) => (
+    <svg viewBox="0 0 120 120" className="h-full w-full">
+      <circle cx="60" cy="60" r="46" fill={fill} opacity="0.9" />
+      <circle cx="60" cy="60" r="16" fill={accent} />
+    </svg>
+  ),
   // Rajasthani Royal — a palace jharokha dome.
   jharokha: (fill, accent) => (
     <svg viewBox="0 0 120 120" className="h-full w-full">
@@ -43,10 +50,23 @@ const BADGES = {
       />
     </svg>
   ),
-  // Punjabi Phulkari — a bold embroidered diamond.
+  // Punjabi Phulkari — a bold embroidered diamond crowned in a royal
+  // filigree ring, echoing the crest medallion in its FrameBanner.
   phulkari: (fill, accent) => (
     <svg viewBox="0 0 100 100" className="h-full w-full">
+      <circle cx="50" cy="50" r="46" fill="none" stroke={fill} strokeWidth="2" opacity="0.55" strokeDasharray="2 6" />
       <rect x="24" y="24" width="52" height="52" fill={fill} opacity="0.9" transform="rotate(45 50 50)" />
+      <rect
+        x="34"
+        y="34"
+        width="32"
+        height="32"
+        fill="none"
+        stroke={accent}
+        strokeWidth="2"
+        opacity="0.8"
+        transform="rotate(45 50 50)"
+      />
       <circle cx="50" cy="50" r="7" fill={accent} />
     </svg>
   ),

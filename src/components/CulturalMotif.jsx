@@ -19,6 +19,20 @@ const MOTIFS = {
       <path d="M40 180 V92 M100 180 V92" stroke={line} strokeWidth="1" />
     </pattern>
   ),
+  // Royal Festive Vibrant — a jewel-tone mandala medallion with paisley tips.
+  'rani-mandala': (line, accent) => (
+    <pattern id="motif-rani-mandala" width="130" height="130" patternUnits="userSpaceOnUse">
+      <circle cx="65" cy="65" r="38" fill="none" stroke={line} strokeWidth="1" strokeDasharray="1.5 5" />
+      <path
+        d="M65 40 Q84 46 84 65 Q84 84 65 90 Q46 84 46 65 Q46 46 65 40 Z"
+        fill="none"
+        stroke={line}
+        strokeWidth="1.4"
+      />
+      <path d="M65 40 Q78 30 90 34 Q84 46 65 40 Z" fill={accent} opacity="0.55" />
+      <circle cx="65" cy="65" r="5" fill={accent} opacity="0.75" />
+    </pattern>
+  ),
   // Swastik & mandala ring — the classic Gujarati/Marwari auspicious opener.
   'swastik-mandala': (line) => (
     <pattern id="motif-swastik-mandala" width="110" height="110" patternUnits="userSpaceOnUse">
@@ -73,17 +87,21 @@ const MOTIFS = {
       <path d="M54 120 Q60 98 66 120" fill="none" stroke={accent} strokeWidth="1.4" />
     </pattern>
   ),
-  // Diamond chevrons with stitch dots — Phulkari embroidery.
+  // Punjabi Phulkari — a dense Bagh Phulkari fill: nested diamond blooms
+  // (the classic double-chevron stitch unit) linked by a fine gold filigree
+  // thread, on the template's deep crimson/maroon base cloth.
   phulkari: (line, accent) => (
-    <pattern id="motif-phulkari" width="100" height="60" patternUnits="userSpaceOnUse">
-      <path
-        d="M20 10 L40 30 L20 50 L0 30 Z M70 10 L90 30 L70 50 L50 30 Z"
-        fill="none"
-        stroke={line}
-        strokeWidth="1.6"
-      />
-      <circle cx="20" cy="30" r="2.2" fill={accent} />
-      <circle cx="70" cy="30" r="2.2" fill={accent} />
+    <pattern id="motif-phulkari" width="120" height="70" patternUnits="userSpaceOnUse">
+      <path d="M30 8 L54 35 L30 62 L6 35 Z" fill="none" stroke={line} strokeWidth="1.6" />
+      <path d="M30 18 L44 35 L30 52 L16 35 Z" fill="none" stroke={line} strokeWidth="1" opacity="0.8" />
+      <path d="M90 8 L114 35 L90 62 L66 35 Z" fill="none" stroke={line} strokeWidth="1.6" />
+      <path d="M90 18 L104 35 L90 52 L76 35 Z" fill="none" stroke={line} strokeWidth="1" opacity="0.8" />
+      <circle cx="30" cy="35" r="2.4" fill={accent} />
+      <circle cx="90" cy="35" r="2.4" fill={accent} />
+      <path d="M54 35 L66 35 M6 35 L-6 35 M114 35 L126 35" stroke={line} strokeWidth="1" opacity="0.7" />
+      <circle cx="60" cy="35" r="1.4" fill={accent} opacity="0.85" />
+      <circle cx="0" cy="35" r="1.4" fill={accent} opacity="0.85" />
+      <circle cx="120" cy="35" r="1.4" fill={accent} opacity="0.85" />
     </pattern>
   ),
   // Interlocking diamond + circle lattice — Mughal jaali screen.

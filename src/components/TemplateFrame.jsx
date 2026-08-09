@@ -67,6 +67,28 @@ const BANNERS = {
       <line x1="24" y1="92" x2="296" y2="92" stroke={c.goldSoft} strokeWidth="1" opacity="0.8" />
     </>
   ),
+  // Royal Festive Vibrant — a jewel medallion flanked by rani-pink paisleys.
+  'rani-mandala': (c, accent) => (
+    <>
+      <path d="M40,88 Q100,32 160,32 Q220,32 280,88" fill="none" stroke={c.gold} strokeWidth="2" />
+      <circle cx="160" cy="26" r="13" fill={c.blushDeep} stroke={c.gold} strokeWidth="1.6" />
+      <circle cx="160" cy="26" r="5" fill={accent} />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+        <line
+          key={deg}
+          x1={160 + Math.cos((deg * Math.PI) / 180) * 13}
+          y1={26 + Math.sin((deg * Math.PI) / 180) * 13}
+          x2={160 + Math.cos((deg * Math.PI) / 180) * 19}
+          y2={26 + Math.sin((deg * Math.PI) / 180) * 19}
+          stroke={c.goldSoft}
+          strokeWidth="1.2"
+        />
+      ))}
+      <path d="M90,58 Q70,50 66,30 Q90,34 96,54 Q94,60 90,58 Z" fill={c.blushDeep} opacity="0.85" />
+      <path d="M230,58 Q250,50 254,30 Q230,34 224,54 Q226,60 230,58 Z" fill={c.blushDeep} opacity="0.85" />
+      <line x1="24" y1="92" x2="296" y2="92" stroke={c.goldSoft} strokeWidth="1" opacity="0.85" />
+    </>
+  ),
   // Gujarati Traditional — a strung marigold garland with tasseled ends.
   'swastik-mandala': (c) => (
     <>
@@ -161,21 +183,45 @@ const BANNERS = {
       <line x1="20" y1="96" x2="300" y2="96" stroke={c.goldSoft} strokeWidth="1" />
     </>
   ),
-  // Punjabi Phulkari — a repeating embroidered diamond chain.
+  // Punjabi Phulkari — a nested-diamond Bagh garland crowned by a royal
+  // gold crest medallion, linked throughout by a fine filigree thread.
   phulkari: (c, accent) => (
     <>
-      {[40, 90, 140, 190, 240, 290].map((x, i) => (
+      {[30, 74, 118, 202, 246, 290].map((x) => (
         <g key={x}>
+          <path d={`M${x - 16},50 L${x},32 L${x + 16},50 L${x},68 Z`} fill="none" stroke={c.gold} strokeWidth="1.4" />
           <path
-            d={`M${x - 18},50 L${x},32 L${x + 18},50 L${x},68 Z`}
+            d={`M${x - 8},50 L${x},41 L${x + 8},50 L${x},59 Z`}
             fill="none"
-            stroke={c.gold}
-            strokeWidth="1.4"
+            stroke={c.goldSoft}
+            strokeWidth="0.9"
+            opacity="0.85"
           />
-          <circle cx={x} cy="50" r="2.2" fill={accent ?? c.rose} />
-          {i < 5 && <line x1={x + 18} y1="50" x2={x + 32} y2="50" stroke={c.goldSoft} strokeWidth="1" />}
+          <circle cx={x} cy="50" r="2" fill={accent ?? c.rose} />
         </g>
       ))}
+      <path
+        d="M46,50 L58,50 M90,50 L102,50 M234,50 L222,50 M278,50 L266,50"
+        stroke={c.goldSoft}
+        strokeWidth="1"
+        opacity="0.75"
+      />
+      <path d="M118,58 Q140,38 160,42 Q180,38 202,58" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <circle cx="160" cy="22" r="12" fill="none" stroke={c.gold} strokeWidth="1.6" />
+      <circle cx="160" cy="22" r="6" fill="none" stroke={accent ?? c.rose} strokeWidth="1.2" />
+      <circle cx="160" cy="22" r="2.4" fill={accent ?? c.rose} />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+        <line
+          key={deg}
+          x1={160 + Math.cos((deg * Math.PI) / 180) * 12}
+          y1={22 + Math.sin((deg * Math.PI) / 180) * 12}
+          x2={160 + Math.cos((deg * Math.PI) / 180) * 17}
+          y2={22 + Math.sin((deg * Math.PI) / 180) * 17}
+          stroke={c.goldSoft}
+          strokeWidth="1.1"
+        />
+      ))}
+      <line x1="20" y1="88" x2="300" y2="88" stroke={c.goldSoft} strokeWidth="1" opacity="0.85" />
     </>
   ),
   // Royal Mughal — an interlocking jaali lattice band.
@@ -417,6 +463,13 @@ const BANNERS = {
 }
 
 const CORNERS = {
+  'rani-mandala': (c, accent) => (
+    <>
+      <path d="M6,52 Q6,20 34,10" fill="none" stroke={c.gold} strokeWidth="1.6" />
+      <path d="M18,20 Q10,14 12,4 Q22,6 24,16 Q22,20 18,20 Z" fill={c.blushDeep} opacity="0.85" />
+      <circle cx="12" cy="14" r="2.4" fill={accent} />
+    </>
+  ),
   jharokha: (c) => (
     <>
       <path d="M6,52 L6,18 Q6,6 18,6 L52,6" fill="none" stroke={c.gold} strokeWidth="2" />
@@ -453,7 +506,9 @@ const CORNERS = {
   ),
   phulkari: (c, accent) => (
     <>
-      <path d="M6,40 L20,26 L34,40 L20,54 Z M6,40 L6,54" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <path d="M6,52 Q6,24 34,12" fill="none" stroke={c.gold} strokeWidth="1.3" opacity="0.85" />
+      <path d="M6,40 L20,26 L34,40 L20,54 Z" fill="none" stroke={c.gold} strokeWidth="1.3" />
+      <path d="M12,40 L20,32 L28,40 L20,48 Z" fill="none" stroke={c.goldSoft} strokeWidth="0.9" opacity="0.85" />
       <circle cx="20" cy="40" r="2" fill={accent ?? c.rose} />
     </>
   ),

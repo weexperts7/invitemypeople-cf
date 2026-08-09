@@ -58,6 +58,11 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   // and passes it in via `invitationSlug` instead, so its RSVPs/Wishes Wall
   // entries land under the same slug the invite itself was saved under.
   const invitationSlug = slugOverride || slugify(template?.couple?.names)
+  // Punjabi Phulkari's royal maroon palette needs its own ambient background
+  // wash — .bg-petals lightens toward cream, which reads as a washed-out
+  // fog and hurts text contrast over a dark palette (see .bg-petals-royal
+  // in index.css). Every other template keeps using .bg-petals unchanged.
+  const isPhulkari = template?.motif === 'phulkari'
   const [isOpened, setIsOpened] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef(null)
@@ -211,6 +216,8 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
               key="envelope"
               onOpen={openEnvelope}
               motif={template?.motif}
+              palette={template?.palette}
+              motifAccent={template?.motifAccent}
               coupleNames={template?.couple?.names}
             />
           ) : (
@@ -219,7 +226,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className={`relative bg-petals ${isPreview ? 'pb-24' : ''}`}
+              className={`relative ${isPhulkari ? 'bg-petals-royal' : 'bg-petals'} ${isPreview ? 'pb-24' : ''}`}
             >
               <WelcomeSplash
                 greeting={template?.greeting}

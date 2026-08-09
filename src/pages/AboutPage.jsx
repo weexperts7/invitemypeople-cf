@@ -190,9 +190,65 @@ export default function AboutPage() {
               Your time is better spent celebrating than chasing RSVPs. We
               obsess over making the &ldquo;behind-the-scenes&rdquo; of your
               event effortless, so you can focus on the big day. Hosts trust
-              us to manage the logistics of their most important moments.
+              us to manage the logistics of their most important moments,
+              from an intimate Satsang to a multi-day wedding with a hundred
+              functions to track — and every one of those hosts builds their
+              invitation themselves, in our live builder, without ever
+              needing to brief a designer or wait on a revision.
             </p>
           </motion.div>
+        </section>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* One platform, every celebration + honest pricing */}
+        {/* ---------------------------------------------------------------- */}
+        <section className="bg-champagne/40 px-6 py-16 sm:py-20">
+          <div className="mx-auto grid max-w-5xl gap-10 sm:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="mb-4 flex justify-center sm:justify-start">
+                <SectionEyebrow icon={Sparkles} tone="gold">One Platform</SectionEyebrow>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl text-ink mb-3 text-center sm:text-left">
+                Built for every celebration
+              </h2>
+              <p className="text-ink-soft leading-relaxed text-base text-center sm:text-left">
+                Weddings, Guruji Satsangs, and Ganesh Chaturthi celebrations
+                are live today, with birthdays, engagements, baby showers,
+                housewarmings, corporate events, and anniversaries on the
+                way. Every occasion runs on the same live builder, the same
+                interactive RSVP tracking, and the same private host
+                dashboard — one platform, built for celebrations across
+                India.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <div className="mb-4 flex justify-center sm:justify-start">
+                <SectionEyebrow icon={ClipboardCheck} tone="rose">Honest Pricing</SectionEyebrow>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl text-ink mb-3 text-center sm:text-left">
+                Why hosts choose us
+              </h2>
+              <p className="text-ink-soft leading-relaxed text-base text-center sm:text-left">
+                Every invitation ships cost-effective, eco-friendly and
+                mobile-first, backed by ready-made templates across every
+                tradition, plus 2 free revisions. Pricing is all-inclusive,
+                with no per-guest or courier costs added on — a celebration
+                that's as unforgettable as the day itself never has to start
+                with a complicated setup.
+              </p>
+            </motion.div>
+          </div>
         </section>
 
         {/* ---------------------------------------------------------------- */}

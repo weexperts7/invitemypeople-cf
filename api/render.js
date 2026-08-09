@@ -103,6 +103,16 @@ function renderBodyBlock(block) {
   return `<h2>${escapeHtml(block.h2)}</h2>`
 }
 
+// Visually hidden (not display:none — screen readers and non-JS text
+// crawlers, e.g. Seobility, still read it fine) so real visitors never see
+// this markup flash before React's own render() replaces #root's children.
+// The style is inline, part of the very first HTML the browser parses, so
+// there's no visible flash even on a slow connection/device — unlike
+// hiding it via an external stylesheet class or JS, either of which would
+// still paint it visible for at least one frame first.
+const SR_ONLY_STYLE =
+  'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;'
+
 function setRootContent(html, { h1, body, links }) {
   const content = (body || []).map(renderBodyBlock).join('')
   const nav = links && links.length
@@ -110,7 +120,7 @@ function setRootContent(html, { h1, body, links }) {
     : ''
   return html.replace(
     '<div id="root"></div>',
-    `<div id="root"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div>`,
+    `<div id="root"><div style="${SR_ONLY_STYLE}"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div></div>`,
   )
 }
 

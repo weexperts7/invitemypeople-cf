@@ -71,18 +71,28 @@ function setTitle(html, title) {
 // reconciling against them. That makes it safe to seed #root with real
 // markup here: non-JS crawlers and SEO auditors that only ever see this raw
 // response get an actual semantic <h1> (plus, on the homepage, real
-// paragraph copy and internal links — see `body`/`links` below) instead of
-// an empty div, while JS-executing visitors see it swapped for React's own
-// (matching) content within milliseconds, with no hydration warnings either
-// way.
+// paragraph/subheading copy and internal links — see `body`/`links` below)
+// instead of an empty div, while JS-executing visitors see it swapped for
+// React's own (matching) content within milliseconds, with no hydration
+// warnings either way.
+//
+// Each `body` entry is either a plain string (rendered as a <p>) or a
+// `{ h2 }` object (rendered as an <h2>) — see routesSeo.js's homepage
+// `body` for why: it gives a non-JS crawler a real H1 → H2 → paragraph
+// heading hierarchy in the raw HTML, not just a flat wall of <p> text under
+// a single heading.
 function setRootContent(html, { h1, body, links }) {
-  const paragraphs = (body || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('')
+  const content = (body || [])
+    .map((block) =>
+      typeof block === 'string' ? `<p>${escapeHtml(block)}</p>` : `<h2>${escapeHtml(block.h2)}</h2>`,
+    )
+    .join('')
   const nav = links && links.length
     ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
     : ''
   return html.replace(
     '<div id="root"></div>',
-    `<div id="root"><h1>${escapeHtml(h1)}</h1>${paragraphs}${nav}</div>`,
+    `<div id="root"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div>`,
   )
 }
 

@@ -33,7 +33,7 @@ import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { GANESH_TEMPLATES } from '../data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
-import { ROUTES_SEO } from '../data/routesSeo'
+import { ROUTES_SEO, HOMEPAGE_SEO_BODY } from '../data/routesSeo'
 import TemplateCard from './TemplateCard'
 import SatsangTemplateCard from './SatsangTemplateCard'
 import GaneshTemplateCard from './GaneshTemplateCard'
@@ -1121,6 +1121,59 @@ export default function LandingPage() {
               Ask us on WhatsApp
             </a>
           </motion.p>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* SEO content — rich, keyword-relevant narrative copy for search    */}
+      {/* crawlers and genuinely curious visitors alike. Sourced from       */}
+      {/* HOMEPAGE_SEO_BODY (see routesSeo.js), the exact same copy         */}
+      {/* server/index.js and api/render.js inject into the raw,            */}
+      {/* pre-hydration HTML — see that file's own comment. Reading from    */}
+      {/* one shared array means the two can never drift apart: whatever a  */}
+      {/* non-JS crawler sees before React mounts is exactly what a real    */}
+      {/* visitor or JS-executing crawler (most SEO auditors, Googlebot)    */}
+      {/* sees rendered here after. A `{ h2 }` entry renders as an <h3> in  */}
+      {/* this context (not <h2>, unlike the raw SSR shell) because it now */}
+      {/* sits under this section's own <h2> below, one level deeper than  */}
+      {/* it was in the flat pre-hydration shell.                          */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="bg-ivory px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <div className="mb-4 flex justify-center">
+              <SectionEyebrow icon={Sparkles} tone="gold">About InviteMyPeople</SectionEyebrow>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl text-ink">
+              The Digital Wedding Invitation Maker Behind Every Unforgettable Celebration
+            </h2>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="space-y-6"
+          >
+            {HOMEPAGE_SEO_BODY.map((block, i) =>
+              typeof block === 'string' ? (
+                <p key={i} className="text-ink-soft leading-relaxed text-base sm:text-lg">
+                  {block}
+                </p>
+              ) : (
+                <h3 key={i} className="font-serif text-xl sm:text-2xl text-ink pt-2">
+                  {block.h2}
+                </h3>
+              ),
+            )}
+          </motion.div>
         </div>
       </section>
       </main>

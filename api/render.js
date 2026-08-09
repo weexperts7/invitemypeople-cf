@@ -76,17 +76,31 @@ function setTitle(html, title) {
 // React's own (matching) content within milliseconds, with no hydration
 // warnings either way.
 //
-// Each `body` entry is either a plain string (rendered as a <p>) or a
-// `{ h2 }` object (rendered as an <h2>) — see routesSeo.js's homepage
-// `body` for why: it gives a non-JS crawler a real H1 → H2 → paragraph
-// heading hierarchy in the raw HTML, not just a flat wall of <p> text under
-// a single heading.
+// Each `body` entry is a plain string (rendered as a <p>), a `{ h2 }`
+// object (rendered as an <h2>), or an array of segments (rendered as a <p>
+// whose segments are either plain text or a `{ text, href }` internal
+// link, rendered as a real <a href>) — see routesSeo.js's homepage `body`
+// for why: it gives a non-JS crawler a real H1 → H2 → paragraph heading
+// hierarchy, with real contextual internal links inside that paragraph
+// text, in the raw HTML — not just a flat wall of <p> text under a single
+// heading, and not only links siloed off in the nav below.
+function renderBodyBlock(block) {
+  if (typeof block === 'string') return `<p>${escapeHtml(block)}</p>`
+  if (Array.isArray(block)) {
+    const inner = block
+      .map((seg) =>
+        typeof seg === 'string'
+          ? escapeHtml(seg)
+          : `<a href="${escapeHtml(seg.href)}">${escapeHtml(seg.text)}</a>`,
+      )
+      .join('')
+    return `<p>${inner}</p>`
+  }
+  return `<h2>${escapeHtml(block.h2)}</h2>`
+}
+
 function setRootContent(html, { h1, body, links }) {
-  const content = (body || [])
-    .map((block) =>
-      typeof block === 'string' ? `<p>${escapeHtml(block)}</p>` : `<h2>${escapeHtml(block.h2)}</h2>`,
-    )
-    .join('')
+  const content = (body || []).map(renderBodyBlock).join('')
   const nav = links && links.length
     ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
     : ''

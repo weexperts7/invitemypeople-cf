@@ -102,7 +102,7 @@ export default function SiteFooter() {
   return (
     <footer className="border-t border-champagne-deep/40 bg-ivory px-6 py-14">
       <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
           <div>
             <Logo size="lg" className="mb-3" />
             <p className="text-sm text-ink-soft max-w-xs leading-relaxed">
@@ -193,26 +193,6 @@ export default function SiteFooter() {
                   FAQs
                 </a>
               </li>
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-ink-soft mb-4">
-              Follow Us
-            </p>
-            <ul className="space-y-2.5 text-sm">
-              {SOCIAL_LINKS.map((social) => (
-                <li key={social.label}>
-                  <a
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-ink-soft hover:text-rose transition-colors"
-                  >
-                    {social.label}
-                  </a>
-                </li>
-              ))}
             </ul>
           </div>
 

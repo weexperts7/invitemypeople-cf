@@ -267,7 +267,13 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
-  const [openFaq, setOpenFaq] = useState(0)
+  // All FAQ answers are visible by default — see FaqItem below — rather
+  // than hidden behind a single-open accordion, so a crawler and a visitor
+  // who never clicks anything both see the full Q&A content, not just the
+  // first question. Each answer still independently collapses on click for
+  // anyone who wants to tidy the list up, tracked here as a set of closed
+  // indices instead of a single "currently open" index.
+  const [closedFaqs, setClosedFaqs] = useState(() => new Set())
   const reduceMotion = useReducedMotion()
 
   const filtered = useMemo(() => {
@@ -1098,8 +1104,15 @@ export default function LandingPage() {
               <FaqItem
                 key={item.question}
                 item={item}
-                isOpen={openFaq === i}
-                onToggle={() => setOpenFaq((prev) => (prev === i ? -1 : i))}
+                isOpen={!closedFaqs.has(i)}
+                onToggle={() =>
+                  setClosedFaqs((prev) => {
+                    const next = new Set(prev)
+                    if (next.has(i)) next.delete(i)
+                    else next.add(i)
+                    return next
+                  })
+                }
               />
             ))}
           </motion.div>

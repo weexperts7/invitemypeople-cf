@@ -524,15 +524,21 @@ function setTitle(html, title) {
 // Mirrors api/render.js's setRootContent exactly — see its comment for why
 // this is safe (createRoot, not hydrateRoot) and why it exists (a
 // non-JS-executing crawler otherwise only ever sees an empty
-// `<div id="root"></div>`).
+// `<div id="root"></div>`). Each `body` entry is either a plain string
+// (rendered as a <p>) or a `{ h2 }` object (rendered as an <h2>) — see
+// routesSeo.js's homepage `body` for why.
 function setRootContent(html, { h1, body, links }) {
-  const paragraphs = (body || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('')
+  const content = (body || [])
+    .map((block) =>
+      typeof block === 'string' ? `<p>${escapeHtml(block)}</p>` : `<h2>${escapeHtml(block.h2)}</h2>`,
+    )
+    .join('')
   const nav = links && links.length
     ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
     : ''
   return html.replace(
     '<div id="root"></div>',
-    `<div id="root"><h1>${escapeHtml(h1)}</h1>${paragraphs}${nav}</div>`,
+    `<div id="root"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div>`,
   )
 }
 

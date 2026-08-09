@@ -112,19 +112,28 @@ const STATIC_ROUTES_SEO = {
     h1: 'Digital Invitations as unforgettable as your celebration',
     // Only the homepage carries `body` — real, on-page paragraph copy (see
     // the matching sections of LandingPage.jsx: hero subtitle, wedding/
-    // Satsang/Ganesh Chaturthi scrollers, comparison and "how it works")
-    // reproduced here word-for-word so the *raw* HTML response a non-JS
-    // crawler or SEO auditor sees already carries 250+ words of genuine,
+    // Satsang/Ganesh Chaturthi scrollers, comparison, live builder and "how
+    // it works") reproduced here so the *raw* HTML response a non-JS
+    // crawler or SEO auditor sees already carries 400+ words of genuine,
     // keyword-relevant content instead of the bare h1 + empty shell they'd
-    // otherwise get before React mounts. Keep in sync with LandingPage.jsx
-    // the same way `h1` above already has to be.
+    // otherwise get before React mounts — Seobility flagged the bare-shell
+    // version as thin/empty entry-page content. Keep in sync with
+    // LandingPage.jsx the same way `h1` above already has to be.
+    //
+    // A plain string renders as a <p>; a `{ h2 }` entry renders as an <h2> —
+    // see setRootContent in server/index.js and api/render.js. This gives a
+    // non-JS crawler a real H1 → H2 → paragraph hierarchy in the raw HTML,
+    // not just a flat wall of text under one heading.
     body: [
-      'Interactive, mobile-first digital invitations for weddings, Guruji Satsangs, Ganesh Chaturthi and every celebration in between — tap-to-open envelope reveals, scratch-to-reveal cards, and built-in RSVP management. Delivered on WhatsApp, usually within 30 minutes.',
-      'Digital Wedding Invitations for Every Tradition: browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and a live RSVP dashboard that tracks attendance, guest counts and blessings without a single phone call.',
-      "Devotional Invitations for Guruji's Satsang pair Guruji's photo with a Divine Blessing scratch card and built-in RSVP. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, an interactive RSVP and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
-      "Unlike a printed card or a forwarded WhatsApp video, every InviteMyPeople digital invitation stays interactive and editable after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Pricing is all-inclusive, with no per-guest or courier costs added on.",
-      'Getting a personalized invitation takes three simple steps: select a template, connect on WhatsApp with your names, dates and venue — no forms or signup needed — and receive your finished, ready-to-share invitation link back, typically within 30 minutes.',
-      'Every InviteMyPeople invitation ships cost-effective, eco-friendly, mobile-first and ready in 30 minutes, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be.',
+      "InviteMyPeople is the digital wedding invitation maker India families turn to when a printed card, or a forwarded WhatsApp video, no longer feels like enough. Every invitation is interactive, mobile-first and genuinely unforgettable — built to open like a story, not just be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, a Ganesh Chaturthi celebration or any occasion in between, one link turns into a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
+      { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
+      'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and interactive RSVP tracking that records attendance, guest counts, song requests and blessings without a single phone call. As a digital wedding invitation maker India hosts trust for every function — Haldi, Sangeet, the wedding ceremony, Reception — each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
+      { h2: 'A Guruji Satsang Invite Online, With a Devotional Touch' },
+      "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card and the same interactive RSVP tracking used across the platform, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
+      { h2: 'More Than a Card — A Wedding Website Builder With a Live Dashboard' },
+      "Unlike a static card, InviteMyPeople doubles as a wedding website builder: pick a template in our Invitation Builder, fill in your names, dates and venue, and watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Behind every link sits a private host dashboard with real-time interactive RSVP tracking, downloadable guest lists for catering and planning, and automated pre-event summaries, so nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
+      { h2: 'Why Hosts Choose InviteMyPeople' },
+      "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on, so a celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
     ],
   },
   '/about': {

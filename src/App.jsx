@@ -7,6 +7,8 @@ import WeddingsPage from './pages/WeddingsPage'
 import GurujiSatsangsPage from './pages/GurujiSatsangsPage'
 import GaneshChaturthiPage from './pages/GaneshChaturthiPage'
 import CreateInvitePage from './pages/CreateInvitePage'
+import BlogListPage from './pages/BlogListPage'
+import BlogPostPage from './pages/BlogPostPage'
 import LiveDraftPreviewPage from './pages/LiveDraftPreviewPage'
 import GeneratedInvitePage from './pages/GeneratedInvitePage'
 import HostDashboardPage from './pages/HostDashboardPage'
@@ -119,6 +121,8 @@ function App() {
             <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
             <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
             <Route path="/create" element={<CreateInvitePage />} />
+            <Route path="/blog" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             {/* Not a real destination — only ever loaded in the same-origin
                 iframe inside the Invitation Builder's own live preview (see
                 builder/LiveInvitePreview.jsx / draftInvitePreview.js). */}

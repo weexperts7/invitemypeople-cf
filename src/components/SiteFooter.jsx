@@ -171,6 +171,11 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/blog" className="text-ink-soft hover:text-rose transition-colors">
+                  Blog
+                </Link>
+              </li>
+              <li>
                 <Link to="/about" className="text-ink-soft hover:text-rose transition-colors">
                   About Us
                 </Link>

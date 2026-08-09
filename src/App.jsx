@@ -7,9 +7,13 @@ import WeddingsPage from './pages/WeddingsPage'
 import GurujiSatsangsPage from './pages/GurujiSatsangsPage'
 import GaneshChaturthiPage from './pages/GaneshChaturthiPage'
 import CreateInvitePage from './pages/CreateInvitePage'
+import LiveDraftPreviewPage from './pages/LiveDraftPreviewPage'
 import GeneratedInvitePage from './pages/GeneratedInvitePage'
 import HostDashboardPage from './pages/HostDashboardPage'
 import ComingSoonPage from './pages/ComingSoonPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import TermsOfServicePage from './pages/TermsOfServicePage'
+import RefundPolicyPage from './pages/RefundPolicyPage'
 import NotFoundPage from './pages/NotFoundPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
@@ -115,8 +119,15 @@ function App() {
             <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
             <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
             <Route path="/create" element={<CreateInvitePage />} />
+            {/* Not a real destination — only ever loaded in the same-origin
+                iframe inside the Invitation Builder's own live preview (see
+                builder/LiveInvitePreview.jsx / draftInvitePreview.js). */}
+            <Route path="/create/live-preview" element={<LiveDraftPreviewPage />} />
             <Route path="/i/:slug" element={<GeneratedInvitePage />} />
             <Route path="/i/:slug/host/:hostToken" element={<HostDashboardPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/refund" element={<RefundPolicyPage />} />
             {COMING_SOON_OCCASIONS.map((occasion) => (
               <Route
                 key={occasion.slug}

@@ -153,14 +153,19 @@ export default function SiteFooter() {
             </p>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="#" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/privacy" className="text-ink-soft hover:text-rose transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/terms" className="text-ink-soft hover:text-rose transition-colors">
                   Terms of Service
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund" className="text-ink-soft hover:text-rose transition-colors">
+                  Refund Policy
+                </Link>
               </li>
             </ul>
           </div>

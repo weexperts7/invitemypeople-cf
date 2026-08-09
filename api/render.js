@@ -80,13 +80,18 @@ function setTitle(html, title) {
 // Each `body` entry is a plain string (rendered as a <p>), a `{ h2 }`
 // object (rendered as an <h2>), a `{ h3 }` object (rendered as an <h3> —
 // added for blog posts, see blogPosts.js, which nest a subheading level
-// beneath each <h2>), or an array of segments (rendered as a <p> whose
-// segments are either plain text or a `{ text, href }` internal link,
-// rendered as a real <a href>) — see routesSeo.js's homepage `body` for
-// why: it gives a non-JS crawler a real H1 → H2 → (H3 →) paragraph heading
-// hierarchy, with real contextual internal links inside that paragraph
-// text, in the raw HTML — not just a flat wall of <p> text under a single
-// heading, and not only links siloed off in the nav below.
+// beneath each <h2>), a `{ cta }` object (rendered as a plain <a href> —
+// the live page turns this into a styled button, but there's no
+// server-side React here to render that with), a `{ widget }` object
+// (rendered as a plain <p> naming the demo — the live page swaps this for
+// the real interactive component, see BLOG_WIDGETS in BlogPostPage.jsx),
+// or an array of segments (rendered as a <p> whose segments are either
+// plain text or a `{ text, href }` internal link, rendered as a real
+// <a href>) — see routesSeo.js's homepage `body` for why: it gives a
+// non-JS crawler a real H1 → H2 → (H3 →) paragraph heading hierarchy, with
+// real contextual internal links inside that paragraph text, in the raw
+// HTML — not just a flat wall of <p> text under a single heading, and not
+// only links siloed off in the nav below.
 function renderBodyBlock(block) {
   if (typeof block === 'string') return `<p>${escapeHtml(block)}</p>`
   if (Array.isArray(block)) {
@@ -100,6 +105,8 @@ function renderBodyBlock(block) {
     return `<p>${inner}</p>`
   }
   if (block.h3) return `<h3>${escapeHtml(block.h3)}</h3>`
+  if (block.cta) return `<p><a href="${escapeHtml(block.cta.href)}">${escapeHtml(block.cta.label)}</a></p>`
+  if (block.widget) return `<p>Interactive demo: search for a song and preview a 30-second clip.</p>`
   return `<h2>${escapeHtml(block.h2)}</h2>`
 }
 

@@ -4,15 +4,27 @@ import { ArrowLeft, ArrowRight, Calendar, Clock } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
+import MusicVibeWidget from '../components/blog/MusicVibeWidget'
 import { getBlogPostBySlug, formatBlogDate } from '../data/blogPosts'
 
+// Blog-only interactive components a `{ widget }` block can reference — see
+// blogPosts.js's body-scheme comment. Keyed by name rather than importing
+// directly in BlogBodyBlock so adding a new one later is a one-line entry
+// here, not a new branch in the renderer below.
+const BLOG_WIDGETS = {
+  musicVibe: MusicVibeWidget,
+}
+
 // Renders one `body` block from blogPosts.js — the same { h2 }/{ h3 }/
-// string/segment-array scheme routesSeo.js's STATIC_ROUTES_SEO bodies use
-// (see api/render.js's renderBodyBlock, which mirrors this exactly for the
-// raw, pre-hydration SSR shell). Unlike LandingPage.jsx's rendering of
-// HOMEPAGE_SEO_BODY, headings aren't demoted a level here — this page's
-// article *is* the page, sitting directly under its own <h1>, so a `{ h2 }`
-// entry stays an <h2> and `{ h3 }` stays an <h3>.
+// string/segment-array scheme routesSeo.js's STATIC_ROUTES_SEO bodies use,
+// extended with `{ cta }` (a real inline button) and `{ widget }` (a named
+// interactive component) — see api/render.js's renderBodyBlock, which
+// mirrors the text/link shapes for the raw, pre-hydration SSR shell but
+// falls back to a plain <a>/<p> for these last two, since there's no
+// server-side React to render the real component with there. Unlike
+// LandingPage.jsx's rendering of HOMEPAGE_SEO_BODY, headings aren't demoted
+// a level here — this page's article *is* the page, sitting directly under
+// its own <h1>, so a `{ h2 }` entry stays an <h2> and `{ h3 }` stays an <h3>.
 function BlogBodyBlock({ block }) {
   if (typeof block === 'string') {
     return <p className="text-ink-soft leading-relaxed text-base sm:text-lg">{block}</p>
@@ -34,6 +46,23 @@ function BlogBodyBlock({ block }) {
           ),
         )}
       </p>
+    )
+  }
+  if (block.widget) {
+    const Widget = BLOG_WIDGETS[block.widget]
+    return Widget ? <Widget /> : null
+  }
+  if (block.cta) {
+    return (
+      <div className="py-2 text-center">
+        <Link
+          to={block.cta.href}
+          className="inline-flex items-center gap-2 rounded-full bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-card transition-transform hover:scale-[1.03]"
+        >
+          {block.cta.label}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
     )
   }
   if (block.h3) {

@@ -50,6 +50,10 @@ function themeToCssVars(template) {
 }
 
 const MUSIC_VOLUME = 0.7
+// The standard track every invitation opens with unless the host picks
+// their own (see builder/SongSearchPicker.jsx) — a guest should always
+// hear *something* when the envelope opens, not silence by default.
+const DEFAULT_BG_MUSIC_URL = '/audio/soothing-romantic.wav'
 
 export default function InvitationExperience({ template, onBack, isPreview = false, invitationSlug: slugOverride }) {
   // Every invitation is identified by a slug — by default one derived from
@@ -66,13 +70,12 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   const isPhulkari = template?.motif === 'phulkari'
   // Host-selected background music — see builder/SongSearchPicker.jsx
   // (search + preview) and buildWeddingExperienceTemplate.js (where a real
-  // invite's confirmed Spotify track becomes this `bgMusic` shape). null
-  // whenever the host skipped that step, which is the normal/default case
-  // — no <audio> element is rendered at all then (see below), and the mute
-  // toggle never appears, rather than either playing nothing or erroring
-  // on a missing source.
+  // invite's confirmed Spotify/iTunes track becomes this `bgMusic` shape).
+  // null whenever the host skipped that step, in which case musicUrl below
+  // falls back to DEFAULT_BG_MUSIC_URL — every invitation plays *something*
+  // once opened, the host's own pick if they made one.
   const bgMusic = template?.bgMusic ?? null
-  const hasMusic = Boolean(bgMusic?.previewUrl)
+  const musicUrl = bgMusic?.previewUrl || DEFAULT_BG_MUSIC_URL
   const [isOpened, setIsOpened] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef(null)
@@ -89,7 +92,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   function openEnvelope() {
     setIsOpened(true)
     const audio = audioRef.current
-    if (audio && hasMusic && !isMuted) {
+    if (audio && !isMuted) {
       audio.volume = 0
       audio.play().catch(() => {})
     }
@@ -105,24 +108,24 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
   // it originally locked onto, ignoring every subsequent song change.
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio || !isOpened || !hasMusic) return
+    if (!audio || !isOpened) return
     audio.load()
     if (!isMuted) {
       audio.volume = 0
       audio.play().catch(() => {})
     }
-    // Deliberately keyed on bgMusic?.previewUrl alone — isOpened/isMuted are
-    // read here but must NOT be dependencies, or this would also re-fire
-    // (and reload/restart the track from 0:00) on every mute toggle, which
-    // the effect below already handles via pause()/play() without a reload.
+    // Deliberately keyed on musicUrl alone — isOpened/isMuted are read here
+    // but must NOT be dependencies, or this would also re-fire (and
+    // reload/restart the track from 0:00) on every mute toggle, which the
+    // effect below already handles via pause()/play() without a reload.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgMusic?.previewUrl])
+  }, [musicUrl])
 
   // Fades the clip in once opened, and handles pause/resume whenever the
   // mute button is toggled after that.
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio || !isOpened || !hasMusic) return
+    if (!audio || !isOpened) return
     if (isMuted) {
       audio.pause()
       return
@@ -137,28 +140,28 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
     }
     step()
     return () => cancelAnimationFrame(raf)
-  }, [isOpened, isMuted, hasMusic])
+  }, [isOpened, isMuted])
 
   return (
     <div
       className="min-h-svh w-full bg-linen flex justify-center sm:py-8"
       style={themeToCssVars(template)}
     >
-      {/* Only rendered at all when the host actually confirmed a song (see
-          SongSearchPicker.jsx) — no element, no fallback track, no attempt
-          to play anything, when they skipped that step. `loop`: the preview
-          clip is a fixed ~30s, and guests routinely stay on the page well
-          past that. No `type` on the <source>: previewUrl is an MP3 on the
-          rare track Spotify itself still serves one for, but an M4A/AAC
-          clip from the iTunes fallback (see utils/itunesPreview.js) for
-          everything else — a hardcoded type would be wrong for whichever
-          one it isn't, so the browser sniffs the actual format instead. */}
-      {hasMusic && (
-        // eslint-disable-next-line jsx-a11y/media-has-caption
-        <audio ref={audioRef} loop preload="auto">
-          <source src={bgMusic.previewUrl} />
-        </audio>
-      )}
+      {/* Always rendered: musicUrl is the host's own pick when they made
+          one (see SongSearchPicker.jsx), DEFAULT_BG_MUSIC_URL otherwise —
+          every invitation plays something once opened, never silence by
+          default. `loop`: a host's confirmed track is a fixed ~30s preview
+          clip, and guests routinely stay on the page well past that (the
+          default track is a full-length loop already). No `type` on the
+          <source>: a host's previewUrl is an MP3 on the rare track Spotify
+          itself still serves one for, but M4A/AAC from the iTunes fallback
+          (see utils/itunesPreview.js) for everything else, vs. WAV for the
+          default — a hardcoded type would be wrong for at least one of
+          those, so the browser sniffs the actual format instead. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio ref={audioRef} loop preload="auto">
+        <source src={musicUrl} />
+      </audio>
 
       {isOpened && <FallingPetals palette={template?.palette} />}
 
@@ -202,7 +205,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
             className="fixed inset-x-0 bottom-0 z-[70] flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 bg-gradient-to-t from-ink/20 via-ink/5 to-transparent"
           >
             <div className="flex w-full max-w-md items-center gap-3">
-              {isOpened && hasMusic && <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />}
+              {isOpened && <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />}
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -232,10 +235,11 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
           with its "Create Your Own" CTA bar). This floating corner widget
           gives a real, live invitation — what a guest actually opens from
           a shared link — the same control once the envelope's opened,
-          without disturbing the preview overlay's own layout. Both are
-          gated on hasMusic: a host who skipped Background Music Selection
-          gets no mute button controlling nothing. */}
-      {!isPreview && isOpened && hasMusic && (
+          without disturbing the preview overlay's own layout. Every
+          invitation has *some* track playing by now (see musicUrl above),
+          so this is gated on isOpened alone, not on whether the host
+          picked their own song. */}
+      {!isPreview && isOpened && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}

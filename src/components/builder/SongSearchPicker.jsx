@@ -275,9 +275,9 @@ export default function SongSearchPicker({ value, onConfirm, onRemove }) {
       )}
 
       <p className="mt-2 text-xs text-ink-soft">
-        Optional — skip this and your invitation opens silently. Powered by
-        Spotify; only songs with a 30-second preview available can be
-        selected.
+        Optional — skip this and we&apos;ll play a soft default track
+        instead. Powered by Spotify; only songs with a 30-second preview
+        available can be selected.
       </p>
     </div>
   )

@@ -162,8 +162,9 @@ export default function CreateInvitePage() {
   const [events, setEvents] = useState([])
   // Background Music Selection (see builder/SongSearchPicker.jsx) — null
   // until the host confirms a Spotify search result; { title, artist,
-  // albumArt, previewUrl } once they do. Optional: skipping it just leaves
-  // the generated invitation silent.
+  // albumArt, previewUrl } once they do. Optional: skipping it just means
+  // the generated invitation plays the standard default track instead of
+  // the host's own pick (see DEFAULT_BG_MUSIC_URL in InvitationExperience.jsx).
   const [song, setSong] = useState(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)

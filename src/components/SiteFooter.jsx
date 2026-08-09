@@ -1,10 +1,28 @@
 import { Heart, Mail, MessageCircle } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Logo from './Logo'
+import { SITE_URL } from '../data/routesSeo'
 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+}
+
+// Share-intent URLs for the "Share This Page" row below — distinct from
+// getWhatsAppLink above, which opens a chat *with us* (an inquiry).
+// These instead let a visitor share whatever page they're currently on
+// out to their own network. WhatsApp intentionally uses the standalone
+// api.whatsapp.com/send endpoint (not wa.me, and no phone number) — the
+// generic "share to any contact" intent, not a chat with a specific
+// number.
+function getWhatsAppShareLink(text) {
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
+}
+function getTwitterShareLink(text, url) {
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
+}
+function getLinkedInShareLink(url) {
+  return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
 }
 
 // lucide-react dropped brand/logo glyphs, so social icons are hand-drawn
@@ -36,15 +54,51 @@ function YoutubeIcon({ className }) {
   )
 }
 
+// X (Twitter) and LinkedIn's real logo marks are filled shapes, not
+// stroke-based line icons like Instagram/Facebook/YouTube above — kept
+// as their actual brand glyphs (via `fill="currentColor"`) rather than
+// forcing a stroke-style redraw, so they stay instantly recognizable.
+// Still sized identically to every other icon here via `className`.
+function XIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  )
+}
+
+function LinkedInIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.114 20.452H3.558V9h3.556v11.452z" />
+    </svg>
+  )
+}
+
 const SOCIAL_LINKS = [
   { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/invitemypeople' },
   { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
   { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
 ]
 
+const SHARE_TEXT = 'Check out InviteMyPeople — beautifully interactive digital invitations for weddings, Guruji Satsangs, Ganesh Chaturthi and more.'
+
 // Site-wide footer, shared across every page (Home, About, category pages)
 // so quick links and contact info are one edit, not duplicated per page.
 export default function SiteFooter() {
+  // Shares whatever page the visitor is actually on (a specific wedding
+  // template, a host's own generated invite, the homepage, ...) rather
+  // than always pointing back at "/" — same SITE_URL every canonical/OG
+  // tag on the site already reads from (see routesSeo.js), so this never
+  // drifts onto the redirecting apex domain the way a hand-typed URL
+  // could.
+  const shareUrl = `${SITE_URL}${useLocation().pathname}`
+  const SHARE_LINKS = [
+    { icon: MessageCircle, label: 'Share on WhatsApp', href: getWhatsAppShareLink(`${SHARE_TEXT} ${shareUrl}`) },
+    { icon: XIcon, label: 'Share on X', href: getTwitterShareLink(SHARE_TEXT, shareUrl) },
+    { icon: LinkedInIcon, label: 'Share on LinkedIn', href: getLinkedInShareLink(shareUrl) },
+  ]
+
   return (
     <footer className="border-t border-champagne-deep/40 bg-ivory px-6 py-14">
       <div className="mx-auto max-w-6xl">
@@ -178,6 +232,33 @@ export default function SiteFooter() {
                 </Link>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* Share This Page — distinct from "Follow Us" above (our own
+            profiles); this lets a visitor share the page they're actually
+            on out to their own network. Deliberately subtle: a small label
+            plus icon-only buttons, sized and styled identically to the
+            Follow Us row, sitting in its own thin border-topped strip
+            rather than fighting the four-column grid for space. */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-champagne-deep/30 py-6 text-xs text-ink-soft">
+          <span className="uppercase tracking-[0.2em]">Share This Page</span>
+          <div className="flex items-center gap-3">
+            {SHARE_LINKS.map((share) => {
+              const Icon = share.icon
+              return (
+                <a
+                  key={share.label}
+                  href={share.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={share.label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              )
+            })}
           </div>
         </div>
 

@@ -13,7 +13,7 @@ import WishesWall from './WishesWall'
 import CulturalMotif from './CulturalMotif'
 import AudioToggle from './AudioToggle'
 import { FrameCorners } from './TemplateFrame'
-import { PRICING } from '../data/templatesData'
+import { getActivePrice } from '../data/sale'
 import { coupleNameTier } from '../utils/coupleNameFit'
 import { slugify } from '../utils/slugify'
 import { buildCreateLink } from '../utils/createLink'
@@ -223,7 +223,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                   className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
                 >
                   <Heart className="w-4 h-4" />
-                  Create Your Own — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
+                  Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
                 </Link>
               </motion.div>
             </div>

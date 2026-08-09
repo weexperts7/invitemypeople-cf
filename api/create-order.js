@@ -4,6 +4,7 @@
 // logic and src/components/builder/PaymentModal.jsx for the Checkout.js
 // widget that opens against the order this returns.
 import { createOrder, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
+import { getActivePrice } from '../src/data/sale.js'
 import { clean } from './_lib/invites.js'
 
 export default async function handler(req, res) {
@@ -19,6 +20,15 @@ export default async function handler(req, res) {
       return res
         .status(400)
         .json({ ok: false, error: `amount must be at least ${MIN_AMOUNT_PAISE} paise` })
+    }
+    // Re-derives today's real package price on the server, in paise, rather
+    // than trusting whatever amount the client happens to send — so a
+    // tampered client can never buy an invite below the price actually in
+    // effect right now, and the ₹1,100 launch-sale rate can't be replayed
+    // once its 10-day window (see ../src/data/sale.js) has closed.
+    const expectedAmount = Math.round(getActivePrice() * 100)
+    if (amount !== expectedAmount) {
+      return res.status(400).json({ ok: false, error: 'amount does not match the current price' })
     }
 
     const receipt = clean(body.receipt, 60) || `receipt_${Date.now()}`

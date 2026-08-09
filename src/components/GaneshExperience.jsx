@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getGaneshLayoutComponent } from './ganesh/layoutRegistry'
 import LegacyGaneshExperience from './ganesh/LegacyGaneshExperience'
 import { buildCreateLink } from '../utils/createLink'
-import { PRICING } from '../data/templatesData'
+import { getActivePrice } from '../data/sale'
 
 // Dispatches a Ganesh Chaturthi template to its bespoke experience
 // component (see ganesh/layoutRegistry.js) by the template's optional
@@ -72,7 +72,7 @@ export default function GaneshExperience({ template }) {
           className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
         >
           <Heart className="w-4 h-4" />
-          Create Your Own — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
+          Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
         </Link>
       </motion.div>
 

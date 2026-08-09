@@ -162,6 +162,32 @@
   }
 }
 
+/* Soft pulsing glow for the sale price in SaleBanner.jsx — CSS-driven like
+   the petal animations above, so it never costs a JS frame. Falls back to
+   a fixed (non-animated) glow under prefers-reduced-motion rather than
+   disappearing outright, since the glow itself is decorative but the
+   emphasis it adds to the price isn't. */
+.sale-glow {
+  animation: sale-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes sale-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(221, 193, 134, 0);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(221, 193, 134, 0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sale-glow {
+    animation: none;
+    text-shadow: 0 0 10px rgba(221, 193, 134, 0.65);
+  }
+}
+
 /* Auto-scrolling template carousels (TemplateMarquee.jsx). The track holds
    two back-to-back copies of the item list; translating from -50% to 0%
    slides the second copy into view from the left, reading as continuous

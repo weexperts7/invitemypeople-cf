@@ -30,6 +30,7 @@ import {
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { GaneshIcon } from './icons/GaneshIcon'
 import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
+import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { GANESH_TEMPLATES } from '../data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
@@ -38,6 +39,7 @@ import TemplateCard from './TemplateCard'
 import SatsangTemplateCard from './SatsangTemplateCard'
 import GaneshTemplateCard from './GaneshTemplateCard'
 import TemplateMarquee from './TemplateMarquee'
+import SaleBanner from './SaleBanner'
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
 import SEO from './SEO'
@@ -49,6 +51,15 @@ const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }
+
+// Evaluated once at module load (i.e. fresh on every visit, since this is
+// the app's entry route) rather than re-derived on every render — the
+// comparison table and FAQ copy below are static marketing text, not a
+// live countdown like SaleBanner.jsx, so second-by-second reactivity isn't
+// needed here.
+const ACTIVE_PRICE = getActivePrice()
+const SAVINGS_PERCENT = getSavingsPercent()
+const SALE_LIVE = isSaleActive()
 
 // Rotating solid-fill tones so each badge/card/icon reads as distinct at a
 // glance, instead of every element sharing the same pale blush/rose combo.
@@ -102,7 +113,12 @@ const COMPARISON_ROWS = [
   },
   {
     feature: 'Cost',
-    ours: { state: 'yes', text: `₹${PRICING.shagunPrice.toLocaleString('en-IN')} all-inclusive, any celebration` },
+    ours: {
+      state: 'yes',
+      text: SALE_LIVE
+        ? `₹${ACTIVE_PRICE.toLocaleString('en-IN')} all-inclusive — launch sale, save ${SAVINGS_PERCENT}%`
+        : `₹${ACTIVE_PRICE.toLocaleString('en-IN')} all-inclusive, any celebration`,
+    },
     printed: { state: 'no', text: 'Card + printing + courier, per guest' },
     whatsapp: { state: 'partial', text: '"Free" but generic, no real design' },
   },
@@ -146,7 +162,9 @@ const FAQS = [
   },
   {
     question: 'How much does it cost?',
-    answer: `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${PRICING.shagunPrice.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`,
+    answer: SALE_LIVE
+      ? `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or just ₹${ACTIVE_PRICE.toLocaleString('en-IN')} during our current 10-day launch sale — a ${SAVINGS_PERCENT}% saving, all-inclusive with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`
+      : `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${ACTIVE_PRICE.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`,
   },
   {
     question: 'Can I make changes after I see my invitation?',
@@ -293,6 +311,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
       <SEO {...ROUTES_SEO['/']} path="/" />
+      <SaleBanner />
       <SiteHeader />
       <main>
       {/* ---------------------------------------------------------------- */}

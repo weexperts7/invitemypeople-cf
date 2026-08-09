@@ -11,6 +11,7 @@ import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
 import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
+import { getActivePrice } from '../src/data/sale.js'
 import {
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
@@ -488,6 +489,13 @@ app.post('/api/create-order', async (req, res) => {
       return res
         .status(400)
         .json({ ok: false, error: `amount must be at least ${MIN_AMOUNT_PAISE} paise` })
+    }
+    // Mirrors api/create-order.js's own check exactly — see its comment for
+    // why this re-derives the price server-side instead of trusting the
+    // client's amount.
+    const expectedAmount = Math.round(getActivePrice() * 100)
+    if (amount !== expectedAmount) {
+      return res.status(400).json({ ok: false, error: 'amount does not match the current price' })
     }
 
     const receipt = clean(body.receipt, 60) || `receipt_${Date.now()}`

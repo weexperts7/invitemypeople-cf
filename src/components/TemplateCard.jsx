@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom'
 import { Eye, Wand2, BadgeCheck } from 'lucide-react'
 import TemplateShowcase from './TemplateShowcase'
 import { PRICING } from '../data/templatesData'
+import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
 import { buildCreateLink } from '../utils/createLink'
 
 export default function TemplateCard({ template, onPreview }) {
   const reduceMotion = useReducedMotion()
+  const activePrice = getActivePrice()
+  const savingsPercent = getSavingsPercent()
+  const saleLive = isSaleActive()
 
   return (
     <motion.article
@@ -43,15 +47,15 @@ export default function TemplateCard({ template, onPreview }) {
           </p>
         </div>
 
-        <div className="flex items-baseline gap-2">
+        <div className="flex flex-wrap items-baseline gap-2">
           <span className="font-serif text-lg text-rose">
-            &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
+            &#8377;{activePrice.toLocaleString('en-IN')}
           </span>
           <span className="text-sm text-ink-soft/70 line-through">
             &#8377;{PRICING.price.toLocaleString('en-IN')}
           </span>
           <span className="rounded-full bg-blush px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-rose">
-            Shagun Price
+            {saleLive ? `Save ${savingsPercent}%` : 'Shagun Price'}
           </span>
         </div>
 

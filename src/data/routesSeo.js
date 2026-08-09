@@ -101,6 +101,38 @@ export const COMING_SOON_ROUTES = [
 // heading text word-for-word, so bots and JS-rendering visitors always see
 // identical content (never drift into showing crawlers something different
 // from what users see).
+// The homepage's rich, keyword-relevant narrative copy — the single source
+// of truth for BOTH the raw, pre-hydration SSR HTML (via
+// STATIC_ROUTES_SEO['/'].body below, read by server/index.js and
+// api/render.js's setRootContent) AND the real, permanent "About
+// InviteMyPeople" section LandingPage.jsx renders near the bottom of the
+// page. Earlier revisions only injected this into the raw SSR shell, which
+// React's `createRoot(...).render()` (not hydrateRoot — see api/render.js's
+// comment) fully replaces on mount, so a JS-executing crawler (most SEO
+// auditors, Googlebot) never actually saw it once the real page took over —
+// only the initial, pre-JS response did. Exporting one shared array and
+// having LandingPage.jsx render it directly closes that gap permanently:
+// whatever a non-JS crawler sees before React mounts is now exactly what
+// everyone else sees after, with no risk of the two drifting apart the way
+// hand-duplicated copy in two files eventually would.
+//
+// A plain string renders as a <p>; a `{ h2 }` entry renders as an <h2> in
+// the raw SSR shell (setRootContent) or an <h3> in LandingPage.jsx's own
+// section (which already has its own <h2> above this content, one level
+// deeper than the flat pre-hydration shell). Either way: a real H1 → H2 →
+// (H3 →) paragraph hierarchy, not a flat wall of text under one heading.
+export const HOMEPAGE_SEO_BODY = [
+  "InviteMyPeople is the digital wedding invitation maker India families turn to when a printed card, or a forwarded WhatsApp video, no longer feels like enough. Every invitation is interactive, mobile-first and genuinely unforgettable — built to open like a story, not just be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, a Ganesh Chaturthi celebration or any occasion in between, one link turns into a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
+  { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
+  'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and interactive RSVP tracking that records attendance, guest counts, song requests and blessings without a single phone call. As a digital wedding invitation maker India hosts trust for every function — Haldi, Sangeet, the wedding ceremony, Reception — each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
+  { h2: 'A Guruji Satsang Invite Online, With a Devotional Touch' },
+  "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card and the same interactive RSVP tracking used across the platform, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
+  { h2: 'More Than a Card — A Wedding Website Builder With a Live Dashboard' },
+  "Unlike a static card, InviteMyPeople doubles as a wedding website builder: pick a template in our Invitation Builder, fill in your names, dates and venue, and watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Behind every link sits a private host dashboard with real-time interactive RSVP tracking, downloadable guest lists for catering and planning, and automated pre-event summaries, so nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
+  { h2: 'Why Hosts Choose InviteMyPeople' },
+  "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on, so a celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
+]
+
 const STATIC_ROUTES_SEO = {
   '/': {
     title: 'InviteMyPeople | Digital Invites for Weddings & Events',
@@ -110,31 +142,10 @@ const STATIC_ROUTES_SEO = {
     ogDescription:
       'Budget-friendly, interactive digital invitations for weddings, Guruji Satsangs, birthdays, engagements, baby showers, housewarmings, corporate events & anniversaries — delivered on WhatsApp in 30 minutes.',
     h1: 'Digital Invitations as unforgettable as your celebration',
-    // Only the homepage carries `body` — real, on-page paragraph copy (see
-    // the matching sections of LandingPage.jsx: hero subtitle, wedding/
-    // Satsang/Ganesh Chaturthi scrollers, comparison, live builder and "how
-    // it works") reproduced here so the *raw* HTML response a non-JS
-    // crawler or SEO auditor sees already carries 400+ words of genuine,
-    // keyword-relevant content instead of the bare h1 + empty shell they'd
-    // otherwise get before React mounts — Seobility flagged the bare-shell
-    // version as thin/empty entry-page content. Keep in sync with
-    // LandingPage.jsx the same way `h1` above already has to be.
-    //
-    // A plain string renders as a <p>; a `{ h2 }` entry renders as an <h2> —
-    // see setRootContent in server/index.js and api/render.js. This gives a
-    // non-JS crawler a real H1 → H2 → paragraph hierarchy in the raw HTML,
-    // not just a flat wall of text under one heading.
-    body: [
-      "InviteMyPeople is the digital wedding invitation maker India families turn to when a printed card, or a forwarded WhatsApp video, no longer feels like enough. Every invitation is interactive, mobile-first and genuinely unforgettable — built to open like a story, not just be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, a Ganesh Chaturthi celebration or any occasion in between, one link turns into a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
-      { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
-      'Browse interactive digital wedding invitations across Hindu, Muslim, Sikh and more traditions, each with an envelope-reveal animation, a gold-foil scratch card, and interactive RSVP tracking that records attendance, guest counts, song requests and blessings without a single phone call. As a digital wedding invitation maker India hosts trust for every function — Haldi, Sangeet, the wedding ceremony, Reception — each event keeps its own date, time and venue, all living on one polished, mobile-first invitation.',
-      { h2: 'A Guruji Satsang Invite Online, With a Devotional Touch' },
-      "Looking for a Guruji Satsang invite online that still feels personal? Our devotional templates pair Guruji's photo with a Divine Blessing scratch card and the same interactive RSVP tracking used across the platform, so hosts always know who's attending before the day arrives. Ganesh Chaturthi invitations open with a curtain-opening darshan reveal, the full puja muhurat, and a blessing wall guests can sign — every template fully interactive and built mobile-first.",
-      { h2: 'More Than a Card — A Wedding Website Builder With a Live Dashboard' },
-      "Unlike a static card, InviteMyPeople doubles as a wedding website builder: pick a template in our Invitation Builder, fill in your names, dates and venue, and watch a live phone preview update instantly as you type, so you see exactly what your guests will see before you publish. Every invitation stays interactive and editable long after it's sent — update the date, venue or any detail instantly, and everyone holding the link sees the change immediately, with no reprinting or re-recording required. Behind every link sits a private host dashboard with real-time interactive RSVP tracking, downloadable guest lists for catering and planning, and automated pre-event summaries, so nothing gets lost in a spreadsheet or a scattered WhatsApp thread.",
-      { h2: 'Why Hosts Choose InviteMyPeople' },
-      "Every InviteMyPeople invitation ships cost-effective, eco-friendly and mobile-first, backed by ready-made templates across every tradition and 2 free revisions — everything a paper card or a WhatsApp forward could never be. Pricing is all-inclusive, with no per-guest or courier costs added on, so a celebration that's as unforgettable as the day itself never has to start with a complicated setup.",
-    ],
+    // See HOMEPAGE_SEO_BODY above for what this is and why it's shared with
+    // LandingPage.jsx's own "About InviteMyPeople" section instead of being
+    // duplicated here.
+    body: HOMEPAGE_SEO_BODY,
   },
   '/about': {
     title: 'About InviteMyPeople | Guest Management, Reinvented',

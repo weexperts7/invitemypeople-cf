@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
-import { ArrowLeft, Wand2 } from 'lucide-react'
+import { ArrowLeft, Heart } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getSatsangLayoutComponent } from './satsang/layoutRegistry'
 import LegacySatsangExperience from './satsang/LegacySatsangExperience'
 import { buildCreateLink } from '../utils/createLink'
+import { PRICING } from '../data/templatesData'
 
 // Dispatches a Satsang template to its bespoke experience component (see
 // satsang/layoutRegistry.js) by the template's optional `layout` field,
@@ -49,12 +50,15 @@ export default function SatsangExperience({ template }) {
       {/* Every Satsang template lives at its own directly-linkable page
           rather than behind an in-app preview overlay (see App.jsx's
           previewId, used only for wedding templates) — so unlike
-          InvitationExperience.jsx's floating "Buy Now" bar, this CTA never
+          InvitationExperience.jsx's floating "Create Your Own" bar, this CTA never
           has to fight a preview overlay for the route to actually show. A
           small floating pill (not a full-width bottom bar) so it never
           fights each bespoke layout's own footer/RSVP content for space —
           same floating-over-content pattern as the site-wide WhatsApp
-          button (see LandingPage.jsx). */}
+          button (see LandingPage.jsx). Label/icon match
+          InvitationExperience.jsx's own CTA — same "Create Your Own —
+          price" copy site-wide rather than this occasion alone saying
+          "Customize This Template". */}
       <motion.div
         initial={{ opacity: 0, scale: 0.6, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -67,8 +71,8 @@ export default function SatsangExperience({ template }) {
           to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
           className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
         >
-          <Wand2 className="w-4 h-4" />
-          Customize This Template
+          <Heart className="w-4 h-4" />
+          Create Your Own — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
         </Link>
       </motion.div>
 

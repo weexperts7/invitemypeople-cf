@@ -109,7 +109,13 @@ export const BUILDER_TEMPLATES = [
       motifAccent: src.motifAccent,
       fonts: src.fonts,
       weddingType: src.weddingType,
-      heroPhoto: src.heroPhoto,
+      // No heroPhoto here (unlike the other builder entries, which borrow
+      // it straight from src) — the source template's is a stock photo of
+      // its own example couple, and shows up as a circular medallion on
+      // WelcomeSplash (see CouplePhoto.jsx) above every buyer's own name,
+      // regardless of what they actually type in. Every other builder
+      // template already ships without one for the same reason; this one
+      // just inherited it from the source template by omission.
       greeting: src.greeting,
       connective: src.couple.invitationLine,
       example: {

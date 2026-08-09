@@ -185,7 +185,7 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                   className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
                 >
                   <Heart className="w-4 h-4" />
-                  Buy Now — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
+                  Create Your Own — &#8377;{PRICING.shagunPrice.toLocaleString('en-IN')}
                 </Link>
               </motion.div>
             </div>

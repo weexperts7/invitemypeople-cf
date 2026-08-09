@@ -25,6 +25,7 @@ import {
   Gem,
   PartyPopper,
   Gift,
+  Quote,
 } from 'lucide-react'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { GaneshIcon } from './icons/GaneshIcon'
@@ -141,16 +142,16 @@ const FAQS = [
   {
     question: 'How does the whole process work?',
     answer:
-      'Pick a template, then message us your names, dates, and event details on WhatsApp — no forms or signups. We personalize it and send back a live, shareable link, usually within 30 minutes.',
+      'Pick a template in our Invitation Builder, then fill in your names, dates, and venue — the phone preview updates live as you type, so you see exactly what your guests will get. Once it looks right, pay securely online and your own live, shareable invitation link is ready instantly — no forms with us, no waiting on a reply.',
   },
   {
     question: 'How much does it cost?',
-    answer: `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${PRICING.shagunPrice.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs.`,
+    answer: `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${PRICING.shagunPrice.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`,
   },
   {
     question: 'Can I make changes after I see my invitation?',
     answer:
-      'Yes — every invitation includes 2 free revisions. Send us what you\'d like changed on WhatsApp and we\'ll update it and send the link back.',
+      'Yes — you can edit every detail live in the builder before you pay, so nothing is locked in until you\'re happy with it. And every invitation still includes 2 free revisions after it\'s live — just message us on WhatsApp with what you\'d like changed and we\'ll update it and send the link back.',
   },
   {
     question: 'Do my guests need to install an app?',
@@ -160,7 +161,7 @@ const FAQS = [
   {
     question: 'How do RSVPs work?',
     answer:
-      'Guests tap to respond right on the invitation — attendance, guest count, and blessings or wishes all flow into one dashboard, so there\'s no chasing phone calls.',
+      'Guests tap to respond right on the invitation — attendance, guest count, and blessings or wishes all flow straight into your private host dashboard, so there\'s no chasing phone calls.',
   },
   {
     question: 'Can I update details after the date changes or a venue moves?',
@@ -229,6 +230,35 @@ const FEATURES = [
     title: 'Built Mobile-First',
     description:
       'Every template is fast, fluid and beautiful on the phone in your guest’s hand — no app required.',
+  },
+]
+
+// Real host quotes, named with their consent to be featured here — see
+// LandingPage's own project history for the confirmation. Only add a new
+// entry once a host has actually said this and okayed using their name;
+// never invent a name for placeholder copy (that's a fabricated testimonial,
+// not a design choice).
+const TESTIMONIALS = [
+  {
+    icon: Heart,
+    quote:
+      'Everything lived on one page — Haldi, Sangeet, the wedding itself — so I only had to share a single link with two hundred people.',
+    name: 'Surbhi',
+    role: 'Wedding Host',
+  },
+  {
+    icon: FoldedHandsIcon,
+    quote:
+      'Watching the devotional preview update as I typed in the details gave me total peace of mind before sending it out to family and devotees.',
+    name: 'Shruti',
+    role: 'Guruji Satsang Host',
+  },
+  {
+    icon: FoldedHandsIcon,
+    quote:
+      'The serene gold tones and divine motif captured the exact peaceful essence of our Guruji Satsang — everyone kept complimenting the link.',
+    name: 'Jaya',
+    role: 'Guruji Satsang Host',
   },
 ]
 
@@ -919,6 +949,68 @@ export default function LandingPage() {
                   <p className="text-sm text-ink-soft leading-relaxed">
                     {feature.description}
                   </p>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Testimonials — see the comment on TESTIMONIALS above before      */}
+      {/* touching this copy: real, named hosts only, never a fabricated   */}
+      {/* name or photo                                                    */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="bg-ivory px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
+          >
+            <div className="mb-4 flex justify-center">
+              <SectionEyebrow icon={Heart} tone="rose">Trusted By Hosts</SectionEyebrow>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
+              What Hosts Are Saying
+            </h2>
+            <p className="text-ink-soft max-w-xl mx-auto">
+              A few notes from hosts running their celebrations on
+              InviteMyPeople.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((item, i) => {
+              const Icon = item.icon
+              const tone = ACCENT_TONES[i % ACCENT_TONES.length]
+              return (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={reduceMotion ? undefined : { y: -4 }}
+                  className="flex flex-col rounded-3xl border border-white/70 bg-linen/60 p-7 shadow-card"
+                >
+                  <Quote className="w-6 h-6 text-rose/40 mb-4" strokeWidth={1.5} />
+                  <p className="flex-1 text-ink-soft leading-relaxed mb-6">
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-10 w-10 flex-none items-center justify-center rounded-full ${tone.bg} ${tone.text}`}
+                    >
+                      <Icon className="w-4.5 h-4.5" strokeWidth={1.75} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-ink leading-tight">{item.name}</p>
+                      <p className="text-xs text-ink-soft leading-tight">{item.role}</p>
+                    </div>
+                  </div>
                 </motion.div>
               )
             })}

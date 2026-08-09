@@ -63,10 +63,10 @@ alter table public.invites
 
 All four are nullable — a host who skips the Background Music Selection
 step simply has no song of their own, and `/i/:slug` falls back to the
-standard default track (`public/audio/soothing-romantic.wav`) instead —
-see `DEFAULT_BG_MUSIC_URL` in `InvitationExperience.jsx`. Every invitation
-plays something once the envelope opens; skipping the picker just means
-it isn't the host's own choice.
+standard default track (`public/audio/default-background-music.mp3`)
+instead — see `DEFAULT_BG_MUSIC_URL` in `InvitationExperience.jsx`. Every
+invitation plays something once the envelope opens; skipping the picker
+just means it isn't the host's own choice.
 
 ## A real limitation to know about before launch
 

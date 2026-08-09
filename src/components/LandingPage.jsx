@@ -177,6 +177,11 @@ const FAQS = [
       'No. Every template is a mobile-first web page that opens straight from the shared link in any browser — no app, download, or account required.',
   },
   {
+    question: 'Can I add my own background music?',
+    answer:
+      'Yes — search for any song right in the builder and pick it as your invitation\'s background music, so it starts playing the moment a guest taps the envelope open. It\'s entirely optional; skip it and we\'ll play a soft default track instead. Either way, a mute button lets every guest turn it off if they\'d rather open your invitation in silence.',
+  },
+  {
     question: 'How do RSVPs work?',
     answer:
       'Guests tap to respond right on the invitation — attendance, guest count, and blessings or wishes all flow straight into your private host dashboard, so there\'s no chasing phone calls.',

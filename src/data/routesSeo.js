@@ -202,6 +202,8 @@ export const HOMEPAGE_SEO_BODY = [
   'Real answers to the questions hosts ask most before building their own wedding invitation, Guruji Satsang invite, or Ganesh Chaturthi invitation.',
   { h2: 'Do Guests Need to Install an App?' },
   'No. Every invitation is a mobile-first web page. It opens straight from the link, in any browser, on any phone.',
+  { h2: 'Can I Add My Own Background Music?' },
+  "Yes. Search for any song in the Invitation Builder and set it as your invitation's background music, so it plays the moment a guest opens the envelope. It's optional — skip it and a soft default track plays instead — and guests can always mute it themselves.",
   { h2: 'How Do RSVPs and Guest Tracking Work?' },
   "Guests tap to respond right on the invitation itself. Their attendance, guest count, and wishes flow straight into your private host dashboard — the same interactive RSVP tracking behind every InviteMyPeople template.",
   { h2: 'Can Details Change After the Invitation Is Live?' },

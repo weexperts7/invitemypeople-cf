@@ -53,7 +53,7 @@ const MUSIC_VOLUME = 0.7
 // The standard track every invitation opens with unless the host picks
 // their own (see builder/SongSearchPicker.jsx) — a guest should always
 // hear *something* when the envelope opens, not silence by default.
-const DEFAULT_BG_MUSIC_URL = '/audio/soothing-romantic.wav'
+const DEFAULT_BG_MUSIC_URL = '/audio/default-background-music.mp3'
 
 export default function InvitationExperience({ template, onBack, isPreview = false, invitationSlug: slugOverride }) {
   // Every invitation is identified by a slug — by default one derived from
@@ -155,9 +155,9 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
           default track is a full-length loop already). No `type` on the
           <source>: a host's previewUrl is an MP3 on the rare track Spotify
           itself still serves one for, but M4A/AAC from the iTunes fallback
-          (see utils/itunesPreview.js) for everything else, vs. WAV for the
-          default — a hardcoded type would be wrong for at least one of
-          those, so the browser sniffs the actual format instead. */}
+          (see utils/itunesPreview.js) for everything else — a hardcoded
+          type would be wrong for one of those, so the browser sniffs the
+          actual format instead. */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} loop preload="auto">
         <source src={musicUrl} />

@@ -1,0 +1,85 @@
+import { getGaneshTemplateBySlug } from '../data/ganeshTemplatesData'
+import { formatInviteDate, formatInviteTime } from './formatInviteDateTime'
+
+// Finds the buyer's "Festival Schedule" entry (see builder/EventsListEditor.jsx,
+// reused for Ganesh Chaturthi as CreateInvitePage.jsx's "Festival Schedule"
+// section) matching a session by a case-insensitive substring of its title —
+// CreateInvitePage.jsx auto-seeds rows titled exactly "Morning Aarti" /
+// "Evening Aarti" / "Visarjan Yatra" / "Maha Prasad", but a buyer who
+// retitles or reorders them still matches as long as the keyword survives.
+function findSession(events, keyword) {
+  return (events ?? []).find((e) => (e?.title || '').toLowerCase().includes(keyword))
+}
+
+// Ganesh Chaturthi invites get the same full bespoke-layout treatment every
+// pre-built template uses (see GaneshExperience.jsx) — built from a merged
+// object: the full catalog template (palette/motif/layout/puja/moments/
+// event — see getGaneshTemplateBySlug in ganeshTemplatesData.js, looked up
+// via the builder template's `sourceId`) with host/event/photos/music
+// overridden by what the buyer actually submitted. Any schedule field the
+// buyer left blank falls back to the base template's own baked-in example
+// value, so a generated invite never renders an empty "undefined" — same
+// graceful-fallback spirit as buildWeddingExperienceTemplate.js.
+//
+// Shared by GeneratedInvitePage.jsx (the real, paid /i/:slug page) and
+// LiveDraftPreviewPage.jsx (the Invitation Builder's own live preview, see
+// builder/LiveInvitePreview.jsx) — both feed it the same-shaped
+// `{ names, eventTitle, date, time, venue, message, events, photos,
+// bgSong* }` object CreateInvitePage.jsx collects.
+export function buildGaneshExperienceTemplate(invite, builderTemplate) {
+  const base = getGaneshTemplateBySlug(builderTemplate.sourceId) ?? builderTemplate
+  const events = invite.events ?? []
+
+  const morning = findSession(events, 'morning')
+  const evening = findSession(events, 'evening')
+  const visarjan = findSession(events, 'visarjan')
+  const prasad = findSession(events, 'prasad')
+
+  // Real uploaded photos (see builder/PhotoUploader.jsx) win over the base
+  // template's curated "Sacred Moments" — reused as-is by
+  // GaneshMomentsGallery.jsx, which already accepts this generic
+  // `{src, caption}` shape (see royal-durbar-darshan/GaneshMomentsGallery.jsx).
+  const moments = invite.photos?.length
+    ? invite.photos.map((src) => ({ src, caption: 'A cherished moment from the celebration' }))
+    : base.moments
+
+  return {
+    ...base,
+    host: {
+      familyName: invite.names,
+      hostLine: invite.message?.trim() || builderTemplate.connective,
+    },
+    event: {
+      ...base.event,
+      sthapanaDate: invite.date ? formatInviteDate(invite.date) : base.event.sthapanaDate,
+      venue: invite.venue?.trim() || base.event.venue,
+      // "Sthapana Muhurat" (see CreateInvitePage.jsx) reuses the generic
+      // `eventTitle` field — free text, since a muhurat is a time *window*
+      // ("6:00 AM – 8:30 AM"), not a single value a <input type="time">
+      // could capture. Falls back to the plain event Time field formatted,
+      // then to the base template's own muhurat text.
+      sthapanaMuhurat:
+        invite.eventTitle?.trim() ||
+        (invite.time ? formatInviteTime(invite.time) : '') ||
+        base.event.sthapanaMuhurat,
+      morningAarti: morning?.time ? formatInviteTime(morning.time) : base.event.morningAarti,
+      eveningAarti: evening?.time ? formatInviteTime(evening.time) : base.event.eveningAarti,
+      visarjanDate: visarjan?.date ? formatInviteDate(visarjan.date) : base.event.visarjanDate,
+      visarjanYatraTime: visarjan?.time ? formatInviteTime(visarjan.time) : base.event.visarjanYatraTime,
+      mahaPrasadTime: prasad?.time ? formatInviteTime(prasad.time) : base.event.mahaPrasadTime,
+    },
+    moments,
+    // Background Music Selection (see builder/SongSearchPicker.jsx) — same
+    // shape/null-when-unselected convention as buildWeddingExperienceTemplate.js;
+    // GaneshExperience.jsx falls back to DEFAULT_GANESH_MUSIC_URL when this
+    // is null, so a generated invite always plays *something* once opened.
+    bgMusic: invite.bgSongPreviewUrl
+      ? {
+          title: invite.bgSongTitle,
+          artist: invite.bgSongArtist,
+          albumArt: invite.bgSongAlbumArt,
+          previewUrl: invite.bgSongPreviewUrl,
+        }
+      : null,
+  }
+}

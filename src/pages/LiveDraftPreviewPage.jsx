@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import SEO from '../components/SEO'
 import InvitationExperience from '../components/InvitationExperience'
+import GaneshExperience from '../components/GaneshExperience'
 import { getBuilderTemplateById } from '../data/builderTemplates'
 import { buildWeddingExperienceTemplate } from '../utils/buildWeddingExperienceTemplate'
+import { buildGaneshExperienceTemplate } from '../utils/buildGaneshExperienceTemplate'
 import { DRAFT_INVITE_PREVIEW_KEY, readDraftInvitePreview } from '../utils/draftInvitePreview'
 import { slugify } from '../utils/slugify'
 
@@ -10,13 +12,15 @@ import { slugify } from '../utils/slugify'
 // (see builder/LiveInvitePreview.jsx), in a same-origin iframe — never
 // linked anywhere a visitor could land on directly (SEO below keeps it out
 // of search regardless). It's a real, separate document specifically so
-// InvitationExperience runs in its own real browsing context: its
-// `position: fixed` chrome, `min-h-svh` sections, and scroll-linked
-// animations all measure against THIS iframe's own viewport (sized to a
-// phone by the frame around it), not the desktop builder page. The result
-// is the exact same component tree a guest gets at /i/:slug — not a
-// hand-built approximation of it — reading its data from sessionStorage
-// (see utils/draftInvitePreview.js), refreshed live as the buyer types.
+// the real component tree (InvitationExperience for wedding,
+// GaneshExperience for Ganesh Chaturthi) runs in its own real browsing
+// context: its `position: fixed` chrome, `min-h-svh` sections, and
+// scroll-linked animations all measure against THIS iframe's own viewport
+// (sized to a phone by the frame around it), not the desktop builder page.
+// The result is the exact same component tree a guest gets at /i/:slug —
+// not a hand-built approximation of it — reading its data from
+// sessionStorage (see utils/draftInvitePreview.js), refreshed live as the
+// buyer types.
 export default function LiveDraftPreviewPage() {
   const [draft, setDraft] = useState(() => readDraftInvitePreview())
 
@@ -66,6 +70,23 @@ export default function LiveDraftPreviewPage() {
   // so a stray RSVP/wish submitted against this still-unpaid draft can
   // never collide with the real invite once it's actually created.
   const invitationSlug = `preview-${slugify(draft.names) || 'draft'}`
+
+  // draft.occasionId is only ever 'wedding' or 'ganesh-chaturthi' here —
+  // LiveInvitePreview.jsx only mounts this iframe (isRichPreview) for those
+  // two; Guruji Satsang stays on the lighter hero-card preview and never
+  // reaches this page.
+  if (draft.occasionId === 'ganesh-chaturthi') {
+    return (
+      <>
+        {seo}
+        {hideScrollbar}
+        <GaneshExperience
+          template={buildGaneshExperienceTemplate(draft, template)}
+          invitationSlug={invitationSlug}
+        />
+      </>
+    )
+  }
 
   return (
     <>

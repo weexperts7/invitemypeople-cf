@@ -9,7 +9,7 @@ import { MAX_ADDITIONAL_EVENTS } from '../../utils/cleanEvents'
 
 const EMPTY_EVENT = { title: '', date: '', time: '', venue: '', locationUrl: '' }
 
-export default function EventsListEditor({ events, onChange }) {
+export default function EventsListEditor({ events, onChange, titlePlaceholder = 'e.g. Sangeet Night' }) {
   const addEvent = () => {
     if (events.length >= MAX_ADDITIONAL_EVENTS) return
     onChange([...events, { ...EMPTY_EVENT }])
@@ -43,7 +43,7 @@ export default function EventsListEditor({ events, onChange }) {
             type="text"
             value={event.title}
             onChange={updateEvent(index, 'title')}
-            placeholder="e.g. Sangeet Night"
+            placeholder={titlePlaceholder}
             className="mb-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 pr-8 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
           />
 

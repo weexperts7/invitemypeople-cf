@@ -1,24 +1,24 @@
 // The Invitation Builder's live preview (see CreateInvitePage.jsx).
 //
-// Wedding invites (the occasion InvitationExperience.jsx actually supports,
-// see buildWeddingExperienceTemplate.js) get the REAL page in a phone
-// frame: an iframe loading LiveDraftPreviewPage.jsx, which renders the
-// exact same <InvitationExperience> component tree a guest gets at
-// /i/:slug — envelope, scratch card, timeline, gallery, RSVP form, Wishes
-// Wall, the works — built from the same buildWeddingExperienceTemplate()
-// the real generated page uses. It's a genuine separate document (rather
-// than inlining InvitationExperience on this page) specifically so that
-// component's `position: fixed` chrome, `min-h-svh` sections, and
-// scroll-linked animations measure against ITS OWN viewport — sized to a
-// phone by the frame below — instead of the desktop builder page around
-// it. Current form state is handed across via sessionStorage (see
+// Wedding and Ganesh Chaturthi invites get the REAL page in a phone frame:
+// an iframe loading LiveDraftPreviewPage.jsx, which renders the exact same
+// <InvitationExperience>/<GaneshExperience> component tree a guest gets at
+// /i/:slug — envelope/curtain-or-door reveal, timeline/muhurat schedule,
+// gallery, RSVP form, Wishes Wall, the works — built from the same
+// buildWeddingExperienceTemplate()/buildGaneshExperienceTemplate() the real
+// generated page uses. It's a genuine separate document (rather than
+// inlining that tree on this page) specifically so that component's
+// `position: fixed` chrome, `min-h-svh` sections, and scroll-linked
+// animations measure against ITS OWN viewport — sized to a phone by the
+// frame below — instead of the desktop builder page around it. Current form
+// state is handed across via sessionStorage (see
 // utils/draftInvitePreview.js), which the iframe picks up live as the
 // buyer types, no polling required.
 //
-// Other occasions (Ganesh Chaturthi, Guruji Satsang) route through
-// bespoke per-template experience components that don't yet support an
-// external slug override (see GeneratedInvitePage.jsx) — those keep the
-// lighter hero-card preview below, still phone-framed for consistency.
+// Guruji Satsang routes through bespoke per-template experience components
+// that don't yet support an external slug override (see
+// GeneratedInvitePage.jsx) — that occasion keeps the lighter hero-card
+// preview below, still phone-framed for consistency.
 import { useEffect, useRef, useState } from 'react'
 import { CalendarDays, Clock, Heart, MapPin, MessagesSquare } from 'lucide-react'
 import InvitePreviewCard from './InvitePreviewCard'
@@ -159,6 +159,11 @@ const DEVICE_SCALE = FRAME_SCREEN_WIDTH / DEVICE_WIDTH
 
 export default function LiveInvitePreview({ template, values, occasionId, photos = [], events = [], song = null }) {
   const isWedding = occasionId === 'wedding'
+  // Wedding and Ganesh Chaturthi both render the real bespoke component
+  // tree in the iframe below (InvitationExperience / GaneshExperience — see
+  // LiveDraftPreviewPage.jsx, which branches on the draft's own
+  // `occasionId`); Guruji Satsang still gets the lighter hero-card preview.
+  const isRichPreview = isWedding || occasionId === 'ganesh-chaturthi'
 
   // The iframe's own first mount — fetching/parsing its JS, then React
   // mounting the real InvitationExperience tree (envelope animation,
@@ -172,10 +177,10 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
   // uses in the meantime) lets that settle before the iframe ever exists.
   const [iframeReady, setIframeReady] = useState(false)
   useEffect(() => {
-    if (!isWedding) return
+    if (!isRichPreview) return
     const timer = setTimeout(() => setIframeReady(true), 600)
     return () => clearTimeout(timer)
-  }, [isWedding])
+  }, [isRichPreview])
 
   // Keeps the iframe's sessionStorage-backed draft (see
   // utils/draftInvitePreview.js) in sync with typing/uploads — writing
@@ -190,10 +195,15 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
   // the iframe's.
   const draftTimer = useRef(null)
   useEffect(() => {
-    if (!isWedding) return
+    if (!isRichPreview) return
     clearTimeout(draftTimer.current)
     draftTimer.current = setTimeout(() => {
       writeDraftInvitePreview({
+        // LiveDraftPreviewPage.jsx reads this to decide which real
+        // component tree/build function to render — wedding vs. Ganesh
+        // Chaturthi (Guruji Satsang never reaches here, see isRichPreview
+        // above).
+        occasionId,
         templateId: template.id,
         names: values.names.trim() || template.example.names,
         eventTitle: values.eventTitle,
@@ -205,9 +215,9 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —
-        // same camelCase field names buildWeddingExperienceTemplate.js
-        // reads from a real saved invite, so this draft needs no separate
-        // mapping to preview correctly.
+        // same camelCase field names buildWeddingExperienceTemplate.js /
+        // buildGaneshExperienceTemplate.js read from a real saved invite,
+        // so this draft needs no separate mapping to preview correctly.
         bgSongTitle: song?.title || '',
         bgSongArtist: song?.artist || '',
         bgSongAlbumArt: song?.albumArt || '',
@@ -215,9 +225,9 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
       })
     }, 300)
     return () => clearTimeout(draftTimer.current)
-  }, [isWedding, template, values, events, photos, song])
+  }, [isRichPreview, occasionId, template, values, events, photos, song])
 
-  const showIframe = isWedding && iframeReady
+  const showIframe = isRichPreview && iframeReady
 
   return (
     <MobilePreviewFrame

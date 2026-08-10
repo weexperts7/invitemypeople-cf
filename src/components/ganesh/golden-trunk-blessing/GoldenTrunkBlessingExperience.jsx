@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, MapPin, Navigation, Gift } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 import FallingPetals from '../../FallingPetals'
 import CulturalMotif from '../../CulturalMotif'
 import { FrameCorners } from '../../TemplateFrame'
@@ -39,9 +39,9 @@ function DetailCard({ icon: Icon, label, children, action, gold, rose }) {
   )
 }
 
-export default function GoldenTrunkBlessingExperience({ template }) {
+export default function GoldenTrunkBlessingExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, greeting, host, event, puja } = template
-  const invitationSlug = `ganesh-${template.slug}`
+  const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#c28a3a'
   const rose = palette?.rose ?? '#9a1f2b'
@@ -82,7 +82,7 @@ export default function GoldenTrunkBlessingExperience({ template }) {
             <p className="text-center text-sm text-ink-soft mb-8 max-w-xs mx-auto">
               Tap the golden box to receive Bappa&rsquo;s blessing for your journey ahead.
             </p>
-            <ModakBlessingBox palette={palette} />
+            <ModakBlessingBox palette={palette} onOpen={onOpen} />
           </section>
 
           {/* ---------------------------------------------------------- */}
@@ -96,8 +96,8 @@ export default function GoldenTrunkBlessingExperience({ template }) {
               <DetailCard icon={CalendarDays} label="Sthapana" gold={gold} rose={rose}>
                 {event.sthapanaDate}
               </DetailCard>
-              <DetailCard icon={Clock} label="Muhurat" gold={gold} rose={rose}>
-                {event.muhurat}
+              <DetailCard icon={Clock} label="Pran Pratishtha Muhurat" gold={gold} rose={rose}>
+                {event.sthapanaMuhurat}
               </DetailCard>
               <div className="col-span-2">
                 <DetailCard
@@ -123,10 +123,19 @@ export default function GoldenTrunkBlessingExperience({ template }) {
                 </DetailCard>
               </div>
               <div className="col-span-2">
-                <DetailCard icon={Gift} label="Aarti &amp; Visarjan" gold={gold} rose={rose}>
-                  <span className="text-base">{event.time}</span>
+                <DetailCard icon={Sunrise} label="Daily Aarti" gold={gold} rose={rose}>
+                  <span className="text-base">
+                    Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
+                  </span>
+                </DetailCard>
+              </div>
+              <div className="col-span-2">
+                <DetailCard icon={Gift} label="Visarjan &amp; Maha Prasad" gold={gold} rose={rose}>
+                  <span className="text-base">
+                    {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
+                  </span>
                   <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">
-                    {puja?.note} Visarjan on {event.visarjanDate}.
+                    Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
                   </p>
                 </DetailCard>
               </div>
@@ -138,6 +147,8 @@ export default function GoldenTrunkBlessingExperience({ template }) {
           </div>
           <WishesWall
             slug={invitationSlug}
+            heading="Blessings for Bappa's Family"
+            subheading="Leave a wish — Ganpati Bappa Morya 🙏"
             renderIcon={() => <ModakGlyph color={gold} accent={rose} size={14} />}
           />
 

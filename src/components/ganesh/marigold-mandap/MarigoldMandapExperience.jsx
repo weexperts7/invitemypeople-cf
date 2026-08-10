@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, MapPin, Navigation, Gift } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 import FallingPetals from '../../FallingPetals'
 import CulturalMotif from '../../CulturalMotif'
 import WishesWall from '../../WishesWall'
@@ -34,9 +34,9 @@ function MandapStep({ icon: Icon, label, children, action, gold, isLast }) {
   )
 }
 
-export default function MarigoldMandapExperience({ template }) {
+export default function MarigoldMandapExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, greeting, host, event, puja } = template
-  const invitationSlug = `ganesh-${template.slug}`
+  const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#d9932e'
 
@@ -52,7 +52,7 @@ export default function MarigoldMandapExperience({ template }) {
           {/* Chapter One — Bappa's Darshan (curtain reveal) */}
           {/* ---------------------------------------------------------- */}
           <GaneshChapter numeral="I" title="Bappa's Darshan" gold={gold} className="pt-4">
-            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} />
+            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} onOpen={onOpen} />
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
@@ -66,8 +66,8 @@ export default function MarigoldMandapExperience({ template }) {
               <MandapStep icon={CalendarDays} label="Sthapana" gold={gold}>
                 {event.sthapanaDate}
               </MandapStep>
-              <MandapStep icon={Clock} label="Puja Muhurat" gold={gold}>
-                {event.muhurat}
+              <MandapStep icon={Clock} label="Pran Pratishtha Muhurat" gold={gold}>
+                {event.sthapanaMuhurat}
               </MandapStep>
               <MandapStep
                 icon={MapPin}
@@ -89,10 +89,15 @@ export default function MarigoldMandapExperience({ template }) {
               >
                 {event.venue}
               </MandapStep>
-              <MandapStep icon={Gift} label="Aarti &amp; Visarjan" gold={gold} isLast>
-                <span>{event.time}</span>
+              <MandapStep icon={Sunrise} label="Daily Aarti" gold={gold}>
+                Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
+              </MandapStep>
+              <MandapStep icon={Gift} label="Visarjan &amp; Maha Prasad" gold={gold} isLast>
+                <span>
+                  {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
+                </span>
                 <p className="mt-1.5 text-sm font-sans font-normal text-ink-soft leading-relaxed">
-                  {puja?.note} Visarjan on {event.visarjanDate}.
+                  Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
                 </p>
               </MandapStep>
             </div>

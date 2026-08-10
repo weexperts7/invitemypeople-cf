@@ -46,10 +46,13 @@ export const GANESH_TEMPLATES = [
     },
     event: {
       sthapanaDate: 'September 14, 2026',
-      muhurat: '6:00 AM – 8:30 AM (Sthapana Muhurat)',
-      time: 'Evening Aarti at 7:00 PM daily',
+      sthapanaMuhurat: '6:00 AM – 8:30 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '8:00 AM',
+      eveningAarti: '7:00 PM',
       venue: 'Deshmukh Residence, Prabhadevi, Mumbai',
       visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '4:00 PM',
+      mahaPrasadTime: '6:30 PM (following the Visarjan Yatra)',
     },
     puja: {
       note:
@@ -90,10 +93,13 @@ export const GANESH_TEMPLATES = [
     },
     event: {
       sthapanaDate: 'September 14, 2026',
-      muhurat: '7:00 AM – 9:00 AM (Sthapana Muhurat)',
-      time: 'Evening Aarti at 7:30 PM daily',
+      sthapanaMuhurat: '7:00 AM – 9:00 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '7:30 AM',
+      eveningAarti: '7:30 PM',
       venue: 'Kulkarni Niwas, Shivaji Nagar, Pune',
       visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '4:30 PM',
+      mahaPrasadTime: '7:00 PM (following the Visarjan Yatra)',
     },
     puja: {
       note:
@@ -133,10 +139,13 @@ export const GANESH_TEMPLATES = [
     },
     event: {
       sthapanaDate: 'September 14, 2026',
-      muhurat: '6:30 AM – 9:00 AM (Sthapana Muhurat)',
-      time: 'Evening Aarti at 7:00 PM daily',
+      sthapanaMuhurat: '6:30 AM – 9:00 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '8:00 AM',
+      eveningAarti: '7:00 PM',
       venue: 'Joshi Wada, Sadashiv Peth, Pune',
       visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '4:00 PM',
+      mahaPrasadTime: '6:30 PM (following the Visarjan Yatra)',
     },
     puja: {
       note:
@@ -176,10 +185,13 @@ export const GANESH_TEMPLATES = [
     },
     event: {
       sthapanaDate: 'September 14, 2026',
-      muhurat: '6:00 AM – 8:00 AM (Sthapana Muhurat)',
-      time: 'Evening Aarti at 7:00 PM daily',
+      sthapanaMuhurat: '6:00 AM – 8:00 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '7:30 AM',
+      eveningAarti: '7:00 PM',
       venue: 'Rao Bhavan, Malleshwaram, Bengaluru',
       visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '3:30 PM',
+      mahaPrasadTime: '6:00 PM (following the Visarjan Yatra)',
     },
     puja: {
       note:
@@ -220,10 +232,13 @@ export const GANESH_TEMPLATES = [
     },
     event: {
       sthapanaDate: 'September 14, 2026',
-      muhurat: '6:00 AM – 8:30 AM (Sthapana Muhurat)',
-      time: 'Evening Aarti at 7:00 PM daily',
+      sthapanaMuhurat: '6:00 AM – 8:30 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '8:00 AM',
+      eveningAarti: '7:00 PM',
       venue: 'Chavan Wada, Dadar, Mumbai',
       visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '4:00 PM',
+      mahaPrasadTime: '6:30 PM (following the Visarjan Yatra)',
     },
     puja: {
       note:
@@ -284,6 +299,88 @@ export const GANESH_TEMPLATES = [
       goldSoft: '#dcb662',
       ink: '#241009',
       inkSoft: '#5c3a24',
+    },
+  },
+  {
+    slug: 'divine-threshold',
+    name: 'Divine Threshold',
+    layout: 'divine-threshold',
+    tagline: 'Temple doors part on tap over a full-bleed photo, a day-by-day festival timeline',
+    description:
+      'A show-stopping, photo-driven welcome — a full-bleed festival photograph stands behind two ornate temple doors that swing open on tap to reveal Bappa, in rich marigold orange, auspicious red and sacred gold. A day-by-day festival timeline lays out Sthapana, daily Aarti and Visarjan & Maha Prasad in one glance, alongside a swipeable photo gallery, interactive RSVP and a blessing wall.',
+    metaDescription:
+      'Photo-driven Ganesh Chaturthi invitation with a tap-to-open temple-door reveal, a day-by-day festival timeline, photo gallery, interactive RSVP and a blessing wall.',
+    tags: ['Marigold', 'Photo Doors', 'Festival Timeline'],
+    motif: 'marigold-garland',
+    motifAccent: '#e8720c',
+    fonts: { serif: '"Cinzel Decorative", "Yatra One", "Cormorant Garamond", serif' },
+    greeting: { symbol: 'ॐ', line: 'Ganpati Bappa Morya' },
+    host: {
+      familyName: 'The Patil Family',
+      hostLine:
+        'With overflowing joy, our family throws open our doors to welcome Ganpati Bappa and everyone who wishes to seek his blessings this Chaturthi.',
+    },
+    event: {
+      sthapanaDate: 'September 14, 2026',
+      sthapanaMuhurat: '6:00 AM – 8:30 AM (Pran Pratishtha Muhurat)',
+      morningAarti: '7:30 AM',
+      eveningAarti: '7:30 PM',
+      venue: 'Patil Wada, Vile Parle, Mumbai',
+      visarjanDate: 'September 23, 2026',
+      visarjanYatraTime: '4:00 PM',
+      mahaPrasadTime: '6:30 PM (following the Visarjan Yatra)',
+    },
+    puja: {
+      note:
+        'Daily Aarti and Modak Prasad follow every morning and evening, with our doors open to every devotee across the ten days.',
+    },
+    // A real festival photograph for the temple-door hero backdrop — same
+    // drop-in convention as royal-durbar-darshan's heroPhoto (see
+    // TempleDoorReveal.jsx, which falls back to a rich gradient wash if this
+    // file isn't present yet).
+    heroPhoto: {
+      src: '/images/ganesh/divine-threshold/hero.jpg',
+      alt: 'A beautifully lit Ganpati Bappa mandap decorated for Ganesh Chaturthi',
+    },
+    // Reuses the same generic {src, alt, caption, sub, when} shape
+    // GaneshMomentsGallery.jsx already renders for royal-durbar-darshan —
+    // this is also exactly the shape buildGaneshExperienceTemplate.js maps
+    // a buyer's own uploaded photos into for a purchased invite.
+    moments: [
+      {
+        src: '/images/ganesh/royal-durbar/marigold.jpg',
+        alt: 'Strings of fresh marigold flowers',
+        caption: 'The Marigold Threshold',
+        sub: 'Fresh garlands strung at every doorway',
+        when: 'September 13 · Evening',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/aarti.jpg',
+        alt: 'Lit oil lamps at evening aarti',
+        caption: 'Aarti’s Golden Glow',
+        sub: 'Diyas lit at dusk, morning and evening',
+        when: 'Daily',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/modak.jpg',
+        alt: 'Modak sweets offered as prasad',
+        caption: 'Modak Prasad',
+        sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
+      },
+    ],
+    palette: {
+      ivory: '#fffaf3',
+      linen: '#fdedd6',
+      champagne: '#fad39a',
+      champagneDeep: '#e8720c',
+      blush: '#fcdccb',
+      blushDeep: '#e89a6e',
+      rose: '#c1272d',
+      gold: '#d4a017',
+      goldSoft: '#eec767',
+      ink: '#3a1408',
+      inkSoft: '#7a4a2c',
     },
   },
 ]

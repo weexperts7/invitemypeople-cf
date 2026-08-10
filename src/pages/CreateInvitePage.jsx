@@ -54,6 +54,24 @@ const EMPTY_FORM = {
   hostEmail: '',
 }
 
+// Ganesh Chaturthi's "Festival Schedule" reuses the generic "Additional
+// Events" list (see builder/EventsListEditor.jsx, backed by the same
+// `events` JSON column every occasion's invite already stores) rather than
+// adding dedicated new form fields/DB columns for each session. Auto-seeding
+// these four titled-but-otherwise-empty rows the moment a buyer lands on
+// this occasion is what makes it read as "dedicated fields" in the UI —
+// the buyer fills in (or deletes) each one — and guarantees
+// buildGaneshExperienceTemplate.js's keyword match always has something to
+// find by default. MAX_ADDITIONAL_EVENTS is 5, so one extra custom entry
+// still fits.
+const GANESH_SCHEDULE_SEED = ['Morning Aarti', 'Evening Aarti', 'Visarjan Yatra', 'Maha Prasad'].map((title) => ({
+  title,
+  date: '',
+  time: '',
+  venue: '',
+  locationUrl: '',
+}))
+
 // Shown once, right after a successful payment — the ONLY moment the host
 // dashboard link (with its one-time host_token, see api/invites/index.js)
 // is ever available. There's no login system in this app and no "resend my
@@ -160,7 +178,9 @@ export default function CreateInvitePage() {
   })
   const [form, setForm] = useState(EMPTY_FORM)
   const [photos, setPhotos] = useState([])
-  const [events, setEvents] = useState([])
+  const [events, setEvents] = useState(() =>
+    initialOccasionId === 'ganesh-chaturthi' ? GANESH_SCHEDULE_SEED : [],
+  )
   // Background Music Selection (see builder/SongSearchPicker.jsx) — null
   // until the host confirms a Spotify search result; { title, artist,
   // albumArt, previewUrl } once they do. Optional: skipping it just means
@@ -189,6 +209,9 @@ export default function CreateInvitePage() {
   const handleOccasionChange = (nextOccasionId) => {
     setOccasionId(nextOccasionId)
     setTemplateId(getBuilderTemplatesForOccasion(nextOccasionId)[0].id)
+    if (nextOccasionId === 'ganesh-chaturthi') {
+      setEvents((prev) => (prev.length === 0 ? GANESH_SCHEDULE_SEED : prev))
+    }
   }
 
   const handleField = (field) => (e) =>
@@ -384,6 +407,22 @@ export default function CreateInvitePage() {
                       </div>
                     )}
 
+                    {occasionId === 'ganesh-chaturthi' && (
+                      <div>
+                        <label htmlFor="eventTitle" className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          Sthapana Muhurat <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <input
+                          id="eventTitle"
+                          type="text"
+                          value={form.eventTitle}
+                          onChange={handleField('eventTitle')}
+                          placeholder="e.g. 6:00 AM – 8:30 AM (Pran Pratishtha Muhurat)"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div>
                         <label htmlFor="date" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
@@ -498,7 +537,7 @@ export default function CreateInvitePage() {
                       />
                     </div>
 
-                    {occasionId === 'wedding' && (
+                    {(occasionId === 'wedding' || occasionId === 'ganesh-chaturthi') && (
                       <div>
                         <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
                           <Camera className="h-3.5 w-3.5 text-rose" />
@@ -522,15 +561,35 @@ export default function CreateInvitePage() {
                       </div>
                     )}
 
-                    {occasionId === 'wedding' && (
+                    {occasionId === 'ganesh-chaturthi' && (
+                      <div>
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <CalendarPlus className="h-3.5 w-3.5 text-rose" />
+                          Festival Schedule <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <p className="mb-3 text-xs text-ink-soft">
+                          We&rsquo;ve started you off with Morning Aarti, Evening
+                          Aarti, Visarjan Yatra and Maha Prasad — fill in each
+                          time, or delete any you don&rsquo;t need.
+                        </p>
+                        <EventsListEditor
+                          events={events}
+                          onChange={setEvents}
+                          titlePlaceholder="e.g. Morning Aarti"
+                        />
+                      </div>
+                    )}
+
+                    {(occasionId === 'wedding' || occasionId === 'ganesh-chaturthi') && (
                       <div className="border-t border-champagne-deep/30 pt-5">
                         <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
                           <Music2 className="h-3.5 w-3.5 text-rose" />
                           Background Music Selection <span className="normal-case text-ink-soft/70">(optional)</span>
                         </label>
                         <p className="mb-3 text-xs text-ink-soft">
-                          Search Spotify, preview any track, then confirm one
-                          to play the moment guests open your invitation.
+                          {occasionId === 'ganesh-chaturthi'
+                            ? 'Search for a devotional bhajan or festive instrumental, preview it, then confirm one to play the moment guests open your invitation.'
+                            : 'Search Spotify, preview any track, then confirm one to play the moment guests open your invitation.'}
                         </p>
                         <SongSearchPicker
                           value={song}

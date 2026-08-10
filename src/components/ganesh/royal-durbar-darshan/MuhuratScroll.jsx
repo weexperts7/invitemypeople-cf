@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, MapPin, Navigation, Gift } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 
 function ScrollRod({ gold, goldSoft, champagne }) {
   return (
@@ -61,8 +61,8 @@ export default function MuhuratScroll({ event, puja, palette, gold, rose }) {
         <ScrollRow icon={CalendarDays} label="Sthapana" gold={gold} rose={rose}>
           {event.sthapanaDate}
         </ScrollRow>
-        <ScrollRow icon={Clock} label="Muhurat" gold={gold} rose={rose}>
-          {event.muhurat}
+        <ScrollRow icon={Clock} label="Pran Pratishtha Muhurat" gold={gold} rose={rose}>
+          {event.sthapanaMuhurat}
         </ScrollRow>
         <ScrollRow icon={MapPin} label="Venue" gold={gold} rose={rose}>
           <span>{event.venue}</span>
@@ -80,10 +80,15 @@ export default function MuhuratScroll({ event, puja, palette, gold, rose }) {
             </motion.a>
           </div>
         </ScrollRow>
-        <ScrollRow icon={Gift} label="Aarti & Visarjan" gold={gold} rose={rose} last>
-          <span>{event.time}</span>
+        <ScrollRow icon={Sunrise} label="Daily Aarti" gold={gold} rose={rose}>
+          Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
+        </ScrollRow>
+        <ScrollRow icon={Gift} label="Visarjan & Maha Prasad" gold={gold} rose={rose} last>
+          <span>
+            {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
+          </span>
           <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">
-            {puja?.note} Visarjan on {event.visarjanDate}.
+            Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
           </p>
         </ScrollRow>
       </motion.div>

@@ -149,7 +149,7 @@ export default function GaneshRsvpForm({ palette, slug }) {
                     className="overflow-hidden"
                   >
                     <label htmlFor="ganesh-guests" className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
-                      Number of Guests
+                      Guests Joining for Prasad
                     </label>
                     <select
                       id="ganesh-guests"
@@ -164,14 +164,36 @@ export default function GaneshRsvpForm({ palette, slug }) {
                         </option>
                       ))}
                     </select>
+                    <p className="mt-1.5 text-xs text-ink-soft">
+                      Helps the family plan enough Modak Prasad for everyone.
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
 
               <div>
-                <label htmlFor="ganesh-message" className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
-                  Blessings &amp; Wishes
-                </label>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <label htmlFor="ganesh-message" className="block text-xs tracking-[0.2em] uppercase text-ink-soft">
+                    Blessings &amp; Wishes
+                  </label>
+                  <motion.button
+                    type="button"
+                    whileHover={reduceMotion ? undefined : { scale: 1.03 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        message: prev.message.includes('Ganpati Bappa Morya')
+                          ? prev.message
+                          : `Ganpati Bappa Morya 🙏 ${prev.message}`.trim(),
+                      }))
+                    }
+                    className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium text-ink"
+                    style={{ borderColor: `${gold}55`, background: `${gold}14` }}
+                  >
+                    🙏 Ganpati Bappa Morya
+                  </motion.button>
+                </div>
                 <textarea
                   id="ganesh-message"
                   rows={3}

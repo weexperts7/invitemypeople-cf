@@ -8,7 +8,7 @@ import { useRandomBlessing } from '../../../hooks/useRandomBlessing'
 // tap-to-open golden gift box, its lid domed like a modak, revealing a
 // personal blessing. Modeled on BlessingEnvelope.jsx's stage/timing pattern,
 // re-themed as a lidded box instead of a sealed envelope.
-export default function ModakBlessingBox({ palette }) {
+export default function ModakBlessingBox({ palette, onOpen }) {
   const [stage, setStage] = useState('closed') // closed | opening | open
   const [burst, setBurst] = useState(null)
   const reduceMotion = useReducedMotion()
@@ -22,7 +22,10 @@ export default function ModakBlessingBox({ palette }) {
     setStage('opening')
     const lidDelay = reduceMotion ? 100 : 650
     const openDelay = reduceMotion ? 200 : 1250
-    setTimeout(() => setStage('open'), lidDelay)
+    setTimeout(() => {
+      setStage('open')
+      onOpen?.()
+    }, lidDelay)
     setTimeout(() => setBurst({ id: Date.now() }), openDelay)
   }
 

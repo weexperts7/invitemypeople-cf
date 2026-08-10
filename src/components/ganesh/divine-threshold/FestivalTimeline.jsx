@@ -39,7 +39,12 @@ function Row({ icon: Icon, label, children, gold, rose }) {
 }
 
 export default function FestivalTimeline({ event, puja, gold, rose }) {
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
+  // A buyer's own pasted Google Maps link (see CreateInvitePage.jsx's
+  // "Location URL" field, threaded through as `event.mapHref` by
+  // buildGaneshExperienceTemplate.js) wins over this generic venue-name
+  // search, which only the pre-built demo templates (with no mapHref) fall
+  // back to.
+  const mapsHref = event.mapHref || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
 
   return (
     <div className="mx-auto max-w-sm space-y-8">

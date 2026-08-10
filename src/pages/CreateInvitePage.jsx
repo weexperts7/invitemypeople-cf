@@ -409,17 +409,20 @@ export default function CreateInvitePage() {
 
                     {occasionId === 'ganesh-chaturthi' && (
                       <div>
-                        <label htmlFor="eventTitle" className="block text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                        <label htmlFor="eventTitle" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Clock className="h-3.5 w-3.5 text-rose" />
                           Sthapana Muhurat <span className="normal-case text-ink-soft/70">(optional)</span>
                         </label>
                         <input
                           id="eventTitle"
-                          type="text"
+                          type="time"
                           value={form.eventTitle}
                           onChange={handleField('eventTitle')}
-                          placeholder="e.g. 6:00 AM – 8:30 AM (Pran Pratishtha Muhurat)"
-                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                         />
+                        <p className="mt-1.5 text-xs text-ink-soft">
+                          The auspicious Pran Pratishtha moment — shown on your invitation as the puja muhurat.
+                        </p>
                       </div>
                     )}
 

@@ -54,12 +54,13 @@ export function buildGaneshExperienceTemplate(invite, builderTemplate) {
       sthapanaDate: invite.date ? formatInviteDate(invite.date) : base.event.sthapanaDate,
       venue: invite.venue?.trim() || base.event.venue,
       // "Sthapana Muhurat" (see CreateInvitePage.jsx) reuses the generic
-      // `eventTitle` field — free text, since a muhurat is a time *window*
-      // ("6:00 AM – 8:30 AM"), not a single value a <input type="time">
-      // could capture. Falls back to the plain event Time field formatted,
-      // then to the base template's own muhurat text.
+      // `eventTitle` field, captured there as a <input type="time"> (the
+      // auspicious Pran Pratishtha moment) rather than free text — same
+      // "HH:MM" 24-hour shape formatInviteTime() already formats for every
+      // other time field. Falls back to the plain Event Time field, then to
+      // the base template's own muhurat text.
       sthapanaMuhurat:
-        invite.eventTitle?.trim() ||
+        (invite.eventTitle ? formatInviteTime(invite.eventTitle) : '') ||
         (invite.time ? formatInviteTime(invite.time) : '') ||
         base.event.sthapanaMuhurat,
       morningAarti: morning?.time ? formatInviteTime(morning.time) : base.event.morningAarti,

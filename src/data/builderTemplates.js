@@ -470,6 +470,29 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromGanesh('divine-threshold')
+    return {
+      id: 'ganesh-divine-threshold',
+      sourceId: 'divine-threshold',
+      occasion: 'ganesh-chaturthi',
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-09-14',
+        time: '19:00',
+        venue: src.event.venue,
+        message: src.puja.note,
+      },
+    }
+  })(),
 
   // ---- Guruji Satsang -------------------------------------------------
   (() => {

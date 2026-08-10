@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, MapPin, Navigation, Gift } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 import FallingPetals from '../../FallingPetals'
 import CulturalMotif from '../../CulturalMotif'
 import WishesWall from '../../WishesWall'
@@ -7,6 +7,13 @@ import { themeToCssVars } from '../../../utils/themeToCssVars'
 import { GaneshChapter, ModakGlyph } from '../ganeshMotifs'
 import GaneshCurtainReveal from '../GaneshCurtainReveal'
 import GaneshRsvpForm from '../GaneshRsvpForm'
+import GaneshMomentsGallery from '../royal-durbar-darshan/GaneshMomentsGallery'
+
+// Chapter numerals shift depending on whether the optional "Cherished
+// Moments" chapter renders (see `moments` below) — only present once a
+// host has uploaded their own photos, since this layout ships no stock
+// moments of its own — so numbering is computed rather than hardcoded.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
 // The "Storybook Mandap Flow" archetype: four numbered chapters, bookended
 // by hairline rules and a modak-lit rhythm, giving the page a sequential
@@ -34,11 +41,14 @@ function MandapStep({ icon: Icon, label, children, action, gold, isLast }) {
   )
 }
 
-export default function MarigoldMandapExperience({ template }) {
-  const { palette, greeting, host, event, puja } = template
-  const invitationSlug = `ganesh-${template.slug}`
+export default function MarigoldMandapExperience({ template, invitationSlug: slugOverride, onOpen }) {
+  const { palette, greeting, host, event, puja, moments } = template
+  const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#d9932e'
+  const hasMoments = moments?.length > 0
+  const rsvpNumeral = ROMAN[hasMoments ? 3 : 2]
+  const blessingsNumeral = ROMAN[hasMoments ? 4 : 3]
 
   return (
     <div className="min-h-svh w-full bg-linen flex justify-center sm:py-8" style={themeToCssVars(template)}>
@@ -52,7 +62,7 @@ export default function MarigoldMandapExperience({ template }) {
           {/* Chapter One — Bappa's Darshan (curtain reveal) */}
           {/* ---------------------------------------------------------- */}
           <GaneshChapter numeral="I" title="Bappa's Darshan" gold={gold} className="pt-4">
-            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} />
+            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} onOpen={onOpen} />
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
@@ -66,8 +76,8 @@ export default function MarigoldMandapExperience({ template }) {
               <MandapStep icon={CalendarDays} label="Sthapana" gold={gold}>
                 {event.sthapanaDate}
               </MandapStep>
-              <MandapStep icon={Clock} label="Puja Muhurat" gold={gold}>
-                {event.muhurat}
+              <MandapStep icon={Clock} label="Pran Pratishtha Muhurat" gold={gold}>
+                {event.sthapanaMuhurat}
               </MandapStep>
               <MandapStep
                 icon={MapPin}
@@ -89,12 +99,40 @@ export default function MarigoldMandapExperience({ template }) {
               >
                 {event.venue}
               </MandapStep>
-              <MandapStep icon={Gift} label="Aarti &amp; Visarjan" gold={gold} isLast>
-                <span>{event.time}</span>
+              <MandapStep icon={Sunrise} label="Daily Aarti" gold={gold}>
+                Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
+              </MandapStep>
+              <MandapStep
+                icon={Gift}
+                label="Visarjan &amp; Maha Prasad"
+                gold={gold}
+                isLast={!event.extraSessions?.length}
+              >
+                <span>
+                  {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
+                </span>
                 <p className="mt-1.5 text-sm font-sans font-normal text-ink-soft leading-relaxed">
-                  {puja?.note} Visarjan on {event.visarjanDate}.
+                  Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
                 </p>
               </MandapStep>
+              {/* Any host-added session beyond the four named ones above —
+                  see buildGaneshExperienceTemplate.js's `extraSessions`. */}
+              {event.extraSessions?.map((session, i, arr) => (
+                <MandapStep
+                  key={i}
+                  icon={CalendarDays}
+                  label={session.title}
+                  gold={gold}
+                  isLast={i === arr.length - 1}
+                >
+                  <span>{[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}</span>
+                  {session.venue && (
+                    <p className="mt-1.5 text-sm font-sans font-normal text-ink-soft leading-relaxed">
+                      {session.venue}
+                    </p>
+                  )}
+                </MandapStep>
+              ))}
             </div>
             <div className="flex justify-center mt-2">
               <ModakGlyph color={gold} accent={palette?.rose} size={22} />
@@ -102,16 +140,26 @@ export default function MarigoldMandapExperience({ template }) {
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
-          {/* Chapter Three — Your Presence (RSVP) */}
+          {/* Chapter Three — Cherished Moments (only once a host has    */}
+          {/* uploaded photos — see buildGaneshExperienceTemplate.js)    */}
           {/* ---------------------------------------------------------- */}
-          <GaneshChapter numeral="III" title="Your Presence" gold={gold}>
+          {hasMoments && (
+            <GaneshChapter numeral="III" title="Cherished Moments" gold={gold}>
+              <GaneshMomentsGallery moments={moments} palette={palette} gold={gold} rose={palette?.rose} />
+            </GaneshChapter>
+          )}
+
+          {/* ---------------------------------------------------------- */}
+          {/* Your Presence (RSVP) */}
+          {/* ---------------------------------------------------------- */}
+          <GaneshChapter numeral={rsvpNumeral} title="Your Presence" gold={gold}>
             <GaneshRsvpForm palette={palette} slug={invitationSlug} />
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
-          {/* Chapter Four — Blessings Received */}
+          {/* Blessings Received */}
           {/* ---------------------------------------------------------- */}
-          <GaneshChapter numeral="IV" title="Blessings Received" gold={gold}>
+          <GaneshChapter numeral={blessingsNumeral} title="Blessings Received" gold={gold}>
             <WishesWall
               slug={invitationSlug}
               heading=""

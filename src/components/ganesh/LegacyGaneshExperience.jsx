@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, MapPin, Navigation, Gift } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 import FallingPetals from '../FallingPetals'
 import CulturalMotif from '../CulturalMotif'
 import { FrameBanner, FrameCorners } from '../TemplateFrame'
@@ -9,6 +9,7 @@ import { themeToCssVars } from '../../utils/themeToCssVars'
 import { ModakGlyph } from './ganeshMotifs'
 import GaneshCurtainReveal from './GaneshCurtainReveal'
 import GaneshRsvpForm from './GaneshRsvpForm'
+import GaneshMomentsGallery from './royal-durbar-darshan/GaneshMomentsGallery'
 
 // The shared Ganesh Chaturthi layout for every template that doesn't
 // declare a bespoke `layout` (see ganesh/layoutRegistry.js) — mirrors
@@ -34,9 +35,9 @@ function DetailCard({ icon: Icon, label, children, action }) {
   )
 }
 
-export default function LegacyGaneshExperience({ template }) {
-  const { palette, motif, motifAccent, greeting, host, event, puja, name } = template
-  const invitationSlug = `ganesh-${template.slug}`
+export default function LegacyGaneshExperience({ template, invitationSlug: slugOverride, onOpen }) {
+  const { palette, motif, motifAccent, greeting, host, event, puja, moments, name } = template
+  const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
 
   return (
@@ -67,7 +68,7 @@ export default function LegacyGaneshExperience({ template }) {
               <FrameBanner motif={motif} palette={palette} accent={motifAccent} className="w-full h-auto" />
             </motion.div>
 
-            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} />
+            <GaneshCurtainReveal palette={palette} greeting={greeting} host={host} onOpen={onOpen} />
           </section>
 
           {/* ---------------------------------------------------------- */}
@@ -88,8 +89,8 @@ export default function LegacyGaneshExperience({ template }) {
               <DetailCard icon={CalendarDays} label="Sthapana">
                 {event.sthapanaDate}
               </DetailCard>
-              <DetailCard icon={Clock} label="Muhurat">
-                {event.muhurat}
+              <DetailCard icon={Clock} label="Pran Pratishtha Muhurat">
+                {event.sthapanaMuhurat}
               </DetailCard>
               <div className="col-span-2">
                 <DetailCard
@@ -113,21 +114,74 @@ export default function LegacyGaneshExperience({ template }) {
                 </DetailCard>
               </div>
               <div className="col-span-2">
-                <DetailCard icon={Gift} label="Aarti &amp; Visarjan">
-                  <span className="text-base">{event.time}</span>
+                <DetailCard icon={Sunrise} label="Daily Aarti">
+                  <span className="text-base">
+                    Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
+                  </span>
+                </DetailCard>
+              </div>
+              <div className="col-span-2">
+                <DetailCard icon={Gift} label="Visarjan &amp; Maha Prasad">
+                  <span className="text-base">
+                    {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
+                  </span>
                   <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">
-                    {puja?.note} Visarjan on {event.visarjanDate}.
+                    Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
                   </p>
                 </DetailCard>
               </div>
+              {/* Any host-added session beyond the four named ones above —
+                  see buildGaneshExperienceTemplate.js's `extraSessions`. */}
+              {event.extraSessions?.map((session, i) => (
+                <div className="col-span-2" key={i}>
+                  <DetailCard icon={CalendarDays} label={session.title}>
+                    <span className="text-base">
+                      {[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}
+                    </span>
+                    {session.venue && (
+                      <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">
+                        {session.venue}
+                      </p>
+                    )}
+                  </DetailCard>
+                </div>
+              ))}
             </div>
           </section>
+
+          {/* ---------------------------------------------------------- */}
+          {/* Sacred Moments — only present once a host has uploaded their */}
+          {/* own photos (see buildGaneshExperienceTemplate.js); the      */}
+          {/* pre-built demo templates that use this legacy layout don't  */}
+          {/* ship stock `moments`, so this renders nothing for them.     */}
+          {/* ---------------------------------------------------------- */}
+          {moments?.length > 0 && (
+            <section className="px-6 pb-4">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="font-serif text-2xl sm:text-3xl text-ink text-center mb-8"
+              >
+                Sacred Moments
+              </motion.h2>
+              <GaneshMomentsGallery
+                moments={moments}
+                palette={palette}
+                gold={palette?.gold ?? '#d9932e'}
+                rose={palette?.rose ?? '#c2410c'}
+              />
+            </section>
+          )}
 
           <div className="px-6">
             <GaneshRsvpForm palette={palette} slug={invitationSlug} />
           </div>
           <WishesWall
             slug={invitationSlug}
+            heading="Blessings for Bappa's Family"
+            subheading="Leave a wish — Ganpati Bappa Morya 🙏"
             renderIcon={() => <ModakGlyph color={palette?.gold} accent={palette?.rose} size={14} />}
           />
 

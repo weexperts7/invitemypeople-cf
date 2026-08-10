@@ -10,7 +10,7 @@ import Celebration from '../Celebration'
 // template's palette re-skins it. Modeled on BlessingEnvelope.jsx's
 // stage/timing pattern, but curtains parting horizontally instead of an
 // envelope flap opening.
-export default function GaneshCurtainReveal({ palette, greeting, host }) {
+export default function GaneshCurtainReveal({ palette, greeting, host, onOpen }) {
   const [stage, setStage] = useState('closed') // closed | opening | open
   const [burst, setBurst] = useState(null)
   const reduceMotion = useReducedMotion()
@@ -23,7 +23,10 @@ export default function GaneshCurtainReveal({ palette, greeting, host }) {
     setStage('opening')
     const openDelay = reduceMotion ? 100 : 900
     const burstDelay = reduceMotion ? 200 : 1200
-    setTimeout(() => setStage('open'), openDelay)
+    setTimeout(() => {
+      setStage('open')
+      onOpen?.()
+    }, openDelay)
     setTimeout(() => setBurst({ id: Date.now() }), burstDelay)
   }
 

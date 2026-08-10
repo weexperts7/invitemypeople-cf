@@ -157,7 +157,14 @@ export default function HostDashboardPage() {
           <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Host Dashboard</p>
           <h1 className="mt-1 font-serif text-3xl sm:text-4xl text-ink">{invite.names}</h1>
           <p className="mt-2 text-ink-soft">
-            {invite.eventTitle ? `${invite.eventTitle} — ` : ''}
+            {/* For Ganesh Chaturthi, `eventTitle` holds the Sthapana Muhurat
+                as a <input type="time"> value (see CreateInvitePage.jsx /
+                buildGaneshExperienceTemplate.js) rather than free text like
+                a wedding's Function Name, so it needs the same
+                formatInviteTime() treatment as `time` below. */}
+            {invite.eventTitle
+              ? `${invite.occasion === 'ganesh-chaturthi' ? formatInviteTime(invite.eventTitle) : invite.eventTitle} — `
+              : ''}
             {formatInviteDate(invite.date)}
             {invite.time ? ` at ${formatInviteTime(invite.time)}` : ''} · {invite.venue}
           </p>

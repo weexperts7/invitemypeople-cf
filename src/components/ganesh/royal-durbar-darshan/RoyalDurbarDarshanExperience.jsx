@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Crown } from 'lucide-react'
 import FallingPetals from '../../FallingPetals'
 import CulturalMotif from '../../CulturalMotif'
@@ -17,11 +18,20 @@ import MuhuratScroll from './MuhuratScroll'
 // muhurat presented as an unrolling parchment scroll rather than a step
 // list or card grid — the structural differentiator from
 // MarigoldMandapExperience and GoldenTrunkBlessingExperience.
-export default function RoyalDurbarDarshanExperience({ template }) {
+export default function RoyalDurbarDarshanExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, host, event, puja, moments } = template
-  const invitationSlug = `ganesh-${template.slug}`
+  const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const gold = palette?.gold ?? '#b8892c'
   const rose = palette?.rose ?? '#7a1230'
+
+  // No tap-gated reveal here (it's a straight full-bleed photo hero, unlike
+  // GaneshCurtainReveal/ModakBlessingBox/TempleDoorReveal) — background
+  // music (see GaneshExperience.jsx) still needs an "opened" signal to
+  // start playing, so this fires it as soon as the page mounts instead.
+  useEffect(() => {
+    onOpen?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="min-h-svh w-full bg-linen flex justify-center sm:py-8" style={themeToCssVars(template)}>
@@ -65,6 +75,8 @@ export default function RoyalDurbarDarshanExperience({ template }) {
           </div>
           <WishesWall
             slug={invitationSlug}
+            heading="Blessings for Bappa's Family"
+            subheading="Leave a wish — Ganpati Bappa Morya 🙏"
             renderIcon={() => <Crown className="w-3.5 h-3.5" style={{ color: rose }} strokeWidth={1.6} />}
           />
 

@@ -17,10 +17,12 @@ import RsvpForm from '../components/RsvpForm'
 import WishesWall from '../components/WishesWall'
 import InvitePreviewCard from '../components/builder/InvitePreviewCard'
 import InvitationExperience from '../components/InvitationExperience'
+import GaneshExperience from '../components/GaneshExperience'
 import { getBuilderTemplateById } from '../data/builderTemplates'
 import { getInviteBySlug } from '../utils/inviteApi'
 import { formatInviteDate } from '../utils/formatInviteDateTime'
 import { buildWeddingExperienceTemplate } from '../utils/buildWeddingExperienceTemplate'
+import { buildGaneshExperienceTemplate } from '../utils/buildGaneshExperienceTemplate'
 import { SITE_URL } from '../data/routesSeo'
 
 // Where a paid Invitation Builder submission (CreateInvitePage.jsx) lands —
@@ -132,11 +134,30 @@ export default function GeneratedInvitePage() {
     )
   }
 
-  // Ganesh Chaturthi / Guruji Satsang invites keep the lighter preview-card
-  // treatment (plus the copy-link/share banner) for now — those templates
-  // route through several bespoke per-template layout components (see
-  // GaneshExperience.jsx / SatsangExperience.jsx) that don't yet support an
-  // external slug override the way InvitationExperience now does.
+  // Ganesh Chaturthi invites: same treatment as wedding above — the real
+  // bespoke experience (whichever layout the buyer's chosen template maps
+  // to, see ganesh/layoutRegistry.js), built from the buyer's own
+  // submission via buildGaneshExperienceTemplate.js, with RSVP/Wishes Wall
+  // keyed to this invite's own slug via GaneshExperience's
+  // `invitationSlug` prop override.
+  if (invite.occasion === 'ganesh-chaturthi') {
+    return (
+      <>
+        {seo}
+        <GaneshExperience
+          template={buildGaneshExperienceTemplate(invite, template)}
+          invitationSlug={invite.slug}
+          showChrome={false}
+        />
+      </>
+    )
+  }
+
+  // Guruji Satsang invites keep the lighter preview-card treatment (plus
+  // the copy-link/share banner) for now — those templates route through
+  // several bespoke per-template layout components (see
+  // SatsangExperience.jsx) that don't yet support an external slug override
+  // the way InvitationExperience/GaneshExperience now do.
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
       {seo}

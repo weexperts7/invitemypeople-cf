@@ -38,7 +38,12 @@ function DetailCard({ icon: Icon, label, children, action }) {
 export default function LegacyGaneshExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, motif, motifAccent, greeting, host, event, puja, moments, name } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
+  // A buyer's own pasted Google Maps link (see CreateInvitePage.jsx's
+  // "Location URL" field, threaded through as `event.mapHref` by
+  // buildGaneshExperienceTemplate.js) wins over this generic venue-name
+  // search, which only the pre-built demo templates (with no mapHref) fall
+  // back to.
+  const mapsHref = event.mapHref || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
 
   return (
     <div className="min-h-svh w-full bg-linen flex justify-center sm:py-8" style={themeToCssVars(template)}>

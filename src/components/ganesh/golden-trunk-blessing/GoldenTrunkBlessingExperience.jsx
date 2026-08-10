@@ -43,7 +43,12 @@ function DetailCard({ icon: Icon, label, children, action, gold, rose }) {
 export default function GoldenTrunkBlessingExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, greeting, host, event, puja, moments } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
+  // A buyer's own pasted Google Maps link (see CreateInvitePage.jsx's
+  // "Location URL" field, threaded through as `event.mapHref` by
+  // buildGaneshExperienceTemplate.js) wins over this generic venue-name
+  // search, which only the pre-built demo templates (with no mapHref) fall
+  // back to.
+  const mapsHref = event.mapHref || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#c28a3a'
   const rose = palette?.rose ?? '#9a1f2b'
 
@@ -77,11 +82,11 @@ export default function GoldenTrunkBlessingExperience({ template, invitationSlug
           </section>
 
           {/* ---------------------------------------------------------- */}
-          {/* Golden Trunk Blessing — tap-to-open modak box */}
+          {/* Golden Trunk Blessing — scratch-to-reveal modak card */}
           {/* ---------------------------------------------------------- */}
           <section className="px-6 pb-4">
             <p className="text-center text-sm text-ink-soft mb-8 max-w-xs mx-auto">
-              Tap the golden box to receive Bappa&rsquo;s blessing for your journey ahead.
+              Scratch the golden foil to receive Bappa&rsquo;s blessing for your journey ahead.
             </p>
             <ModakBlessingBox palette={palette} onOpen={onOpen} />
           </section>

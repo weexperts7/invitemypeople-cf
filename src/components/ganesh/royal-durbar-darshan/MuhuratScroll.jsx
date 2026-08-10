@@ -39,7 +39,12 @@ function ScrollRow({ icon: Icon, label, children, gold, rose, last }) {
 // the vertical step-list (Marigold Mandap) or card-grid (Golden Trunk
 // Blessing) the other two Ganesh templates use for the same content.
 export default function MuhuratScroll({ event, puja, palette, gold, rose }) {
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
+  // A buyer's own pasted Google Maps link (see CreateInvitePage.jsx's
+  // "Location URL" field, threaded through as `event.mapHref` by
+  // buildGaneshExperienceTemplate.js) wins over this generic venue-name
+  // search, which only the pre-built demo templates (with no mapHref) fall
+  // back to.
+  const mapsHref = event.mapHref || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const goldSoft = palette?.goldSoft ?? '#dcb662'
   const champagne = palette?.champagne ?? '#e6c883'
 

@@ -44,7 +44,12 @@ function MandapStep({ icon: Icon, label, children, action, gold, isLast }) {
 export default function MarigoldMandapExperience({ template, invitationSlug: slugOverride, onOpen }) {
   const { palette, greeting, host, event, puja, moments } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
+  // A buyer's own pasted Google Maps link (see CreateInvitePage.jsx's
+  // "Location URL" field, threaded through as `event.mapHref` by
+  // buildGaneshExperienceTemplate.js) wins over this generic venue-name
+  // search, which only the pre-built demo templates (with no mapHref) fall
+  // back to.
+  const mapsHref = event.mapHref || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#d9932e'
   const hasMoments = moments?.length > 0
   const rsvpNumeral = ROMAN[hasMoments ? 3 : 2]

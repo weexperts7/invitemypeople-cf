@@ -1,5 +1,5 @@
 import { getGaneshTemplateBySlug } from '../data/ganeshTemplatesData'
-import { formatInviteDate, formatInviteTime } from './formatInviteDateTime'
+import { formatInviteDate, formatInviteTime, mapsSearchUrl } from './formatInviteDateTime'
 
 // Finds the buyer's "Festival Schedule" entry (see builder/EventsListEditor.jsx,
 // reused for Ganesh Chaturthi as CreateInvitePage.jsx's "Festival Schedule"
@@ -72,6 +72,13 @@ export function buildGaneshExperienceTemplate(invite, builderTemplate) {
       ...base.event,
       sthapanaDate: invite.date ? formatInviteDate(invite.date) : base.event.sthapanaDate,
       venue: invite.venue?.trim() || base.event.venue,
+      // "Location URL" (see CreateInvitePage.jsx) — a buyer's own pasted
+      // Google Maps link wins over the generic venue-name search every
+      // layout's "Get Directions" button otherwise falls back to (see
+      // mapsSearchUrl below, and each layout's own `event.mapHref ??`
+      // fallback), same locationUrl -> mapHref mapping
+      // buildWeddingExperienceTemplate.js already does per-ceremony.
+      mapHref: invite.locationUrl?.trim() || mapsSearchUrl(invite.venue?.trim() || base.event.venue),
       // "Sthapana Muhurat" (see CreateInvitePage.jsx) reuses the generic
       // `eventTitle` field, captured there as a <input type="time"> (the
       // auspicious Pran Pratishtha moment) rather than free text — same

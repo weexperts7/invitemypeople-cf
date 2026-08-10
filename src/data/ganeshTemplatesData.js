@@ -58,6 +58,35 @@ export const GANESH_TEMPLATES = [
       note:
         'Daily Aarti and Modak Prasad follow every evening, with all devotees warmly invited to join.',
     },
+    // Reuses the same free-licensed festival photography as
+    // royal-durbar-darshan/divine-threshold (see the Wikimedia Commons
+    // credits at the bottom of this file) so every template's demo page —
+    // not just the two photo-led flagships — shows guests a real "Sacred
+    // Moments" gallery, matching what a buyer's own uploaded photos
+    // (buildGaneshExperienceTemplate.js) replace it with once purchased.
+    moments: [
+      {
+        src: '/images/ganesh/royal-durbar/marigold.jpg',
+        alt: 'Strings of fresh marigold flowers',
+        caption: 'The Marigold Threshold',
+        sub: 'Fresh garlands strung at the doorway',
+        when: 'September 13 · Evening',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/aarti.jpg',
+        alt: 'Lit oil lamps at evening aarti',
+        caption: 'Aarti’s Golden Glow',
+        sub: 'Diyas lit at dusk, every evening',
+        when: 'Daily · 7:00 PM',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/modak.jpg',
+        alt: 'Modak sweets offered as prasad',
+        caption: 'Modak Prasad',
+        sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
+      },
+    ],
     palette: {
       ivory: '#fffaf3',
       linen: '#fdf0da',
@@ -76,12 +105,12 @@ export const GANESH_TEMPLATES = [
     slug: 'golden-trunk-blessing',
     name: 'Golden Trunk Blessing',
     layout: 'golden-trunk-blessing',
-    tagline: 'Deep vermilion & gold, tap-to-open modak blessing',
+    tagline: 'Deep vermilion & gold, scratch-to-reveal modak blessing',
     description:
-      'Bappa’s photo takes center stage inside a golden symmetric panel, framed by a modak-and-mandala border. A tap-to-open golden modak box reveals a personal blessing, alongside the full puja muhurat, RSVP and blessing wall.',
+      'Bappa’s photo takes center stage inside a golden symmetric panel, framed by a modak-and-mandala border. A scratch-to-reveal golden modak card uncovers a personal blessing, alongside the full puja muhurat, RSVP and blessing wall.',
     metaDescription:
-      'Golden Ganesh Chaturthi invitation with a modak-and-mandala border and a tap-to-open blessing box, plus full puja muhurat, RSVP and blessing wall.',
-    tags: ['Vermilion', 'Modak Reveal', 'Symmetric Panel'],
+      'Golden Ganesh Chaturthi invitation with a modak-and-mandala border and a scratch-to-reveal blessing card, plus full puja muhurat, RSVP and blessing wall.',
+    tags: ['Vermilion', 'Scratch Reveal', 'Symmetric Panel'],
     motif: 'modak-mandala',
     motifAccent: '#9a1f2b',
     fonts: { serif: '"Cinzel", "Cormorant Garamond", serif' },
@@ -105,6 +134,31 @@ export const GANESH_TEMPLATES = [
       note:
         'Modak Prasad is served after every evening Aarti, and all devotees are lovingly requested to partake.',
     },
+    // See marigold-mandap's own `moments` comment above — same shared,
+    // free-licensed photo set.
+    moments: [
+      {
+        src: '/images/ganesh/royal-durbar/marigold.jpg',
+        alt: 'Strings of fresh marigold flowers',
+        caption: 'The Marigold Threshold',
+        sub: 'Fresh garlands strung at the doorway',
+        when: 'September 13 · Evening',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/aarti.jpg',
+        alt: 'Lit oil lamps at evening aarti',
+        caption: 'Aarti’s Golden Glow',
+        sub: 'Diyas lit at dusk, every evening',
+        when: 'Daily · 7:00 PM',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/modak.jpg',
+        alt: 'Modak sweets offered as prasad',
+        caption: 'Modak Prasad',
+        sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
+      },
+    ],
     palette: {
       ivory: '#fdf8f3',
       linen: '#f7e6d6',
@@ -151,6 +205,31 @@ export const GANESH_TEMPLATES = [
       note:
         'Aarti and Modak Prasad follow every evening, with all devotees warmly welcomed to join us through the ten days.',
     },
+    // See marigold-mandap's own `moments` comment above — same shared,
+    // free-licensed photo set.
+    moments: [
+      {
+        src: '/images/ganesh/royal-durbar/marigold.jpg',
+        alt: 'Strings of fresh marigold flowers',
+        caption: 'The Marigold Threshold',
+        sub: 'Fresh garlands strung at the doorway',
+        when: 'September 13 · Evening',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/aarti.jpg',
+        alt: 'Lit oil lamps at evening aarti',
+        caption: 'Aarti’s Golden Glow',
+        sub: 'Diyas lit at dusk, every evening',
+        when: 'Daily · 7:00 PM',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/modak.jpg',
+        alt: 'Modak sweets offered as prasad',
+        caption: 'Modak Prasad',
+        sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
+      },
+    ],
     palette: {
       ivory: '#fdf7f2',
       linen: '#f9e3da',
@@ -197,6 +276,31 @@ export const GANESH_TEMPLATES = [
       note:
         'Modak Prasad is served after every evening Aarti, and all devotees are lovingly requested to partake.',
     },
+    // See marigold-mandap's own `moments` comment above — same shared,
+    // free-licensed photo set.
+    moments: [
+      {
+        src: '/images/ganesh/royal-durbar/marigold.jpg',
+        alt: 'Strings of fresh marigold flowers',
+        caption: 'The Marigold Threshold',
+        sub: 'Fresh garlands strung at the doorway',
+        when: 'September 13 · Evening',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/aarti.jpg',
+        alt: 'Lit oil lamps at evening aarti',
+        caption: 'Aarti’s Golden Glow',
+        sub: 'Diyas lit at dusk, every evening',
+        when: 'Daily · 7:00 PM',
+      },
+      {
+        src: '/images/ganesh/royal-durbar/modak.jpg',
+        alt: 'Modak sweets offered as prasad',
+        caption: 'Modak Prasad',
+        sub: 'Bappa’s favourite sweet, shared with all',
+        when: 'Daily · After Aarti',
+      },
+    ],
     palette: {
       ivory: '#f8fbf6',
       linen: '#eaf3e6',
@@ -402,9 +506,11 @@ export function getGaneshTemplateBySlug(slug) {
 // https://commons.wikimedia.org/wiki/File:Ganesh_Chaturthi_Festival_(192).jpg
 export const GANESH_IDOL_PHOTO_SRC = '/images/ganesh-idol.jpg'
 
-// Real photography used by Royal Durbar Darshan (see heroPhoto/moments on
-// the 'royal-durbar-darshan' template above and DurbarPhotoHero.jsx /
-// GaneshMomentsGallery.jsx), all freely-licensed via Wikimedia Commons:
+// Real photography originally sourced for Royal Durbar Darshan's heroPhoto/
+// moments (see DurbarPhotoHero.jsx / GaneshMomentsGallery.jsx) — marigold/
+// aarti/modak are now reused as the shared `moments` gallery on every other
+// template above too, so each one's demo page shows a real "Sacred Moments"
+// section rather than none at all. All freely-licensed via Wikimedia Commons:
 //
 // - hero.jpg: "Ganesh Chaturthi Festival (247)" by AmanAgrahari01, CC BY-SA 4.0
 //   https://commons.wikimedia.org/wiki/File:Ganesh_Chaturthi_Festival_(247).jpg

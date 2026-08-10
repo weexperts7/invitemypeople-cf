@@ -35,6 +35,25 @@ export function buildGaneshExperienceTemplate(invite, builderTemplate) {
   const visarjan = findSession(events, 'visarjan')
   const prasad = findSession(events, 'prasad')
 
+  // Any row a buyer added beyond the four auto-seeded ones (see
+  // CreateInvitePage.jsx's "+ Add Another Event", capped at
+  // MAX_ADDITIONAL_EVENTS) — or one of the four they retitled away from a
+  // matchable keyword — would otherwise vanish silently: nothing above
+  // reads it once it stops matching morning/evening/visarjan/prasad. Every
+  // Ganesh layout renders `event.extraSessions` as its own generic
+  // "additional session" row/card, right after the four named ones, so a
+  // custom entry (e.g. "Ganesh Sthapana Procession") always shows up
+  // somewhere on the invitation instead of being dropped.
+  const known = new Set([morning, evening, visarjan, prasad].filter(Boolean))
+  const extraSessions = events
+    .filter((e) => !known.has(e) && (e?.title?.trim() || e?.date || e?.time))
+    .map((e) => ({
+      title: e.title?.trim() || 'Special Session',
+      date: e.date ? formatInviteDate(e.date) : '',
+      time: e.time ? formatInviteTime(e.time) : '',
+      venue: e.venue?.trim() || '',
+    }))
+
   // Real uploaded photos (see builder/PhotoUploader.jsx) win over the base
   // template's curated "Sacred Moments" — reused as-is by
   // GaneshMomentsGallery.jsx, which already accepts this generic
@@ -68,6 +87,7 @@ export function buildGaneshExperienceTemplate(invite, builderTemplate) {
       visarjanDate: visarjan?.date ? formatInviteDate(visarjan.date) : base.event.visarjanDate,
       visarjanYatraTime: visarjan?.time ? formatInviteTime(visarjan.time) : base.event.visarjanYatraTime,
       mahaPrasadTime: prasad?.time ? formatInviteTime(prasad.time) : base.event.mahaPrasadTime,
+      extraSessions,
     },
     moments,
     // Background Music Selection (see builder/SongSearchPicker.jsx) — same

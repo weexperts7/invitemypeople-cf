@@ -83,7 +83,13 @@ export default function MuhuratScroll({ event, puja, palette, gold, rose }) {
         <ScrollRow icon={Sunrise} label="Daily Aarti" gold={gold} rose={rose}>
           Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
         </ScrollRow>
-        <ScrollRow icon={Gift} label="Visarjan & Maha Prasad" gold={gold} rose={rose} last>
+        <ScrollRow
+          icon={Gift}
+          label="Visarjan & Maha Prasad"
+          gold={gold}
+          rose={rose}
+          last={!event.extraSessions?.length}
+        >
           <span>
             {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
           </span>
@@ -91,6 +97,23 @@ export default function MuhuratScroll({ event, puja, palette, gold, rose }) {
             Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
           </p>
         </ScrollRow>
+        {/* Any host-added session beyond the four named ones above — see
+            buildGaneshExperienceTemplate.js's `extraSessions`. */}
+        {event.extraSessions?.map((session, i, arr) => (
+          <ScrollRow
+            key={i}
+            icon={CalendarDays}
+            label={session.title}
+            gold={gold}
+            rose={rose}
+            last={i === arr.length - 1}
+          >
+            <span>{[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}</span>
+            {session.venue && (
+              <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">{session.venue}</p>
+            )}
+          </ScrollRow>
+        ))}
       </motion.div>
 
       <ScrollRod gold={gold} goldSoft={goldSoft} champagne={champagne} />

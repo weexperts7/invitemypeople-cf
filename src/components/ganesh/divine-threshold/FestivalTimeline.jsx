@@ -105,6 +105,26 @@ export default function FestivalTimeline({ event, puja, gold, rose }) {
           <p className="mt-3 text-sm font-sans text-ink-soft leading-relaxed">{puja.note}</p>
         )}
       </div>
+
+      {/* Also On The Calendar — any host-added session beyond the three
+          days above (see buildGaneshExperienceTemplate.js's
+          `extraSessions`), so a custom entry always shows up somewhere. */}
+      {event.extraSessions?.length > 0 && (
+        <div
+          className="rounded-2xl border px-5 py-6"
+          style={{ borderColor: `${gold}45`, background: 'var(--color-ivory)' }}
+        >
+          <DayBadge label="Also On The Calendar" gold={gold} rose={rose} />
+          {event.extraSessions.map((session, i) => (
+            <Row key={i} icon={CalendarDays} label={session.title} gold={gold} rose={rose}>
+              <span>{[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}</span>
+              {session.venue && (
+                <p className="mt-1 text-sm font-sans font-normal text-ink-soft leading-relaxed">{session.venue}</p>
+              )}
+            </Row>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

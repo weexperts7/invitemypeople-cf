@@ -102,7 +102,12 @@ export default function MarigoldMandapExperience({ template, invitationSlug: slu
               <MandapStep icon={Sunrise} label="Daily Aarti" gold={gold}>
                 Morning {event.morningAarti} &middot; Evening {event.eveningAarti}
               </MandapStep>
-              <MandapStep icon={Gift} label="Visarjan &amp; Maha Prasad" gold={gold} isLast>
+              <MandapStep
+                icon={Gift}
+                label="Visarjan &amp; Maha Prasad"
+                gold={gold}
+                isLast={!event.extraSessions?.length}
+              >
                 <span>
                   {event.visarjanDate} &middot; Yatra at {event.visarjanYatraTime}
                 </span>
@@ -110,6 +115,24 @@ export default function MarigoldMandapExperience({ template, invitationSlug: slu
                   Maha Prasad at {event.mahaPrasadTime}. {puja?.note}
                 </p>
               </MandapStep>
+              {/* Any host-added session beyond the four named ones above —
+                  see buildGaneshExperienceTemplate.js's `extraSessions`. */}
+              {event.extraSessions?.map((session, i, arr) => (
+                <MandapStep
+                  key={i}
+                  icon={CalendarDays}
+                  label={session.title}
+                  gold={gold}
+                  isLast={i === arr.length - 1}
+                >
+                  <span>{[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}</span>
+                  {session.venue && (
+                    <p className="mt-1.5 text-sm font-sans font-normal text-ink-soft leading-relaxed">
+                      {session.venue}
+                    </p>
+                  )}
+                </MandapStep>
+              ))}
             </div>
             <div className="flex justify-center mt-2">
               <ModakGlyph color={gold} accent={palette?.rose} size={22} />

@@ -140,6 +140,22 @@ export default function GoldenTrunkBlessingExperience({ template, invitationSlug
                   </p>
                 </DetailCard>
               </div>
+              {/* Any host-added session beyond the four named ones above —
+                  see buildGaneshExperienceTemplate.js's `extraSessions`. */}
+              {event.extraSessions?.map((session, i) => (
+                <div className="col-span-2" key={i}>
+                  <DetailCard icon={CalendarDays} label={session.title} gold={gold} rose={rose}>
+                    <span className="text-base">
+                      {[session.date, session.time].filter(Boolean).join(' · ') || 'Details to follow'}
+                    </span>
+                    {session.venue && (
+                      <p className="mt-2 text-sm font-sans font-normal text-ink-soft leading-relaxed">
+                        {session.venue}
+                      </p>
+                    )}
+                  </DetailCard>
+                </div>
+              ))}
             </div>
           </section>
 

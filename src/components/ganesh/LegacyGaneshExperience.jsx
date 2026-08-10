@@ -9,6 +9,7 @@ import { themeToCssVars } from '../../utils/themeToCssVars'
 import { ModakGlyph } from './ganeshMotifs'
 import GaneshCurtainReveal from './GaneshCurtainReveal'
 import GaneshRsvpForm from './GaneshRsvpForm'
+import GaneshMomentsGallery from './royal-durbar-darshan/GaneshMomentsGallery'
 
 // The shared Ganesh Chaturthi layout for every template that doesn't
 // declare a bespoke `layout` (see ganesh/layoutRegistry.js) — mirrors
@@ -35,7 +36,7 @@ function DetailCard({ icon: Icon, label, children, action }) {
 }
 
 export default function LegacyGaneshExperience({ template, invitationSlug: slugOverride, onOpen }) {
-  const { palette, motif, motifAccent, greeting, host, event, puja, name } = template
+  const { palette, motif, motifAccent, greeting, host, event, puja, moments, name } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
 
@@ -131,6 +132,32 @@ export default function LegacyGaneshExperience({ template, invitationSlug: slugO
               </div>
             </div>
           </section>
+
+          {/* ---------------------------------------------------------- */}
+          {/* Sacred Moments — only present once a host has uploaded their */}
+          {/* own photos (see buildGaneshExperienceTemplate.js); the      */}
+          {/* pre-built demo templates that use this legacy layout don't  */}
+          {/* ship stock `moments`, so this renders nothing for them.     */}
+          {/* ---------------------------------------------------------- */}
+          {moments?.length > 0 && (
+            <section className="px-6 pb-4">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="font-serif text-2xl sm:text-3xl text-ink text-center mb-8"
+              >
+                Sacred Moments
+              </motion.h2>
+              <GaneshMomentsGallery
+                moments={moments}
+                palette={palette}
+                gold={palette?.gold ?? '#d9932e'}
+                rose={palette?.rose ?? '#c2410c'}
+              />
+            </section>
+          )}
 
           <div className="px-6">
             <GaneshRsvpForm palette={palette} slug={invitationSlug} />

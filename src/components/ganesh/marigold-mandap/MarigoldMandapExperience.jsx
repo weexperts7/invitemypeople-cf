@@ -7,6 +7,13 @@ import { themeToCssVars } from '../../../utils/themeToCssVars'
 import { GaneshChapter, ModakGlyph } from '../ganeshMotifs'
 import GaneshCurtainReveal from '../GaneshCurtainReveal'
 import GaneshRsvpForm from '../GaneshRsvpForm'
+import GaneshMomentsGallery from '../royal-durbar-darshan/GaneshMomentsGallery'
+
+// Chapter numerals shift depending on whether the optional "Cherished
+// Moments" chapter renders (see `moments` below) — only present once a
+// host has uploaded their own photos, since this layout ships no stock
+// moments of its own — so numbering is computed rather than hardcoded.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
 // The "Storybook Mandap Flow" archetype: four numbered chapters, bookended
 // by hairline rules and a modak-lit rhythm, giving the page a sequential
@@ -35,10 +42,13 @@ function MandapStep({ icon: Icon, label, children, action, gold, isLast }) {
 }
 
 export default function MarigoldMandapExperience({ template, invitationSlug: slugOverride, onOpen }) {
-  const { palette, greeting, host, event, puja } = template
+  const { palette, greeting, host, event, puja, moments } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#d9932e'
+  const hasMoments = moments?.length > 0
+  const rsvpNumeral = ROMAN[hasMoments ? 3 : 2]
+  const blessingsNumeral = ROMAN[hasMoments ? 4 : 3]
 
   return (
     <div className="min-h-svh w-full bg-linen flex justify-center sm:py-8" style={themeToCssVars(template)}>
@@ -107,16 +117,26 @@ export default function MarigoldMandapExperience({ template, invitationSlug: slu
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
-          {/* Chapter Three — Your Presence (RSVP) */}
+          {/* Chapter Three — Cherished Moments (only once a host has    */}
+          {/* uploaded photos — see buildGaneshExperienceTemplate.js)    */}
           {/* ---------------------------------------------------------- */}
-          <GaneshChapter numeral="III" title="Your Presence" gold={gold}>
+          {hasMoments && (
+            <GaneshChapter numeral="III" title="Cherished Moments" gold={gold}>
+              <GaneshMomentsGallery moments={moments} palette={palette} gold={gold} rose={palette?.rose} />
+            </GaneshChapter>
+          )}
+
+          {/* ---------------------------------------------------------- */}
+          {/* Your Presence (RSVP) */}
+          {/* ---------------------------------------------------------- */}
+          <GaneshChapter numeral={rsvpNumeral} title="Your Presence" gold={gold}>
             <GaneshRsvpForm palette={palette} slug={invitationSlug} />
           </GaneshChapter>
 
           {/* ---------------------------------------------------------- */}
-          {/* Chapter Four — Blessings Received */}
+          {/* Blessings Received */}
           {/* ---------------------------------------------------------- */}
-          <GaneshChapter numeral="IV" title="Blessings Received" gold={gold}>
+          <GaneshChapter numeral={blessingsNumeral} title="Blessings Received" gold={gold}>
             <WishesWall
               slug={invitationSlug}
               heading=""

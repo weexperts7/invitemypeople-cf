@@ -8,6 +8,7 @@ import WishesWall from '../../WishesWall'
 import { themeToCssVars } from '../../../utils/themeToCssVars'
 import { MandapArch, ModakGlyph } from '../ganeshMotifs'
 import GaneshRsvpForm from '../GaneshRsvpForm'
+import GaneshMomentsGallery from '../royal-durbar-darshan/GaneshMomentsGallery'
 import ModakBlessingBox from './ModakBlessingBox'
 
 // The "Symmetric Golden Panel" archetype — Bappa's photo sits front and
@@ -40,7 +41,7 @@ function DetailCard({ icon: Icon, label, children, action, gold, rose }) {
 }
 
 export default function GoldenTrunkBlessingExperience({ template, invitationSlug: slugOverride, onOpen }) {
-  const { palette, greeting, host, event, puja } = template
+  const { palette, greeting, host, event, puja, moments } = template
   const invitationSlug = slugOverride || `ganesh-${template.slug}`
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`
   const gold = palette?.gold ?? '#c28a3a'
@@ -141,6 +142,19 @@ export default function GoldenTrunkBlessingExperience({ template, invitationSlug
               </div>
             </div>
           </section>
+
+          {/* Sacred Moments — only present once a host has uploaded their
+              own photos (see buildGaneshExperienceTemplate.js); the
+              pre-built demo templates don't ship stock `moments` for this
+              layout, so this renders nothing for them. */}
+          {moments?.length > 0 && (
+            <section className="px-6 pb-4">
+              <h2 className="font-serif text-2xl sm:text-3xl text-ink text-center mb-8">
+                Sacred Moments
+              </h2>
+              <GaneshMomentsGallery moments={moments} palette={palette} gold={gold} rose={rose} />
+            </section>
+          )}
 
           <div className="px-6">
             <GaneshRsvpForm palette={palette} slug={invitationSlug} />

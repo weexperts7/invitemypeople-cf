@@ -83,6 +83,7 @@ export default function LiveDraftPreviewPage() {
         <GaneshExperience
           template={buildGaneshExperienceTemplate(draft, template)}
           invitationSlug={invitationSlug}
+          showChrome={false}
         />
       </>
     )

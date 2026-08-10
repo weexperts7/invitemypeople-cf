@@ -147,6 +147,7 @@ export default function GeneratedInvitePage() {
         <GaneshExperience
           template={buildGaneshExperienceTemplate(invite, template)}
           invitationSlug={invite.slug}
+          showChrome={false}
         />
       </>
     )

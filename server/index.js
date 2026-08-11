@@ -31,10 +31,13 @@ import { randomBytes } from 'node:crypto'
 import {
   signupPartner,
   getMyProfile,
-  updateBranding,
+  updateProfile,
+  uploadPartnerLogo,
   getMyCredits,
   createPurchaseOrder,
   verifyPurchase,
+  partnerInvitesIndex,
+  getPartnerInviteBySlug,
   adminListPartners,
   adminApprovePartner,
   adminRejectPartner,
@@ -562,10 +565,18 @@ app.post('/api/verify-payment', (req, res) => {
 // there's no flat-file fallback for a real login system.
 app.post('/api/partners/signup', signupPartner)
 app.get('/api/partners/me', getMyProfile)
-app.post('/api/partners/branding', updateBranding)
+app.post('/api/partners/profile', updateProfile)
+app.post('/api/partners/logo', uploadPartnerLogo)
 app.get('/api/partners/credits', getMyCredits)
 app.post('/api/partners/purchase/create-order', createPurchaseOrder)
 app.post('/api/partners/purchase/verify', verifyPurchase)
+app.get('/api/partners/invites', partnerInvitesIndex)
+app.post('/api/partners/invites', partnerInvitesIndex)
+// Public shareable link — see api/_lib/partnerHandlers.js's pathParam()
+// helper for why this reads req.params.slug fine even though the shared
+// handler is written against req.query?.slug for the Vercel [slug].js
+// counterpart.
+app.get('/api/partners/invites/:slug', getPartnerInviteBySlug)
 app.get('/api/admin/partners', adminListPartners)
 app.post('/api/admin/partners/approve', adminApprovePartner)
 app.post('/api/admin/partners/reject', adminRejectPartner)

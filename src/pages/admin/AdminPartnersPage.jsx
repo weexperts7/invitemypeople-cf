@@ -7,25 +7,25 @@ import RequirePartnerAuth from '../../components/partners/RequirePartnerAuth'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { adminListPartners, adminApprovePartner, adminRejectPartner } from '../../utils/partnerApi'
 
-const TABS = ['pending', 'approved', 'rejected', 'suspended']
+const TABS = ['pending_approval', 'active', 'rejected', 'suspended']
 
 function StatusBadge({ status }) {
   const styles = {
-    pending: 'bg-champagne text-ink-soft',
-    approved: 'bg-blush text-rose',
+    pending_approval: 'bg-champagne text-ink-soft',
+    active: 'bg-blush text-rose',
     rejected: 'bg-ink/10 text-ink-soft',
     suspended: 'bg-ink/10 text-ink-soft',
   }
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${styles[status] || ''}`}>
-      {status}
+      {status.replace('_', ' ')}
     </span>
   )
 }
 
 function AdminContent() {
   const { accessToken, signOut } = usePartnerAuth()
-  const [tab, setTab] = useState('pending')
+  const [tab, setTab] = useState('pending_approval')
   const [partners, setPartners] = useState([])
   const [status, setStatus] = useState('loading') // loading | success | forbidden | error
   const [busyId, setBusyId] = useState(null)
@@ -107,7 +107,7 @@ function AdminContent() {
               tab === t ? 'bg-rose text-ivory' : 'bg-ivory/70 text-ink-soft hover:bg-ivory'
             }`}
           >
-            {t}
+            {t.replace('_', ' ')}
           </button>
         ))}
       </div>
@@ -122,7 +122,7 @@ function AdminContent() {
         {status === 'error' && <p className="py-10 text-ink-soft">Could not load partners.</p>}
         {status === 'success' && partners.length === 0 && (
           <div className="rounded-2xl border border-white/60 bg-ivory/50 px-5 py-8 text-center text-ink-soft">
-            No {tab} partners.
+            No {tab.replace('_', ' ')} partners.
           </div>
         )}
         {status === 'success' &&
@@ -131,21 +131,31 @@ function AdminContent() {
               key={p.id}
               className="rounded-2xl border border-white/60 bg-ivory/50 px-5 py-4 shadow-soft"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-serif text-lg text-ink">{p.businessName}</span>
-                    <StatusBadge status={p.status} />
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  {p.logoUrl ? (
+                    <img src={p.logoUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-champagne text-xs text-ink-soft">
+                      No logo
+                    </div>
+                  )}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif text-lg text-ink">{p.businessName}</span>
+                      <StatusBadge status={p.status} />
+                    </div>
+                    <p className="text-sm text-ink-soft">
+                      {p.email}
+                      {p.phone ? ` · ${p.phone}` : ''}
+                    </p>
+                    {p.address && <p className="text-xs text-ink-soft/70">{p.address}</p>}
+                    <p className="text-xs text-ink-soft/70">
+                      Applied {new Date(p.createdAt).toLocaleString('en-IN')}
+                    </p>
                   </div>
-                  <p className="text-sm text-ink-soft">
-                    {p.contactName} · {p.email}
-                    {p.phone ? ` · ${p.phone}` : ''}
-                  </p>
-                  <p className="text-xs text-ink-soft/70">
-                    Applied {new Date(p.createdAt).toLocaleString('en-IN')}
-                  </p>
                 </div>
-                {p.status === 'pending' && (
+                {p.status === 'pending_approval' && (
                   <div className="flex gap-2">
                     <button
                       type="button"

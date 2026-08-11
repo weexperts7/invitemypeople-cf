@@ -7,7 +7,7 @@ import RequirePartnerAuth from '../../components/partners/RequirePartnerAuth'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 
 const COPY = {
-  pending: {
+  pending_approval: {
     icon: Clock3,
     title: 'Your application is under review',
     body: "We'll email you as soon as a decision is made — usually within a couple of business days.",
@@ -27,10 +27,10 @@ const COPY = {
 function PendingContent() {
   const { partner, profileError } = usePartnerAuth()
 
-  // A logged-in, approved partner has no reason to be here.
-  if (partner?.status === 'approved') return <Navigate to="/partners/dashboard" replace />
+  // A logged-in, active partner has no reason to be here.
+  if (partner?.status === 'active') return <Navigate to="/partners/dashboard" replace />
 
-  const copy = COPY[partner?.status] || COPY.pending
+  const copy = COPY[partner?.status] || COPY.pending_approval
   const Icon = copy.icon
 
   return (

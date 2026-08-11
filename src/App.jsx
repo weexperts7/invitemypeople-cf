@@ -24,6 +24,7 @@ import PartnerPendingPage from './pages/partners/PartnerPendingPage'
 import PartnerDashboardPage from './pages/partners/PartnerDashboardPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminPartnersPage from './pages/admin/AdminPartnersPage'
+import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
@@ -136,6 +137,10 @@ function App() {
             <Route path="/create/live-preview" element={<LiveDraftPreviewPage />} />
             <Route path="/i/:slug" element={<GeneratedInvitePage />} />
             <Route path="/i/:slug/host/:hostToken" element={<HostDashboardPage />} />
+            {/* Partner-generated client invite — public, no auth, isolated
+                from the B2C /i/:slug viewer above (see
+                PartnerInviteViewerPage.jsx). */}
+            <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/refund" element={<RefundPolicyPage />} />

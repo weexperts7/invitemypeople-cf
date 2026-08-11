@@ -27,12 +27,26 @@ export function signupPartner(payload) {
   return request('/api/partners/signup', { method: 'POST', body: payload })
 }
 
+// Public, unauthenticated (same trust model as api/photos.js) — the signup
+// form uploads the logo first and gets back a URL to submit with the rest
+// of the application. Not JSON, so this bypasses request()'s helper.
+export async function uploadPartnerLogo(file) {
+  const formData = new FormData()
+  formData.append('logo', file)
+  const response = await fetch('/api/partners/logo', { method: 'POST', body: formData })
+  const result = await response.json().catch(() => null)
+  if (!response.ok || !result?.ok) {
+    throw new Error(result?.error || `HTTP ${response.status}`)
+  }
+  return result.url
+}
+
 export function getMyProfile(token) {
   return request('/api/partners/me', { token })
 }
 
-export function updateBranding(token, payload) {
-  return request('/api/partners/branding', { method: 'POST', token, body: payload })
+export function updateProfile(token, payload) {
+  return request('/api/partners/profile', { method: 'POST', token, body: payload })
 }
 
 export function getMyCredits(token) {
@@ -45,6 +59,20 @@ export function createPurchaseOrder(token, packageId) {
 
 export function verifyPurchase(token, payload) {
   return request('/api/partners/purchase/verify', { method: 'POST', token, body: payload })
+}
+
+export function getMyInvites(token) {
+  return request('/api/partners/invites', { token })
+}
+
+export function createClientInvite(token, payload) {
+  return request('/api/partners/invites', { method: 'POST', token, body: payload })
+}
+
+// Public, unauthenticated — the shareable /p/:slug link's data source (see
+// PartnerInviteViewerPage.jsx).
+export function getPartnerInviteBySlug(slug) {
+  return request(`/api/partners/invites/${encodeURIComponent(slug)}`)
 }
 
 // --- Admin-facing ------------------------------------------------------

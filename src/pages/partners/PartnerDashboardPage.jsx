@@ -2,12 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import {
   CheckCircle2,
+  Copy,
   CreditCard,
+  ImagePlus,
+  Link2,
   Loader2,
   LogOut,
   Minus,
-  Palette,
   Plus,
+  Sparkles,
   Wallet,
 } from 'lucide-react'
 import SiteHeader from '../../components/SiteHeader'
@@ -18,11 +21,16 @@ import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { loadRazorpayCheckout } from '../../utils/loadRazorpayCheckout'
 import {
   getMyCredits,
-  updateBranding as updateBrandingApi,
+  updateProfile as updateProfileApi,
+  uploadPartnerLogo,
   createPurchaseOrder,
   verifyPurchase,
+  getMyInvites,
+  createClientInvite,
 } from '../../utils/partnerApi'
 import { PARTNER_PACKAGES } from '../../data/partnerPackages'
+import { TEMPLATES } from '../../data/templatesData'
+import { SITE_URL } from '../../data/routesSeo'
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
@@ -60,7 +68,7 @@ function CreditLedger({ transactions }) {
               {tx.credits >= 0 ? '+' : ''}
               {tx.credits}
             </p>
-            <p className="text-xs text-ink-soft/70">balance {tx.balanceAfter}</p>
+            <p className="text-xs text-ink-soft/70">{tx.balanceAfter} remaining</p>
           </div>
         </div>
       ))}
@@ -68,38 +76,83 @@ function CreditLedger({ transactions }) {
   )
 }
 
+function CopyLinkButton({ url }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('[PartnerDashboard] clipboard copy failed:', err)
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose px-3.5 py-2 text-xs font-medium text-ivory shadow-card"
+    >
+      {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  )
+}
+
 function DashboardContent() {
   const { partner, accessToken, signOut, refreshProfile } = usePartnerAuth()
-  const [credits, setCredits] = useState(null) // { balance, transactions }
+
+  const [credits, setCredits] = useState(null) // { creditsRemaining, transactions }
   const [purchasingId, setPurchasingId] = useState(null)
   const [purchaseError, setPurchaseError] = useState(null)
 
-  const [branding, setBranding] = useState(null)
-  const [savingBranding, setSavingBranding] = useState(false)
-  const [brandingSaved, setBrandingSaved] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [profileLogoFile, setProfileLogoFile] = useState(null)
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+
+  const [invites, setInvites] = useState([])
+  const [inviteForm, setInviteForm] = useState({
+    coupleNames: '',
+    weddingDate: '',
+    weddingTime: '',
+    venue: '',
+    locationUrl: '',
+    message: '',
+    templateId: TEMPLATES[0]?.id || '',
+  })
+  const [creatingInvite, setCreatingInvite] = useState(false)
+  const [inviteError, setInviteError] = useState(null)
 
   const loadCredits = useCallback(async () => {
     try {
-      const result = await getMyCredits(accessToken)
-      setCredits(result)
+      setCredits(await getMyCredits(accessToken))
     } catch (err) {
       console.error('[PartnerDashboard] failed to load credits:', err)
     }
   }, [accessToken])
 
+  const loadInvites = useCallback(async () => {
+    try {
+      const result = await getMyInvites(accessToken)
+      setInvites(result.invites)
+    } catch (err) {
+      console.error('[PartnerDashboard] failed to load invites:', err)
+    }
+  }, [accessToken])
+
   useEffect(() => {
     loadCredits()
-  }, [loadCredits])
+    loadInvites()
+  }, [loadCredits, loadInvites])
 
   useEffect(() => {
     if (partner) {
-      setBranding({
-        contactName: partner.contactName || '',
+      setProfile({
+        businessName: partner.businessName || '',
+        address: partner.address || '',
         phone: partner.phone || '',
-        brandDisplayName: partner.brandDisplayName || '',
-        brandLogoUrl: partner.brandLogoUrl || '',
-        brandPrimaryColor: partner.brandPrimaryColor || '',
-        brandSecondaryColor: partner.brandSecondaryColor || '',
+        logoUrl: partner.logoUrl || '',
       })
     }
   }, [partner])
@@ -107,7 +160,7 @@ function DashboardContent() {
   // A partner's own approval status can only ever move forward (or to
   // 'rejected'/'suspended') server-side — nothing on this page can change
   // it — so bouncing away here is safe from render loops.
-  if (partner && partner.status !== 'approved') {
+  if (partner && partner.status !== 'active') {
     return <Navigate to="/partners/pending" replace />
   }
 
@@ -138,6 +191,8 @@ function DashboardContent() {
               razorpay_signature: response.razorpay_signature,
               packageId: pkg.id,
             })
+            // Credits land instantly — refetch right away so the balance
+            // on screen updates without a page reload.
             await loadCredits()
           } catch (err) {
             console.error('[PartnerDashboard] purchase verification failed:', err)
@@ -162,29 +217,51 @@ function DashboardContent() {
     }
   }
 
-  const handleBrandingSubmit = async (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault()
-    setSavingBranding(true)
-    setBrandingSaved(false)
+    setSavingProfile(true)
+    setProfileSaved(false)
     try {
-      await updateBrandingApi(accessToken, branding)
+      let logoUrl = profile.logoUrl
+      if (profileLogoFile) {
+        logoUrl = await uploadPartnerLogo(profileLogoFile)
+      }
+      await updateProfileApi(accessToken, { ...profile, logoUrl })
       await refreshProfile()
-      setBrandingSaved(true)
-      setTimeout(() => setBrandingSaved(false), 2500)
+      setProfileLogoFile(null)
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2500)
     } catch (err) {
-      console.error('[PartnerDashboard] failed to save branding:', err)
+      console.error('[PartnerDashboard] failed to save profile:', err)
     } finally {
-      setSavingBranding(false)
+      setSavingProfile(false)
     }
   }
 
-  if (!partner || !branding) {
+  const handleInviteSubmit = async (e) => {
+    e.preventDefault()
+    setCreatingInvite(true)
+    setInviteError(null)
+    try {
+      await createClientInvite(accessToken, inviteForm)
+      setInviteForm((f) => ({ ...f, coupleNames: '', weddingDate: '', weddingTime: '', venue: '', locationUrl: '', message: '' }))
+      await Promise.all([loadCredits(), loadInvites()])
+    } catch (err) {
+      setInviteError(err.message || 'Could not create the invite.')
+    } finally {
+      setCreatingInvite(false)
+    }
+  }
+
+  if (!partner || !profile) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center text-ink-soft">
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     )
   }
+
+  const noCredits = (credits?.creditsRemaining ?? 0) < 1
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
@@ -193,9 +270,14 @@ function DashboardContent() {
 
       <main className="mx-auto max-w-4xl px-6 py-14 sm:py-16">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Partner Dashboard</p>
-            <h1 className="mt-1 font-serif text-3xl text-ink">{partner.businessName}</h1>
+          <div className="flex items-center gap-3">
+            {partner.logoUrl && (
+              <img src={partner.logoUrl} alt="" className="h-12 w-12 rounded-lg object-cover" />
+            )}
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Partner Dashboard</p>
+              <h1 className="mt-1 font-serif text-3xl text-ink">{partner.businessName}</h1>
+            </div>
           </div>
           <button
             type="button"
@@ -214,8 +296,8 @@ function DashboardContent() {
             Credits
           </h2>
           <div className="rounded-2xl border border-white/60 bg-ivory/60 px-5 py-4 shadow-soft">
-            <div className="font-serif text-3xl text-ink">{credits?.balance ?? '—'}</div>
-            <div className="text-xs uppercase tracking-[0.2em] text-ink-soft">credits available</div>
+            <div className="font-serif text-3xl text-ink">{credits?.creditsRemaining ?? '—'}</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-ink-soft">credits remaining</div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -254,81 +336,210 @@ function DashboardContent() {
           </div>
         </section>
 
-        {/* Branding */}
+        {/* Create a client invite */}
         <section className="mt-12">
           <h2 className="mb-4 flex items-center gap-2 font-serif text-xl text-ink">
-            <Palette className="h-4 w-4 text-rose" />
-            White-label branding
+            <Sparkles className="h-4 w-4 text-rose" />
+            Create a client invite
           </h2>
           <form
-            onSubmit={handleBrandingSubmit}
+            onSubmit={handleInviteSubmit}
+            className="grid gap-4 rounded-2xl border border-white/60 bg-ivory/50 px-5 py-5 shadow-soft sm:grid-cols-2"
+          >
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Couple names</label>
+              <input
+                required
+                placeholder="Meenal & Avinash"
+                className={FIELD_CLASS}
+                value={inviteForm.coupleNames}
+                onChange={(e) => setInviteForm((f) => ({ ...f, coupleNames: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Wedding date</label>
+              <input
+                required
+                type="date"
+                className={FIELD_CLASS}
+                value={inviteForm.weddingDate}
+                onChange={(e) => setInviteForm((f) => ({ ...f, weddingDate: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Time (optional)</label>
+              <input
+                type="time"
+                className={FIELD_CLASS}
+                value={inviteForm.weddingTime}
+                onChange={(e) => setInviteForm((f) => ({ ...f, weddingTime: e.target.value }))}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Venue</label>
+              <input
+                required
+                className={FIELD_CLASS}
+                value={inviteForm.venue}
+                onChange={(e) => setInviteForm((f) => ({ ...f, venue: e.target.value }))}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Map link (optional)</label>
+              <input
+                className={FIELD_CLASS}
+                placeholder="https://maps.google.com/…"
+                value={inviteForm.locationUrl}
+                onChange={(e) => setInviteForm((f) => ({ ...f, locationUrl: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Look &amp; feel</label>
+              <select
+                className={FIELD_CLASS}
+                value={inviteForm.templateId}
+                onChange={(e) => setInviteForm((f) => ({ ...f, templateId: e.target.value }))}
+              >
+                {TEMPLATES.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Message (optional)</label>
+              <textarea
+                rows={2}
+                className={FIELD_CLASS}
+                value={inviteForm.message}
+                onChange={(e) => setInviteForm((f) => ({ ...f, message: e.target.value }))}
+              />
+            </div>
+
+            {inviteError && (
+              <p className="sm:col-span-2 rounded-lg bg-blush px-3 py-2 text-sm text-rose">{inviteError}</p>
+            )}
+            {noCredits && !inviteError && (
+              <p className="sm:col-span-2 rounded-lg bg-champagne/40 px-3 py-2 text-sm text-ink-soft">
+                You have no credits remaining — buy a package above first.
+              </p>
+            )}
+
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                disabled={creatingInvite || noCredits}
+                className="inline-flex items-center gap-2 rounded-full bg-rose px-5 py-2.5 text-sm font-semibold text-ivory shadow-card disabled:opacity-60"
+              >
+                {creatingInvite && <Loader2 className="h-4 w-4 animate-spin" />}
+                Generate invite (1 credit)
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* Past invites */}
+        <section className="mt-12">
+          <h2 className="mb-4 flex items-center gap-2 font-serif text-xl text-ink">
+            <Link2 className="h-4 w-4 text-rose" />
+            Your invites
+          </h2>
+          {invites.length === 0 ? (
+            <div className="rounded-2xl border border-white/60 bg-ivory/50 px-5 py-8 text-center text-ink-soft">
+              No invites created yet.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {invites.map((inv) => {
+                const url = `${SITE_URL}/p/${inv.slug}`
+                return (
+                  <div
+                    key={inv.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/60 bg-ivory/50 px-4 py-3 text-sm"
+                  >
+                    <div>
+                      <p className="text-ink">{inv.coupleNames}</p>
+                      <p className="text-xs text-ink-soft/70">
+                        {inv.venue} · {new Date(inv.createdAt).toLocaleDateString('en-IN')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="max-w-[220px] truncate text-xs text-ink-soft">{url}</span>
+                      <CopyLinkButton url={url} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Business profile */}
+        <section className="mt-12">
+          <h2 className="mb-4 flex items-center gap-2 font-serif text-xl text-ink">
+            <ImagePlus className="h-4 w-4 text-rose" />
+            Business profile &amp; branding
+          </h2>
+          <form
+            onSubmit={handleProfileSubmit}
             className="grid gap-4 rounded-2xl border border-white/60 bg-ivory/50 px-5 py-5 shadow-soft sm:grid-cols-2"
           >
             <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Display name</label>
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Business name</label>
               <input
                 className={FIELD_CLASS}
-                placeholder={partner.businessName}
-                value={branding.brandDisplayName}
-                onChange={(e) => setBranding((b) => ({ ...b, brandDisplayName: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Logo URL</label>
-              <input
-                className={FIELD_CLASS}
-                placeholder="https://…"
-                value={branding.brandLogoUrl}
-                onChange={(e) => setBranding((b) => ({ ...b, brandLogoUrl: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Primary color</label>
-              <input
-                type="text"
-                className={FIELD_CLASS}
-                placeholder="#b3541e"
-                value={branding.brandPrimaryColor}
-                onChange={(e) => setBranding((b) => ({ ...b, brandPrimaryColor: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Secondary color</label>
-              <input
-                type="text"
-                className={FIELD_CLASS}
-                placeholder="#fbf3ea"
-                value={branding.brandSecondaryColor}
-                onChange={(e) => setBranding((b) => ({ ...b, brandSecondaryColor: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Contact name</label>
-              <input
-                className={FIELD_CLASS}
-                value={branding.contactName}
-                onChange={(e) => setBranding((b) => ({ ...b, contactName: e.target.value }))}
+                value={profile.businessName}
+                onChange={(e) => setProfile((p) => ({ ...p, businessName: e.target.value }))}
               />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-ink-soft">Phone</label>
               <input
                 className={FIELD_CLASS}
-                value={branding.phone}
-                onChange={(e) => setBranding((b) => ({ ...b, phone: e.target.value }))}
+                value={profile.phone}
+                onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
               />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Address</label>
+              <textarea
+                rows={2}
+                className={FIELD_CLASS}
+                value={profile.address}
+                onChange={(e) => setProfile((p) => ({ ...p, address: e.target.value }))}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Logo</label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-champagne-deep/60 bg-ivory/50 px-4 py-3 text-sm text-ink-soft hover:bg-ivory">
+                {profileLogoFile ? (
+                  <img src={URL.createObjectURL(profileLogoFile)} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                ) : profile.logoUrl ? (
+                  <img src={profile.logoUrl} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                ) : (
+                  <ImagePlus className="h-5 w-5" />
+                )}
+                {profileLogoFile ? profileLogoFile.name : 'Change logo'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => setProfileLogoFile(e.target.files?.[0] || null)}
+                />
+              </label>
             </div>
 
             <div className="sm:col-span-2 flex items-center gap-3">
               <button
                 type="submit"
-                disabled={savingBranding}
+                disabled={savingProfile}
                 className="inline-flex items-center gap-2 rounded-full bg-rose px-5 py-2.5 text-sm font-semibold text-ivory shadow-card disabled:opacity-60"
               >
-                {savingBranding && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save branding
+                {savingProfile && <Loader2 className="h-4 w-4 animate-spin" />}
+                Save
               </button>
-              {brandingSaved && (
+              {profileSaved && (
                 <span className="flex items-center gap-1.5 text-sm text-rose">
                   <CheckCircle2 className="h-4 w-4" />
                   Saved

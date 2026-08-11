@@ -10,15 +10,37 @@
 // logic to keep separate, and sharing one handler per route means a bug
 // fix or a security check only has to be made once.
 //
+// CRITICAL, by design: nothing in this file reads, writes, or imports
+// anything from the consumer invites/RSVP code path (api/invites/*,
+// api/rsvps, api/_lib/invites.js, any template component, PaymentModal.jsx,
+// CreateInvitePage.jsx). Partner-created invites live in their own
+// `partner_invites` table and their own /p/:slug viewer — see
+// B2B-PARTNER-PORTAL-SETUP.md.
+//
 // Every exported function has the shape `(req, res) => Promise<void>`,
 // which both Express route handlers and Vercel's `export default` function
-// signature already satisfy — req.method/req.headers/req.query/req.body
-// and res.status().json() all read the same either way.
+// signature already satisfy — req.method/req.headers/req.query/req.params/
+// req.body and res.status().json() all read the same either way. Slug path
+// params specifically are read via `req.query?.slug ?? req.params?.slug`
+// since Vercel's [slug].js puts it on req.query and Express's `:slug` route
+// puts it on req.params.
+import formidable from 'formidable'
+import fs from 'node:fs/promises'
 import { getSupabase } from './supabase.js'
 import { requireUser, requireAdmin } from './auth.js'
-import { clean, rowToPartner, rowToTransaction, getPartnerById, recordCreditTransaction } from './partners.js'
+import {
+  clean,
+  randomSlugSuffix,
+  rowToPartner,
+  rowToTransaction,
+  rowToPartnerInvite,
+  getPartnerById,
+  recordCreditTransaction,
+  spendCreditForInvite,
+} from './partners.js'
 import { getPartnerPackageById } from '../../src/data/partnerPackages.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../../src/utils/razorpay.js'
+import { slugify } from '../../src/utils/slugify.js'
 import {
   sendTransactionalEmail,
   buildPartnerApplicationReceivedEmail,
@@ -36,6 +58,10 @@ function adminNotificationRecipients() {
     .filter(Boolean)
 }
 
+function pathParam(req, name) {
+  return req.query?.[name] ?? req.params?.[name]
+}
+
 // ---------------------------------------------------------------------------
 // POST /api/partners/signup — public.
 // ---------------------------------------------------------------------------
@@ -48,13 +74,15 @@ export async function signupPartner(req, res) {
   try {
     const body = req.body || {}
     const businessName = clean(body.businessName, 200)
-    const contactName = clean(body.contactName, 120)
-    const email = clean(body.email, 200).toLowerCase()
+    const address = clean(body.address, 500)
     const phone = clean(body.phone, 30)
+    const email = clean(body.email, 200).toLowerCase()
+    const logoUrl = clean(body.logoUrl, 500)
     const password = String(body.password ?? '')
 
     if (!businessName) return res.status(400).json({ ok: false, error: 'businessName is required' })
-    if (!contactName) return res.status(400).json({ ok: false, error: 'contactName is required' })
+    if (!address) return res.status(400).json({ ok: false, error: 'address is required' })
+    if (!phone) return res.status(400).json({ ok: false, error: 'phone is required' })
     if (!email || !email.includes('@')) return res.status(400).json({ ok: false, error: 'a valid email is required' })
     if (password.length < MIN_PASSWORD_LENGTH) {
       return res.status(400).json({ ok: false, error: `password must be at least ${MIN_PASSWORD_LENGTH} characters` })
@@ -74,10 +102,6 @@ export async function signupPartner(req, res) {
       user_metadata: { business_name: businessName },
     })
     if (createError) {
-      // Supabase's own conflict signal for "this email already has an
-      // account" — surfaced as 409 rather than the generic 500 below so
-      // the signup form can show "you already have an account" instead of
-      // a scary error.
       if (createError.status === 422 || /already registered|already exists/i.test(createError.message || '')) {
         return res.status(409).json({ ok: false, error: 'an account with this email already exists' })
       }
@@ -90,9 +114,10 @@ export async function signupPartner(req, res) {
       .insert({
         id: authUser.id,
         business_name: businessName,
-        contact_name: contactName,
+        address,
+        phone,
         email,
-        phone: phone || null,
+        logo_url: logoUrl || null,
       })
       .select()
       .single()
@@ -114,7 +139,7 @@ export async function signupPartner(req, res) {
     try {
       await sendTransactionalEmail({
         to: partner.email,
-        toName: partner.contactName,
+        toName: partner.businessName,
         ...buildPartnerApplicationReceivedEmail(partner),
       })
     } catch (err) {
@@ -163,12 +188,11 @@ export async function getMyProfile(req, res) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/partners/branding — requires a logged-in, approved partner.
-// Updates the white-label fields plus contact_name/phone. Deliberately
-// can't touch business_name, email, or status — those are either the
-// account's identity or the approval workflow's job, not self-service.
+// POST /api/partners/profile — requires a logged-in partner. Updates
+// address/phone/logoUrl (and businessName) — not `status` or `email`,
+// which only the approval workflow / the Auth account itself can change.
 // ---------------------------------------------------------------------------
-export async function updateBranding(req, res) {
+export async function updateProfile(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ ok: false, error: 'method not allowed' })
@@ -180,18 +204,13 @@ export async function updateBranding(req, res) {
   try {
     const row = await getPartnerById(user.id)
     if (!row) return res.status(404).json({ ok: false, error: 'partner profile not found' })
-    if (row.status !== 'approved') {
-      return res.status(403).json({ ok: false, error: 'your account must be approved before branding can be set' })
-    }
 
     const body = req.body || {}
     const update = {
-      contact_name: clean(body.contactName, 120) || row.contact_name,
+      business_name: clean(body.businessName, 200) || row.business_name,
+      address: clean(body.address, 500) || row.address,
       phone: clean(body.phone, 30) || row.phone,
-      brand_display_name: clean(body.brandDisplayName, 120),
-      brand_logo_url: clean(body.brandLogoUrl, 500),
-      brand_primary_color: clean(body.brandPrimaryColor, 20),
-      brand_secondary_color: clean(body.brandSecondaryColor, 20),
+      logo_url: body.logoUrl !== undefined ? clean(body.logoUrl, 500) || null : row.logo_url,
     }
 
     const { data, error } = await getSupabase()
@@ -204,8 +223,68 @@ export async function updateBranding(req, res) {
 
     res.status(200).json({ ok: true, partner: rowToPartner(data) })
   } catch (err) {
-    console.error('[partners] failed to update branding:', err)
-    res.status(500).json({ ok: false, error: 'could not save your branding' })
+    console.error('[partners] failed to update profile:', err)
+    res.status(500).json({ ok: false, error: 'could not save your profile' })
+  }
+}
+
+const MAX_LOGO_BYTES = 4 * 1024 * 1024
+const ALLOWED_LOGO_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const LOGO_BUCKET = 'partner-logos'
+
+function extensionForMime(mime) {
+  if (mime === 'image/png') return 'png'
+  if (mime === 'image/webp') return 'webp'
+  return 'jpg'
+}
+
+function randomLogoFilename(mime) {
+  const rand = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
+  return `${rand}.${extensionForMime(mime)}`
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/partners/logo — public, multipart/form-data (field name
+// "logo"). Mirrors api/photos.js's shape (formidable + Supabase Storage)
+// but uploads to its OWN `partner-logos` bucket — never the consumer
+// `invite-photos` bucket — and is called unauthenticated for the same
+// reason api/photos.js is: at signup time there's no partner account (and
+// no session) yet to authenticate. The signup form uploads the logo first,
+// gets back a URL, then sends that URL along with the rest of the
+// application in POST /api/partners/signup above.
+// ---------------------------------------------------------------------------
+export async function uploadPartnerLogo(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  try {
+    const form = formidable({ maxFileSize: MAX_LOGO_BYTES, maxFiles: 1 })
+    const [, files] = await form.parse(req)
+    const file = Array.isArray(files.logo) ? files.logo[0] : files.logo
+    if (!file) return res.status(400).json({ ok: false, error: 'no file uploaded' })
+    if (!ALLOWED_LOGO_MIME_TYPES.includes(file.mimetype)) {
+      return res.status(400).json({ ok: false, error: 'only JPEG, PNG, or WebP images are allowed' })
+    }
+
+    const buffer = await fs.readFile(file.filepath)
+    const filename = randomLogoFilename(file.mimetype)
+
+    const supabase = getSupabase()
+    const { error: uploadError } = await supabase.storage
+      .from(LOGO_BUCKET)
+      .upload(filename, buffer, { contentType: file.mimetype, upsert: false })
+    if (uploadError) throw uploadError
+
+    const { data } = supabase.storage.from(LOGO_BUCKET).getPublicUrl(filename)
+    res.status(200).json({ ok: true, url: data.publicUrl })
+  } catch (err) {
+    console.error('[partners] logo upload failed:', err)
+    if (/maxFileSize/i.test(err.message || '')) {
+      return res.status(400).json({ ok: false, error: 'file is too large (max 4MB)' })
+    }
+    res.status(500).json({ ok: false, error: 'could not upload logo' })
   }
 }
 
@@ -225,7 +304,7 @@ export async function getMyCredits(req, res) {
   try {
     const supabase = getSupabase()
     const [{ data: partnerRow, error: partnerError }, { data: txRows, error: txError }] = await Promise.all([
-      supabase.from('partners').select('credit_balance').eq('id', user.id).maybeSingle(),
+      supabase.from('partners').select('credits_remaining').eq('id', user.id).maybeSingle(),
       supabase
         .from('partner_credit_transactions')
         .select('*')
@@ -239,7 +318,7 @@ export async function getMyCredits(req, res) {
 
     res.status(200).json({
       ok: true,
-      balance: partnerRow.credit_balance,
+      creditsRemaining: partnerRow.credits_remaining,
       transactions: (txRows || []).map(rowToTransaction),
     })
   } catch (err) {
@@ -249,9 +328,12 @@ export async function getMyCredits(req, res) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/partners/purchase/create-order — requires a logged-in, approved
+// POST /api/partners/purchase/create-order — requires a logged-in, active
 // partner. Mirrors api/create-order.js: re-derives the package price on
 // the server from `packageId` rather than trusting a client-sent amount.
+// Uses the SAME Razorpay account/keys as the consumer checkout (this is
+// just "our real-time payment gateway flow" reused, not the consumer
+// checkout flow itself — no consumer file or table is touched).
 // ---------------------------------------------------------------------------
 export async function createPurchaseOrder(req, res) {
   if (req.method !== 'POST') {
@@ -265,7 +347,7 @@ export async function createPurchaseOrder(req, res) {
   try {
     const row = await getPartnerById(user.id)
     if (!row) return res.status(404).json({ ok: false, error: 'partner profile not found' })
-    if (row.status !== 'approved') {
+    if (row.status !== 'active') {
       return res.status(403).json({ ok: false, error: 'your account must be approved before purchasing credits' })
     }
 
@@ -292,10 +374,10 @@ export async function createPurchaseOrder(req, res) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/partners/purchase/verify — requires a logged-in, approved
+// POST /api/partners/purchase/verify — requires a logged-in, active
 // partner. Mirrors api/verify-payment.js's signature check, then credits
-// the ledger. This is the ONLY place a 'purchase' transaction is ever
-// recorded.
+// the ledger instantly. This is the ONLY place a 'purchase' transaction is
+// ever recorded.
 // ---------------------------------------------------------------------------
 export async function verifyPurchase(req, res) {
   if (req.method !== 'POST') {
@@ -333,7 +415,7 @@ export async function verifyPurchase(req, res) {
     })
 
     console.log(`[partners] ${user.email} purchased ${pkg.credits} credits (${pkg.id})`)
-    res.status(200).json({ ok: true, transaction, balance: transaction.balanceAfter })
+    res.status(200).json({ ok: true, transaction, creditsRemaining: transaction.balanceAfter })
   } catch (err) {
     console.error('[partners] purchase verification failed:', err)
     res.status(500).json({ ok: false, error: 'could not confirm your purchase' })
@@ -341,7 +423,154 @@ export async function verifyPurchase(req, res) {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/partners?status=pending — admin only.
+// GET /api/partners/invites — requires a logged-in partner. Lists this
+// partner's own client invites (their credit-spend history's other half).
+// POST /api/partners/invites — requires a logged-in, active partner with
+// at least 1 credit. Spends 1 credit and creates a shareable /p/:slug
+// invite — see spend_partner_credit_for_invite() in the migration.
+// ---------------------------------------------------------------------------
+export async function partnerInvitesIndex(req, res) {
+  if (req.method === 'GET') return listMyInvites(req, res)
+  if (req.method === 'POST') return createClientInvite(req, res)
+  res.setHeader('Allow', 'GET, POST')
+  return res.status(405).json({ ok: false, error: 'method not allowed' })
+}
+
+export async function listMyInvites(req, res) {
+  const user = await requireUser(req, res)
+  if (!user) return
+
+  try {
+    const { data, error } = await getSupabase()
+      .from('partner_invites')
+      .select('*')
+      .eq('partner_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(200)
+    if (error) throw error
+    res.status(200).json({ ok: true, invites: (data || []).map(rowToPartnerInvite) })
+  } catch (err) {
+    console.error('[partners] failed to list invites:', err)
+    res.status(500).json({ ok: false, error: 'could not load your invites' })
+  }
+}
+
+const MAX_SLUG_ATTEMPTS = 6
+
+export async function createClientInvite(req, res) {
+  const user = await requireUser(req, res)
+  if (!user) return
+
+  try {
+    const row = await getPartnerById(user.id)
+    if (!row) return res.status(404).json({ ok: false, error: 'partner profile not found' })
+    if (row.status !== 'active') {
+      return res.status(403).json({ ok: false, error: 'your account must be approved before creating invites' })
+    }
+    if (row.credits_remaining < 1) {
+      return res.status(402).json({ ok: false, error: 'you have no credits remaining — purchase a package first' })
+    }
+
+    const body = req.body || {}
+    const coupleNames = clean(body.coupleNames, 120)
+    const weddingDate = clean(body.weddingDate, 20)
+    const weddingTime = clean(body.weddingTime, 10)
+    const venue = clean(body.venue, 200)
+    const locationUrl = clean(body.locationUrl, 500)
+    const message = clean(body.message, 2000)
+    const templateId = clean(body.templateId, 80)
+    if (!coupleNames) return res.status(400).json({ ok: false, error: 'coupleNames is required' })
+    if (!weddingDate) return res.status(400).json({ ok: false, error: 'weddingDate is required' })
+    if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+
+    const base = `p-${slugify(coupleNames) || 'invite'}`
+
+    let lastError = null
+    for (let attempt = 0; attempt < MAX_SLUG_ATTEMPTS; attempt++) {
+      const slug = `${base}-${randomSlugSuffix()}`
+      try {
+        const invite = await spendCreditForInvite(user.id, {
+          slug,
+          templateId: templateId || null,
+          coupleNames,
+          weddingDate,
+          weddingTime: weddingTime || null,
+          venue,
+          locationUrl: locationUrl || null,
+          message: message || null,
+        })
+        console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
+        return res.status(200).json({ ok: true, invite })
+      } catch (err) {
+        lastError = err
+        // Postgres unique_violation on partner_invites.slug — vanishingly
+        // unlikely (random suffix), but retry with a fresh one instead of
+        // failing (and NOT re-charging a credit, since the whole insert
+        // rolled back with it) the way api/invites/index.js already does
+        // for the consumer table's own slug collisions.
+        if (!/duplicate key|unique constraint/i.test(err.message || '')) break
+      }
+    }
+
+    if (/insufficient credits/i.test(lastError?.message || '')) {
+      return res.status(402).json({ ok: false, error: 'you have no credits remaining — purchase a package first' })
+    }
+    if (/is not active/i.test(lastError?.message || '')) {
+      return res.status(403).json({ ok: false, error: 'your account must be approved before creating invites' })
+    }
+    throw lastError || new Error('could not generate a unique slug')
+  } catch (err) {
+    console.error('[partners] failed to create client invite:', err)
+    res.status(500).json({ ok: false, error: 'could not create the invite' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/partners/invites/:slug — public, unauthenticated (the shareable
+// /p/:slug link itself). Returns the invite plus enough of its owning
+// partner's profile to render the white-label badge — never anything else
+// from `partners` (no email/phone/status/credits).
+// ---------------------------------------------------------------------------
+export async function getPartnerInviteBySlug(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const slug = clean(pathParam(req, 'slug'), 200)
+  if (!slug) return res.status(400).json({ ok: false, error: 'slug is required' })
+
+  try {
+    const { data: inviteRow, error: inviteError } = await getSupabase()
+      .from('partner_invites')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (inviteError) throw inviteError
+    if (!inviteRow) return res.status(404).json({ ok: false, error: 'invite not found' })
+
+    const { data: partnerRow, error: partnerError } = await getSupabase()
+      .from('partners')
+      .select('business_name, address, logo_url')
+      .eq('id', inviteRow.partner_id)
+      .maybeSingle()
+    if (partnerError) throw partnerError
+
+    res.status(200).json({
+      ok: true,
+      invite: rowToPartnerInvite(inviteRow),
+      partner: partnerRow
+        ? { businessName: partnerRow.business_name, address: partnerRow.address, logoUrl: partnerRow.logo_url }
+        : null,
+    })
+  } catch (err) {
+    console.error(`[partners] failed to load invite "${slug}":`, err)
+    res.status(500).json({ ok: false, error: 'could not load this invitation' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/partners?status=pending_approval — admin only.
 // ---------------------------------------------------------------------------
 export async function adminListPartners(req, res) {
   if (req.method !== 'GET') {
@@ -384,7 +613,7 @@ export async function adminApprovePartner(req, res) {
 
     const { data, error } = await getSupabase()
       .from('partners')
-      .update({ status: 'approved', approved_at: new Date().toISOString(), reviewed_by: admin.email, rejected_reason: null })
+      .update({ status: 'active', approved_at: new Date().toISOString(), reviewed_by: admin.email, rejected_reason: null })
       .eq('id', partnerId)
       .select()
       .single()
@@ -394,7 +623,7 @@ export async function adminApprovePartner(req, res) {
     try {
       await sendTransactionalEmail({
         to: partner.email,
-        toName: partner.contactName,
+        toName: partner.businessName,
         ...buildPartnerApprovedEmail(partner),
       })
     } catch (err) {
@@ -438,7 +667,7 @@ export async function adminRejectPartner(req, res) {
     try {
       await sendTransactionalEmail({
         to: partner.email,
-        toName: partner.contactName,
+        toName: partner.businessName,
         ...buildPartnerRejectedEmail(partner),
       })
     } catch (err) {

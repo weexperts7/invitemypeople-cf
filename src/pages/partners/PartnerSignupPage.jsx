@@ -1,38 +1,55 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Loader2, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, ImagePlus, Loader2 } from 'lucide-react'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import SEO from '../../components/SEO'
-import { signupPartner } from '../../utils/partnerApi'
+import { signupPartner, uploadPartnerLogo } from '../../utils/partnerApi'
 
 const FIELD_CLASS =
   'w-full rounded-xl border border-champagne-deep/40 bg-ivory/70 px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft/60 focus:border-rose focus:outline-none focus:ring-1 focus:ring-rose'
 
-// Public application form for the B2B Partner Program. Creates a real
-// Supabase Auth login (see POST /api/partners/signup) plus a `partners` row
-// that starts 'pending' — nothing here grants access; an admin has to
-// approve it first (see AdminPartnersPage.jsx), and PartnerLoginPage.jsx
-// routes a pending/rejected login to PartnerPendingPage.jsx accordingly.
+// Public application form for the B2B Partner Program (sweet shop / wedding
+// box creators). Creates a real Supabase Auth login (see POST
+// /api/partners/signup) plus a `partners` row that starts
+// 'pending_approval' — nothing here grants access; an admin has to approve
+// it first (see AdminPartnersPage.jsx), and PartnerLoginPage.jsx routes a
+// pending/rejected login to PartnerPendingPage.jsx accordingly.
 export default function PartnerSignupPage() {
   const [form, setForm] = useState({
     businessName: '',
-    contactName: '',
-    email: '',
+    address: '',
     phone: '',
+    email: '',
     password: '',
   })
+  const [logoFile, setLogoFile] = useState(null)
+  const [logoPreview, setLogoPreview] = useState(null)
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
   const [error, setError] = useState(null)
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0] || null
+    setLogoFile(file)
+    setLogoPreview(file ? URL.createObjectURL(file) : null)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStatus('submitting')
     setError(null)
     try {
-      await signupPartner(form)
+      // Uploaded before the account exists — there's no partner id yet to
+      // authenticate the upload with, so this mirrors api/photos.js's own
+      // unauthenticated-upload-then-reference-the-URL pattern (see
+      // uploadPartnerLogo()'s own comment).
+      let logoUrl = ''
+      if (logoFile) {
+        logoUrl = await uploadPartnerLogo(logoFile)
+      }
+      await signupPartner({ ...form, logoUrl })
       setStatus('success')
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.')
@@ -66,8 +83,8 @@ export default function PartnerSignupPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Partner Program</p>
             <h1 className="mt-1 font-serif text-3xl text-ink">Apply as a partner</h1>
             <p className="mt-2 text-ink-soft">
-              Create invites for your own clients under your own branding, paid for with
-              pre-purchased credits.
+              For sweet shops and wedding box creators — create branded invites for your own
+              clients, paid for with pre-purchased credits.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -76,16 +93,34 @@ export default function PartnerSignupPage() {
                 <input required className={FIELD_CLASS} value={form.businessName} onChange={update('businessName')} />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-ink-soft">Contact name</label>
-                <input required className={FIELD_CLASS} value={form.contactName} onChange={update('contactName')} />
+                <label className="mb-1 block text-xs font-medium text-ink-soft">Full address</label>
+                <textarea
+                  required
+                  rows={2}
+                  className={FIELD_CLASS}
+                  value={form.address}
+                  onChange={update('address')}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ink-soft">Phone</label>
+                <input required className={FIELD_CLASS} value={form.phone} onChange={update('phone')} />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-ink-soft">Email</label>
                 <input required type="email" className={FIELD_CLASS} value={form.email} onChange={update('email')} />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-ink-soft">Phone (optional)</label>
-                <input className={FIELD_CLASS} value={form.phone} onChange={update('phone')} />
+                <label className="mb-1 block text-xs font-medium text-ink-soft">Logo</label>
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-champagne-deep/60 bg-ivory/50 px-4 py-3 text-sm text-ink-soft hover:bg-ivory">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Logo preview" className="h-10 w-10 rounded-lg object-cover" />
+                  ) : (
+                    <ImagePlus className="h-5 w-5" />
+                  )}
+                  {logoFile ? logoFile.name : 'Upload your logo (JPEG, PNG, or WebP)'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleLogoChange} />
+                </label>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-ink-soft">Password</label>

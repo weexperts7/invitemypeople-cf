@@ -149,7 +149,7 @@ export function buildPartnerApplicationReceivedEmail(partner) {
   const subject = `We've received your partner application`
   const html = `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">Thanks for applying, ${escapeHtml(partner.contactName || 'there')} 👋</h2>
+      <h2 style="margin-bottom: 4px;">Thanks for applying! 👋</h2>
       <p>We've received <strong>${escapeHtml(partner.businessName)}</strong>'s application to join our
       B2B Partner Program.</p>
       <p>Our team reviews every application by hand — you'll get another email as soon as a decision is
@@ -169,8 +169,8 @@ export function buildPartnerAdminNotificationEmail(partner) {
   const html = `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
       <h2 style="margin-bottom: 4px;">New partner application</h2>
-      <p><strong>${escapeHtml(partner.businessName)}</strong> (${escapeHtml(partner.contactName)},
-      ${escapeHtml(partner.email)}) is waiting for review.</p>
+      <p><strong>${escapeHtml(partner.businessName)}</strong> (${escapeHtml(partner.email)},
+      ${escapeHtml(partner.phone || '')}) is waiting for review.</p>
       <p><a href="${SITE_URL}/admin/partners" style="color: #b3541e;">Review in the admin dashboard →</a></p>
     </div>
   `
@@ -182,9 +182,9 @@ export function buildPartnerApprovedEmail(partner) {
   const subject = `You're approved — welcome to the Partner Program`
   const html = `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">You're in, ${escapeHtml(partner.contactName || 'there')} 🎉</h2>
+      <h2 style="margin-bottom: 4px;">You're in! 🎉</h2>
       <p><strong>${escapeHtml(partner.businessName)}</strong> has been approved. You can now log in,
-      set up your white-label branding, and purchase invite credits.</p>
+      purchase invite credits, and start creating client invites.</p>
       <p><a href="${SITE_URL}/partners/login" style="color: #b3541e;">Log in to your dashboard →</a></p>
     </div>
   `

@@ -1,8 +1,10 @@
 // Shared helpers for the partner-portal Serverless Functions
 // (api/partners/*, api/admin/*) — mirrors api/_lib/invites.js's
-// clean()/rowToInvite() split for the new `partners` /
+// clean()/rowToInvite() split for the new `partners` / `partner_invites` /
 // `partner_credit_transactions` tables (see
-// supabase/migrations/0001_b2b_partner_portal.sql).
+// supabase/migrations/0001_b2b_partner_portal.sql). None of these touch
+// the existing `invites`/`rsvps` tables in any way.
+import { randomBytes } from 'node:crypto'
 import { getSupabase } from './supabase.js'
 
 export function clean(value, max) {
@@ -11,28 +13,25 @@ export function clean(value, max) {
     .slice(0, max)
 }
 
+export function randomSlugSuffix() {
+  return randomBytes(4).toString('hex')
+}
+
 // `partners` uses snake_case columns like every other table in this app;
 // everything client-side speaks camelCase (see PartnerAuthContext.jsx).
-// credit_balance is deliberately never spread in here as a raw field name —
-// callers get it as `creditBalance` alongside the rest, same allowlist
-// shape as rowToInvite()'s host_token carve-out (nothing sensitive here,
-// just consistency).
 export function rowToPartner(row) {
   return {
     id: row.id,
     businessName: row.business_name,
-    contactName: row.contact_name,
-    email: row.email,
+    address: row.address,
     phone: row.phone,
+    email: row.email,
+    logoUrl: row.logo_url,
     status: row.status,
     rejectedReason: row.rejected_reason,
     approvedAt: row.approved_at,
     reviewedBy: row.reviewed_by,
-    brandDisplayName: row.brand_display_name,
-    brandLogoUrl: row.brand_logo_url,
-    brandPrimaryColor: row.brand_primary_color,
-    brandSecondaryColor: row.brand_secondary_color,
-    creditBalance: row.credit_balance,
+    creditsRemaining: row.credits_remaining,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -54,6 +53,21 @@ export function rowToTransaction(row) {
   }
 }
 
+export function rowToPartnerInvite(row) {
+  return {
+    id: row.id,
+    slug: row.slug,
+    templateId: row.template_id,
+    coupleNames: row.couple_names,
+    weddingDate: row.wedding_date,
+    weddingTime: row.wedding_time,
+    venue: row.venue,
+    locationUrl: row.location_url,
+    message: row.message,
+    createdAt: row.created_at,
+  }
+}
+
 /** Looks up a partner by their (shared) Supabase Auth user id. */
 export async function getPartnerById(id) {
   const { data, error } = await getSupabase()
@@ -66,12 +80,15 @@ export async function getPartnerById(id) {
 }
 
 /**
- * The only way credit_balance ever changes — wraps the
- * apply_partner_credit_transaction() Postgres function (see the migration's
- * own comment for why this is an RPC and not a read-then-write from here).
- * `credits` is signed: positive for a purchase/refund/adjustment-add,
- * negative for spending a credit or an adjustment-deduction. Throws if the
- * partner doesn't exist or the resulting balance would go negative.
+ * The only way credits_remaining ever changes for a purchase/refund/manual
+ * adjustment — wraps the apply_partner_credit_transaction() Postgres
+ * function (see the migration's own comment for why this is an RPC and not
+ * a read-then-write from here). `credits` is signed: positive for a
+ * purchase/refund/adjustment-add, negative for an adjustment-deduction.
+ * Throws if the partner doesn't exist or the resulting balance would go
+ * negative. (Spending a credit to create an invite goes through
+ * spendCreditForInvite() below instead, not this function, since that also
+ * has to insert the partner_invites row atomically.)
  */
 export async function recordCreditTransaction(partnerId, {
   type,
@@ -95,6 +112,37 @@ export async function recordCreditTransaction(partnerId, {
     p_note: note,
   })
   if (error) throw error
-  // supabase-js returns a single-row RPC result as a 1-element array.
   return rowToTransaction(Array.isArray(data) ? data[0] : data)
+}
+
+/**
+ * Spends 1 credit and creates a partner_invites row atomically — wraps
+ * spend_partner_credit_for_invite() (see the migration's own comment).
+ * Throws (with a message the caller pattern-matches on — see
+ * createClientInvite() in partnerHandlers.js) if the partner isn't active
+ * or has no credits left.
+ */
+export async function spendCreditForInvite(partnerId, {
+  slug,
+  templateId,
+  coupleNames,
+  weddingDate,
+  weddingTime,
+  venue,
+  locationUrl,
+  message,
+}) {
+  const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
+    p_partner_id: partnerId,
+    p_slug: slug,
+    p_template_id: templateId,
+    p_couple_names: coupleNames,
+    p_wedding_date: weddingDate,
+    p_wedding_time: weddingTime,
+    p_venue: venue,
+    p_location_url: locationUrl,
+    p_message: message,
+  })
+  if (error) throw error
+  return rowToPartnerInvite(Array.isArray(data) ? data[0] : data)
 }

@@ -361,7 +361,12 @@ export async function createPurchaseOrder(req, res) {
     const order = await createOrder({
       amount: pkg.pricePaise,
       currency: 'INR',
-      receipt: `partner_${user.id}_${Date.now()}`,
+      // Razorpay caps `receipt` at 56 chars — a full UUID partner id plus a
+      // millisecond timestamp blows past that (58+), which Razorpay
+      // rejects as a 400 at order-creation time. Base36 timestamp + the
+      // partner id's first 8 hex chars is enough to keep receipts
+      // human-traceable back to a partner without hitting the limit.
+      receipt: `p_${user.id.slice(0, 8)}_${Date.now().toString(36)}`,
     })
     res.status(200).json({ ok: true, ...order, package: pkg })
   } catch (err) {

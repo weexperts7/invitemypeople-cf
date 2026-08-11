@@ -17,6 +17,13 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import TermsOfServicePage from './pages/TermsOfServicePage'
 import RefundPolicyPage from './pages/RefundPolicyPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PartnerPortalLayout from './components/partners/PartnerPortalLayout'
+import PartnerSignupPage from './pages/partners/PartnerSignupPage'
+import PartnerLoginPage from './pages/partners/PartnerLoginPage'
+import PartnerPendingPage from './pages/partners/PartnerPendingPage'
+import PartnerDashboardPage from './pages/partners/PartnerDashboardPage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminPartnersPage from './pages/admin/AdminPartnersPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
@@ -132,6 +139,18 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/refund" element={<RefundPolicyPage />} />
+            {/* B2B Partner Portal — see PartnerPortalLayout.jsx. One shared
+                Supabase Auth session (PartnerAuthProvider) covers both the
+                partner-facing routes and the internal /admin/* routes, so
+                they're grouped under a single layout route here. */}
+            <Route element={<PartnerPortalLayout />}>
+              <Route path="/partners/signup" element={<PartnerSignupPage />} />
+              <Route path="/partners/login" element={<PartnerLoginPage />} />
+              <Route path="/partners/pending" element={<PartnerPendingPage />} />
+              <Route path="/partners/dashboard" element={<PartnerDashboardPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin/partners" element={<AdminPartnersPage />} />
+            </Route>
             {COMING_SOON_OCCASIONS.map((occasion) => (
               <Route
                 key={occasion.slug}

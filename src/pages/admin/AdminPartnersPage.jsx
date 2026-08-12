@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Check, Loader2, Lock, LogOut, X } from 'lucide-react'
-import SiteHeader from '../../components/SiteHeader'
-import SiteFooter from '../../components/SiteFooter'
+import { Check, Loader2, X } from 'lucide-react'
 import SEO from '../../components/SEO'
-import RequirePartnerAuth from '../../components/partners/RequirePartnerAuth'
+import AdminForbidden from '../../components/admin/AdminForbidden'
+import Pagination from '../../components/partners/Pagination'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { adminListPartners, adminApprovePartner, adminRejectPartner } from '../../utils/partnerApi'
 
 const TABS = ['pending_approval', 'active', 'rejected', 'suspended']
+const PAGE_SIZE = 10
 
 function StatusBadge({ status }) {
   const styles = {
@@ -23,18 +23,24 @@ function StatusBadge({ status }) {
   )
 }
 
-function AdminContent() {
-  const { accessToken, signOut } = usePartnerAuth()
+// "Partner Applications" in the admin sidebar (see AdminShell.jsx), which
+// now provides the page chrome (header, nav, log out) — this only ever
+// renders inside it, so unlike before it has no SiteHeader/SiteFooter or
+// session guard of its own.
+export default function AdminPartnersPage() {
+  const { accessToken } = usePartnerAuth()
   const [tab, setTab] = useState('pending_approval')
   const [partners, setPartners] = useState([])
   const [status, setStatus] = useState('loading') // loading | success | forbidden | error
   const [busyId, setBusyId] = useState(null)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setStatus('loading')
     try {
       const result = await adminListPartners(accessToken, tab)
       setPartners(result.partners)
+      setPage(1)
       setStatus('success')
     } catch (err) {
       setStatus(/not authorized|sign in required/i.test(err.message || '') ? 'forbidden' : 'error')
@@ -44,6 +50,9 @@ function AdminContent() {
   useEffect(() => {
     load()
   }, [load])
+
+  const pageCount = Math.max(1, Math.ceil(partners.length / PAGE_SIZE))
+  const pagePartners = partners.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const handleApprove = async (partnerId) => {
     setBusyId(partnerId)
@@ -70,32 +79,13 @@ function AdminContent() {
     }
   }
 
-  if (status === 'forbidden') {
-    return (
-      <div className="mx-auto flex max-w-md flex-col items-center gap-4 px-6 py-24 text-center">
-        <Lock className="h-10 w-10 text-rose" strokeWidth={1.2} />
-        <h1 className="font-serif text-2xl text-ink">Not authorized</h1>
-        <p className="text-ink-soft">This login isn&rsquo;t on the admin allowlist for this deployment.</p>
-      </div>
-    )
-  }
+  if (status === 'forbidden') return <AdminForbidden />
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-14 sm:py-16">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Internal</p>
-          <h1 className="mt-1 font-serif text-3xl text-ink">Partner applications</h1>
-        </div>
-        <button
-          type="button"
-          onClick={signOut}
-          className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/50 bg-ivory/70 px-4 py-2 text-sm text-ink hover:bg-ivory"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          Log out
-        </button>
-      </div>
+    <main className="mx-auto max-w-4xl px-6 py-10 sm:py-14">
+      <SEO title="Admin — Partners | InviteMyPeople" path="/admin/partners" noindex />
+      <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">Admin Panel</p>
+      <h1 className="mt-1 font-serif text-3xl text-ink">Partner applications</h1>
 
       <div className="mt-6 flex gap-2">
         {TABS.map((t) => (
@@ -126,7 +116,7 @@ function AdminContent() {
           </div>
         )}
         {status === 'success' &&
-          partners.map((p) => (
+          pagePartners.map((p) => (
             <div
               key={p.id}
               className="rounded-2xl border border-white/60 bg-ivory/50 px-5 py-4 shadow-soft"
@@ -181,19 +171,7 @@ function AdminContent() {
             </div>
           ))}
       </div>
+      {status === 'success' && <Pagination page={page} pageCount={pageCount} onChange={setPage} />}
     </main>
-  )
-}
-
-export default function AdminPartnersPage() {
-  return (
-    <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO title="Admin — Partners | InviteMyPeople" path="/admin/partners" noindex />
-      <SiteHeader />
-      <RequirePartnerAuth loginPath="/admin/login">
-        <AdminContent />
-      </RequirePartnerAuth>
-      <SiteFooter />
-    </div>
   )
 }

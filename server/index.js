@@ -33,6 +33,7 @@ import {
   getMyProfile,
   updateProfile,
   uploadPartnerLogo,
+  uploadPartnerInvitePhoto,
   getMyCredits,
   createPurchaseOrder,
   verifyPurchase,
@@ -41,6 +42,8 @@ import {
   adminListPartners,
   adminApprovePartner,
   adminRejectPartner,
+  adminGetStats,
+  adminGetMe,
 } from '../api/_lib/partnerHandlers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -567,6 +570,7 @@ app.post('/api/partners/signup', signupPartner)
 app.get('/api/partners/me', getMyProfile)
 app.post('/api/partners/profile', updateProfile)
 app.post('/api/partners/logo', uploadPartnerLogo)
+app.post('/api/partners/photos', uploadPartnerInvitePhoto)
 app.get('/api/partners/credits', getMyCredits)
 app.post('/api/partners/purchase/create-order', createPurchaseOrder)
 app.post('/api/partners/purchase/verify', verifyPurchase)
@@ -577,9 +581,11 @@ app.post('/api/partners/invites', partnerInvitesIndex)
 // handler is written against req.query?.slug for the Vercel [slug].js
 // counterpart.
 app.get('/api/partners/invites/:slug', getPartnerInviteBySlug)
+app.get('/api/admin/me', adminGetMe)
 app.get('/api/admin/partners', adminListPartners)
 app.post('/api/admin/partners/approve', adminApprovePartner)
 app.post('/api/admin/partners/reject', adminRejectPartner)
+app.get('/api/admin/stats', adminGetStats)
 
 function escapeHtml(str) {
   return String(str)

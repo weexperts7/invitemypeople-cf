@@ -16,7 +16,7 @@ export function PartnerAuthProvider({ children }) {
   // Distinguishes "no partner row for this login" (expected for an
   // admin-only account) from an actual fetch failure — AdminPartnersPage
   // doesn't need `partner` at all, so it never surfaces this; only
-  // PartnerDashboardPage cares.
+  // PartnerOverviewPage cares.
   const [profileError, setProfileError] = useState(null)
   const [loading, setLoading] = useState(true)
 

@@ -91,6 +91,7 @@ export const SITE_NAV_LINKS = [
   { href: '/guruji-satsangs', label: 'Guruji Satsang Invitations' },
   { href: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi Invitations' },
   { href: '/create', label: 'Build Your Invitation' },
+  { href: '/partners', label: 'Partner Program' },
   { href: '/blog', label: 'Blog' },
   { href: '/about', label: 'About Us' },
   { href: '/privacy', label: 'Privacy Policy' },
@@ -309,6 +310,27 @@ const STATIC_ROUTES_SEO = {
       'Every template includes an interactive blessing wall where visitors can leave their wishes for Bappa and your family alongside their RSVP, turning a one-time card into something guests keep coming back to before the visarjan. Nothing here is a static graphic — every reveal, every form, every wall of blessings is built to be tapped, filled in, and shared.',
       { h2: 'Ready to Share in Minutes' },
       'Pricing is all-inclusive, with no per-guest costs, and every invitation includes 2 free revisions — so updating a muhurat time or a venue after the fact never means starting over. Share one link on WhatsApp and your entire community can RSVP, view the puja details and leave their blessings in one place, right up until visarjan day, with nothing lost between the first darshan and the final aarti.',
+    ],
+  },
+  '/partners': {
+    title: 'Partner Program for Sweet Shops | InviteMyPeople',
+    description:
+      'Sweet shop & wedding box vendors: sell a white-labeled Digital Wedding Pass with every luxury box. ₹600 wholesale, ₹2,000+ resale — pure profit, zero coding.',
+    ogTitle: 'InviteMyPeople Partner Program — Sell a Digital Wedding Pass With Every Box',
+    ogDescription:
+      'For mithai box vendors & packaging showrooms: offer couples a white-labeled Interactive Digital Wedding Pass with every luxury box. Wholesale ₹600, resell ₹2,000–₹3,000.',
+    h1: 'Transform Your Luxury Wedding Boxes Into a Complete High-End Concierge Experience',
+    // Condensed prose mirror of PartnerLandingPage.jsx's own section copy —
+    // see STATIC_ROUTES_SEO['/']'s comment above for why this exists and how
+    // the string/`{ h2 }` mix renders in the raw, pre-hydration SSR shell.
+    body: [
+      "Supply gorgeous physical mithai boxes? Now offer your couples an exclusive Interactive Digital Wedding Pass — complete with royal envelope openings, live RSVPs, and background music — branded entirely under your shop's name.",
+      { h2: 'Turn Every Box Into Pure Profit' },
+      "The wholesale price to you is ₹600 per invite credit in bulk packs. What you can charge your client is ₹2,000 to ₹3,000 as a luxury box upgrade. That's ₹1,400 to ₹2,400 pure profit per wedding order, on software you didn't have to code.",
+      { h2: "What's Inside the Box + Tech Bundle" },
+      "The digital backend includes a royal envelope opening, background music, live RSVP tracking, and blessing walls, all hosted seamlessly on invitemypeople.com. The physical QR insert is a print-ready, luxury business-card template with a gold-foil and matte-finish aesthetic, ready to slot into your existing boxes. White-label branding adds a subtle, elegant badge naming your own shop on every invite viewer your clients open.",
+      { h2: 'From Application To Your First Sale' },
+      'Apply in minutes, get approved within a couple of business days, then buy invite credits in bulk and start branding every invite under your own shop name — no coding, no app to build, no server to maintain.',
     ],
   },
   '/create': {

@@ -71,11 +71,27 @@ session (see below) is only ever used for login; every actual read/write of
 partner data goes through this app's own `/api/partners/*` and
 `/api/admin/*` routes.
 
-### 2. Create the `partner-logos` Storage bucket
+Then also run `supabase/migrations/0002_b2b_partner_invite_richness.sql` —
+purely additive columns on `partner_invites` (`event_title`, `photos`,
+`events`, `bg_song_*`) plus a replacement `spend_partner_credit_for_invite()`
+that accepts them. This is what lets a partner-generated `/p/:slug`
+invitation render through the exact same `InvitationExperience` component
+tree a consumer's `/i/:slug` invitation does (see
+`PartnerCreateInvitePage.jsx` / `PartnerInviteViewerPage.jsx`) — photos,
+additional events, background music, and all — instead of the old bare
+themed card.
 
-Supabase Dashboard → **Storage** → New bucket → name it `partner-logos` →
-make it public. Deliberately a separate bucket from the consumer
-`invite-photos` one (see `INVITES-SETUP.md`).
+### 2. Create the Storage buckets
+
+Supabase Dashboard → **Storage** → New bucket, twice, both public:
+
+- `partner-logos` — a partner's own business logo (signup form + branding
+  settings). Deliberately separate from the consumer `invite-photos`
+  bucket (see `INVITES-SETUP.md`).
+- `partner-invite-photos` — photos a partner uploads while building a
+  *client's* invite (`PartnerCreateInvitePage.jsx`, via
+  `POST /api/partners/photos`). Also deliberately separate from both
+  `invite-photos` and `partner-logos`.
 
 ### 3. Environment variables
 
@@ -121,29 +137,43 @@ checkout flows, or database structures. Concretely:
 
 - **No schema change to `invites`/`rsvps`.** Partner invites live in the
   new `partner_invites` table, not as rows in `invites`.
-- **No B2C component modified.** `CreateInvitePage.jsx`, `PaymentModal.jsx`,
-  `GeneratedInvitePage.jsx`, and every template component
-  (`InvitationExperience.jsx`, `GaneshExperience.jsx`, etc.) are untouched.
-  The white-label badge (`PartnerBrandBadge.jsx`) wraps a NEW, separate
-  viewer page (`PartnerInviteViewerPage.jsx` at `/p/:slug`), not the
-  consumer `/i/:slug` page.
+- **`CreateInvitePage.jsx`/`PaymentModal.jsx`/`GeneratedInvitePage.jsx`
+  untouched; the shared template components got one additive prop.**
+  `PartnerCreateInvitePage.jsx` gives partners the SAME builder UX a
+  consumer gets on `/create` (style picker + fields on the left, live
+  preview on the right), and `PartnerInviteViewerPage.jsx` (`/p/:slug`)
+  renders through the exact same `InvitationExperience` component tree
+  `/i/:slug` does — both real reuse, not a hand-built approximation, so a
+  partner invite genuinely looks and behaves like a consumer one. The only
+  change to that shared component was adding `showRsvp` (default `true`,
+  so every existing caller renders exactly as before) — the Partner
+  Portal is the one caller that sets it `false`, since `/p/:slug` doesn't
+  have guest RSVP/Wishes Wall yet (see "Not yet built" below).
+  `PhotoUploader.jsx`/`LiveInvitePreview.jsx` similarly gained optional,
+  backward-compatible props (`endpoint`/`token`, `showRsvp`) rather than
+  being forked.
 - **No B2C checkout flow reused.** Partner credit purchases call the same
   Razorpay *account* (same keys, same "real-time payment gateway" the site
   already integrates), but through their own
   `/api/partners/purchase/*` endpoints — `/api/create-order` and
   `/api/verify-payment` (the consumer routes) are never called.
-- **Read-only reuse only.** The one thing partner-portal code imports from
-  the consumer side is plain, static data — `src/data/templatesData.js`'s
-  `TEMPLATES` list (for the "look" dropdown and the /p/:slug viewer's
-  color theme) and small pure formatting utilities
-  (`slugify.js`, `formatInviteDateTime.js`). Nothing there is written to,
-  and none of it is a template *component*, checkout flow, or table.
+- **No B2C table or storage bucket touched.** Partner invites/photos live
+  in their own `partner_invites` row and `partner-invite-photos` bucket,
+  written through their own `/api/partners/*` endpoints — never the
+  consumer `invites`/`rsvps` tables or `invite-photos` bucket. What's
+  reused from the consumer side is code, not data: `builderTemplates.js`
+  (the same style catalog `/create` itself reads), `buildWeddingExperienceTemplate.js`
+  (a pure `{ names, date, venue, ... } → template props` formatter with no
+  I/O), and small utilities (`slugify.js`, `formatInviteDateTime.js`,
+  `cleanEvents.js`, `photoUpload.js`'s constants).
 
 ## Not yet built
 
 Guest RSVP / a Wishes Wall for partner-created invites — the spec asked
 for a shareable invite link and a white-label viewer, not guest RSVPs, so
-`/p/:slug` is a clean read-only invitation display for now. Adding RSVPs
+`/p/:slug` renders `InvitationExperience` with `showRsvp={false}` for now
+(everything else — envelope reveal, timeline, gallery, background music —
+is the real thing). Adding RSVPs
 later would mean either a fully separate `partner_invite_rsvps` table (to
 keep the same isolation guarantee above) or a deliberate decision to let
 partner invites share the consumer `rsvps` table — worth a explicit call

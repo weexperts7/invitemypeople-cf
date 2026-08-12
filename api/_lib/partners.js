@@ -59,11 +59,20 @@ export function rowToPartnerInvite(row) {
     slug: row.slug,
     templateId: row.template_id,
     coupleNames: row.couple_names,
+    eventTitle: row.event_title,
     weddingDate: row.wedding_date,
     weddingTime: row.wedding_time,
     venue: row.venue,
     locationUrl: row.location_url,
     message: row.message,
+    photos: row.photos ?? [],
+    events: row.events ?? [],
+    bgSongTitle: row.bg_song_title,
+    bgSongArtist: row.bg_song_artist,
+    bgSongAlbumArt: row.bg_song_album_art,
+    bgSongPreviewUrl: row.bg_song_preview_url,
+    clientEmail: row.client_email,
+    clientPhone: row.client_phone,
     createdAt: row.created_at,
   }
 }
@@ -131,6 +140,15 @@ export async function spendCreditForInvite(partnerId, {
   venue,
   locationUrl,
   message,
+  eventTitle,
+  photos,
+  events,
+  bgSongTitle,
+  bgSongArtist,
+  bgSongAlbumArt,
+  bgSongPreviewUrl,
+  clientEmail,
+  clientPhone,
 }) {
   const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
     p_partner_id: partnerId,
@@ -142,6 +160,15 @@ export async function spendCreditForInvite(partnerId, {
     p_venue: venue,
     p_location_url: locationUrl,
     p_message: message,
+    p_event_title: eventTitle || null,
+    p_photos: photos ?? [],
+    p_events: events ?? [],
+    p_bg_song_title: bgSongTitle || null,
+    p_bg_song_artist: bgSongArtist || null,
+    p_bg_song_album_art: bgSongAlbumArt || null,
+    p_bg_song_preview_url: bgSongPreviewUrl || null,
+    p_client_email: clientEmail || null,
+    p_client_phone: clientPhone || null,
   })
   if (error) throw error
   return rowToPartnerInvite(Array.isArray(data) ? data[0] : data)

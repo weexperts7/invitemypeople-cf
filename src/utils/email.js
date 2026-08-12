@@ -191,6 +191,48 @@ export function buildPartnerApprovedEmail(partner) {
   return { subject, html }
 }
 
+/**
+ * Sent to the CLIENT right after a partner spends a credit to create their
+ * invite (POST /api/partners/invites) — the couple/host themselves, not the
+ * partner. Mirrors buildOrderConfirmationEmail()'s shape but points at
+ * /p/:slug (not /i/:slug) and has no host-dashboard link, since partner
+ * invites have no host-dashboard concept (see PartnerInviteViewerPage.jsx /
+ * InvitationExperience.jsx's showRsvp prop). Accepts the camelCase invite
+ * shape rowToPartnerInvite() (api/_lib/partners.js) returns, plus the
+ * partner row (rowToPartner()) so the email can credit who made it.
+ */
+export function buildPartnerInviteReadyEmail(invite, partner) {
+  const inviteUrl = `${SITE_URL}/p/${invite.slug}`
+  const dateLabel = formatInviteDate(invite.weddingDate)
+  const timeLabel = formatInviteTime(invite.weddingTime)
+  const whenLabel = [dateLabel, timeLabel].filter(Boolean).join(' at ')
+
+  const subject = `Your invitation for ${invite.coupleNames} is live!`
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">Your invitation is ready 🎉</h2>
+      <p><strong>${escapeHtml(partner.businessName)}</strong> has created your invitation for
+      <strong>${escapeHtml(invite.coupleNames)}</strong>.</p>
+      ${
+        whenLabel || invite.venue
+          ? `<p>${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
+          : ''
+      }
+
+      <p style="margin-top: 24px;"><strong>Share this with your guests:</strong><br/>
+      <a href="${inviteUrl}" style="color: #b3541e;">${inviteUrl}</a></p>
+
+      <p style="color: #7a6a63; font-size: 12px; margin-top: 24px;">
+        Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
+        they created this for you.
+      </p>
+    </div>
+  `
+
+  return { subject, html }
+}
+
 /** Sent when an admin rejects a pending partner. `partner.rejectedReason` is optional. */
 export function buildPartnerRejectedEmail(partner) {
   const subject = `Update on your partner application`

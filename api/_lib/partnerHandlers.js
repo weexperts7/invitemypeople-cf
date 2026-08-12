@@ -41,12 +41,15 @@ import {
 import { getPartnerPackageById } from '../../src/data/partnerPackages.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../../src/utils/razorpay.js'
 import { slugify } from '../../src/utils/slugify.js'
+import { MAX_PHOTO_BYTES, MAX_PHOTOS, ALLOWED_MIME_TYPES, randomPhotoFilename } from '../../src/utils/photoUpload.js'
+import { cleanEvents } from '../../src/utils/cleanEvents.js'
 import {
   sendTransactionalEmail,
   buildPartnerApplicationReceivedEmail,
   buildPartnerAdminNotificationEmail,
   buildPartnerApprovedEmail,
   buildPartnerRejectedEmail,
+  buildPartnerInviteReadyEmail,
 } from '../../src/utils/email.js'
 
 const MIN_PASSWORD_LENGTH = 8
@@ -288,6 +291,56 @@ export async function uploadPartnerLogo(req, res) {
   }
 }
 
+const INVITE_PHOTO_BUCKET = 'partner-invite-photos'
+
+// ---------------------------------------------------------------------------
+// POST /api/partners/invites/photos — requires a logged-in partner.
+// multipart/form-data (field name "photo"). Mirrors api/photos.js (same
+// formidable + size/mime limits from src/utils/photoUpload.js) but uploads
+// to its OWN `partner-invite-photos` bucket — never the consumer
+// `invite-photos` bucket — same isolation pattern as uploadPartnerLogo
+// above. Unlike that one, this IS authenticated: it's only ever called
+// from the logged-in dashboard's client-invite builder
+// (PartnerCreateInvitePage.jsx), not at signup time.
+// ---------------------------------------------------------------------------
+export async function uploadPartnerInvitePhoto(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const user = await requireUser(req, res)
+  if (!user) return
+
+  try {
+    const form = formidable({ maxFileSize: MAX_PHOTO_BYTES, maxFiles: 1 })
+    const [, files] = await form.parse(req)
+    const file = Array.isArray(files.photo) ? files.photo[0] : files.photo
+    if (!file) return res.status(400).json({ ok: false, error: 'no file uploaded' })
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      return res.status(400).json({ ok: false, error: 'only JPEG, PNG, or WebP images are allowed' })
+    }
+
+    const buffer = await fs.readFile(file.filepath)
+    const filename = randomPhotoFilename(file.mimetype)
+
+    const supabase = getSupabase()
+    const { error: uploadError } = await supabase.storage
+      .from(INVITE_PHOTO_BUCKET)
+      .upload(filename, buffer, { contentType: file.mimetype, upsert: false })
+    if (uploadError) throw uploadError
+
+    const { data } = supabase.storage.from(INVITE_PHOTO_BUCKET).getPublicUrl(filename)
+    res.status(200).json({ ok: true, url: data.publicUrl })
+  } catch (err) {
+    console.error('[partners] invite photo upload failed:', err)
+    if (/maxFileSize/i.test(err.message || '')) {
+      return res.status(400).json({ ok: false, error: 'file is too large (max 4MB)' })
+    }
+    res.status(500).json({ ok: false, error: 'could not upload photo' })
+  }
+}
+
 // ---------------------------------------------------------------------------
 // GET /api/partners/credits — requires a logged-in partner. Balance + the
 // ledger backing it (see partner_credit_transactions in the migration).
@@ -478,15 +531,31 @@ export async function createClientInvite(req, res) {
 
     const body = req.body || {}
     const coupleNames = clean(body.coupleNames, 120)
+    const eventTitle = clean(body.eventTitle, 80)
     const weddingDate = clean(body.weddingDate, 20)
     const weddingTime = clean(body.weddingTime, 10)
     const venue = clean(body.venue, 200)
     const locationUrl = clean(body.locationUrl, 500)
     const message = clean(body.message, 2000)
     const templateId = clean(body.templateId, 80)
+    const photos = Array.isArray(body.photos)
+      ? body.photos.filter((p) => typeof p === 'string').slice(0, MAX_PHOTOS).map((p) => clean(p, 500))
+      : []
+    const events = cleanEvents(body.events, clean)
+    const bgSongTitle = clean(body.bgSongTitle, 200)
+    const bgSongArtist = clean(body.bgSongArtist, 200)
+    const bgSongAlbumArt = clean(body.bgSongAlbumArt, 500)
+    const bgSongPreviewUrl = clean(body.bgSongPreviewUrl, 500)
+    // The CLIENT's own contact details — required so the invitation-ready
+    // email below always has somewhere to go. Distinct from the partner's
+    // own email/phone on their `partners` row.
+    const clientEmail = clean(body.clientEmail, 200)
+    const clientPhone = clean(body.clientPhone, 30)
     if (!coupleNames) return res.status(400).json({ ok: false, error: 'coupleNames is required' })
     if (!weddingDate) return res.status(400).json({ ok: false, error: 'weddingDate is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
+    if (!clientEmail) return res.status(400).json({ ok: false, error: 'clientEmail is required' })
+    if (!clientPhone) return res.status(400).json({ ok: false, error: 'clientPhone is required' })
 
     const base = `p-${slugify(coupleNames) || 'invite'}`
 
@@ -498,13 +567,37 @@ export async function createClientInvite(req, res) {
           slug,
           templateId: templateId || null,
           coupleNames,
+          eventTitle: eventTitle || null,
           weddingDate,
           weddingTime: weddingTime || null,
           venue,
           locationUrl: locationUrl || null,
           message: message || null,
+          photos,
+          events,
+          bgSongTitle: bgSongTitle || null,
+          bgSongArtist: bgSongArtist || null,
+          bgSongAlbumArt: bgSongAlbumArt || null,
+          bgSongPreviewUrl: bgSongPreviewUrl || null,
+          clientEmail,
+          clientPhone,
         })
         console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
+
+        // Invitation-ready email to the CLIENT (couple), not the partner —
+        // must never fail or delay the response, same reasoning as POST
+        // /api/invites' own order-confirmation email (see that file's
+        // comment on why this is awaited, not fire-and-forget).
+        try {
+          await sendTransactionalEmail({
+            to: clientEmail,
+            toName: coupleNames,
+            ...buildPartnerInviteReadyEmail(invite, rowToPartner(row)),
+          })
+        } catch (emailErr) {
+          console.error('[partners] invite-ready email failed:', emailErr)
+        }
+
         return res.status(200).json({ ok: true, invite })
       } catch (err) {
         lastError = err
@@ -575,6 +668,29 @@ export async function getPartnerInviteBySlug(req, res) {
 }
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/me — admin only. Deliberately the cheapest possible admin
+// route (just the requireAdmin() check, no table reads) — its only job is
+// to answer "is this login on the ADMIN_EMAILS allowlist" for
+// AdminLoginPage.jsx to call right after Supabase Auth accepts a
+// email/password, so a valid partner login gets rejected on the login
+// screen itself instead of being let in and finding out via a 403 on
+// /admin/dashboard (see that page's AdminForbidden fallback, which stays
+// as a second line of defense for a session that reaches an /admin/* page
+// some other way).
+// ---------------------------------------------------------------------------
+export async function adminGetMe(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  res.status(200).json({ ok: true, email: admin.email })
+}
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/partners?status=pending_approval — admin only.
 // ---------------------------------------------------------------------------
 export async function adminListPartners(req, res) {
@@ -640,6 +756,249 @@ export async function adminApprovePartner(req, res) {
   } catch (err) {
     console.error('[admin] failed to approve partner:', err)
     res.status(500).json({ ok: false, error: 'could not approve partner' })
+  }
+}
+
+const STATS_STATUSES = ['pending_approval', 'active', 'rejected', 'suspended']
+const STATS_WINDOW_DAYS = 30
+const STATS_WINDOW_MS = STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/stats — admin only. Everything AdminDashboardPage.jsx
+// renders: partner funnel counts, revenue/credits totals (all-time and the
+// trailing 30 days), a day-by-day revenue series for the chart, a
+// per-partner leaderboard, and recent activity feeds. Deliberately reads
+// the three tables in full and reduces in JS rather than hand-rolling
+// GROUP BY RPCs — matches adminListPartners()'s "no realistic volume yet"
+// assumption just above, and keeps every number on this page derived from
+// the exact same three reads (no risk of a SQL aggregate and a JS one
+// silently drifting apart).
+// ---------------------------------------------------------------------------
+export async function adminGetStats(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  try {
+    const supabase = getSupabase()
+    const [
+      { data: partnerRows, error: partnersError },
+      { data: txRows, error: txError },
+      { data: inviteRows, error: invitesError },
+    ] = await Promise.all([
+      supabase
+        .from('partners')
+        .select('id, business_name, status, credits_remaining, created_at, approved_at')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('partner_credit_transactions')
+        .select('partner_id, type, credits, amount_paise, package_id, created_at')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('partner_invites')
+        .select('id, partner_id, couple_names, venue, created_at')
+        .order('created_at', { ascending: false }),
+    ])
+    if (partnersError) throw partnersError
+    if (txError) throw txError
+    if (invitesError) throw invitesError
+
+    const partners = partnerRows || []
+    const transactions = txRows || []
+    const invites = inviteRows || []
+
+    const cutoff = Date.now() - STATS_WINDOW_MS
+    const isRecent = (isoDate) => new Date(isoDate).getTime() >= cutoff
+
+    const partnersByStatus = Object.fromEntries(STATS_STATUSES.map((s) => [s, 0]))
+    for (const p of partners) {
+      if (partnersByStatus[p.status] !== undefined) partnersByStatus[p.status]++
+    }
+
+    const purchases = transactions.filter((t) => t.type === 'purchase')
+    const totalRevenuePaise = purchases.reduce((sum, t) => sum + (t.amount_paise || 0), 0)
+    const totalCreditsSold = purchases.reduce((sum, t) => sum + (t.credits || 0), 0)
+    const totalCreditsRemaining = partners.reduce((sum, p) => sum + (p.credits_remaining || 0), 0)
+    const recentPurchases = purchases.filter((t) => isRecent(t.created_at))
+    const revenueLast30dPaise = recentPurchases.reduce((sum, t) => sum + (t.amount_paise || 0), 0)
+
+    // Day-by-day revenue for the trailing window, zero-filled so the chart
+    // never has a gap for a day with no purchases.
+    const dayBuckets = new Map()
+    for (let i = STATS_WINDOW_DAYS - 1; i >= 0; i--) {
+      const key = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      dayBuckets.set(key, 0)
+    }
+    for (const t of recentPurchases) {
+      const key = new Date(t.created_at).toISOString().slice(0, 10)
+      if (dayBuckets.has(key)) dayBuckets.set(key, dayBuckets.get(key) + (t.amount_paise || 0))
+    }
+    const revenueByDay = Array.from(dayBuckets.entries()).map(([date, amountPaise]) => ({ date, amountPaise }))
+
+    // Same zero-filled day-bucket approach, for new-partner signups — lets
+    // the dashboard show growth momentum alongside revenue instead of just
+    // a single 30-day total.
+    const signupBuckets = new Map()
+    for (let i = STATS_WINDOW_DAYS - 1; i >= 0; i--) {
+      const key = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      signupBuckets.set(key, 0)
+    }
+    for (const p of partners) {
+      const key = new Date(p.created_at).toISOString().slice(0, 10)
+      if (signupBuckets.has(key)) signupBuckets.set(key, signupBuckets.get(key) + 1)
+    }
+    const signupsByDay = Array.from(signupBuckets.entries()).map(([date, count]) => ({ date, count }))
+
+    // Per-partner rollups, for the leaderboard.
+    const revenueByPartner = new Map()
+    for (const t of purchases) {
+      revenueByPartner.set(t.partner_id, (revenueByPartner.get(t.partner_id) || 0) + (t.amount_paise || 0))
+    }
+    const invitesByPartner = new Map()
+    for (const inv of invites) {
+      invitesByPartner.set(inv.partner_id, (invitesByPartner.get(inv.partner_id) || 0) + 1)
+    }
+    const topPartners = partners
+      .map((p) => ({
+        id: p.id,
+        businessName: p.business_name,
+        status: p.status,
+        revenuePaise: revenueByPartner.get(p.id) || 0,
+        invitesCreated: invitesByPartner.get(p.id) || 0,
+        creditsRemaining: p.credits_remaining,
+      }))
+      .sort((a, b) => b.revenuePaise - a.revenuePaise || b.invitesCreated - a.invitesCreated)
+      .slice(0, 8)
+
+    // Program health, at a glance: an activation funnel (how many partners
+    // make it from signup all the way to actually shipping an invite to a
+    // client), a per-package breakdown (which tier sells), and a "needs
+    // attention" list (approved partners who bought credits or not but have
+    // never actually created an invite) — the numbers an admin actually
+    // needs to judge whether the portal is gaining traction, not just its
+    // running totals.
+    const approvedPartners = partners.filter((p) => p.approved_at)
+    const avgApprovalHours =
+      approvedPartners.length > 0
+        ? approvedPartners.reduce(
+            (sum, p) => sum + (new Date(p.approved_at).getTime() - new Date(p.created_at).getTime()),
+            0,
+          ) /
+          approvedPartners.length /
+          (1000 * 60 * 60)
+        : null
+
+    const funnel = {
+      signedUp: partners.length,
+      approved: approvedPartners.length,
+      purchasedCredits: revenueByPartner.size,
+      createdInvite: invitesByPartner.size,
+    }
+
+    const packageStats = new Map()
+    for (const t of purchases) {
+      const key = t.package_id || 'unknown'
+      const entry = packageStats.get(key) || { packageId: key, purchases: 0, creditsSold: 0, revenuePaise: 0 }
+      entry.purchases += 1
+      entry.creditsSold += t.credits || 0
+      entry.revenuePaise += t.amount_paise || 0
+      packageStats.set(key, entry)
+    }
+    const packageBreakdown = Array.from(packageStats.values())
+      .map((entry) => ({ ...entry, label: getPartnerPackageById(entry.packageId)?.label || entry.packageId }))
+      .sort((a, b) => b.revenuePaise - a.revenuePaise)
+
+    const activePartnerCount = partnersByStatus.active || 0
+    const health = {
+      avgApprovalHours,
+      avgRevenuePerActivePartnerPaise: activePartnerCount > 0 ? Math.round(totalRevenuePaise / activePartnerCount) : 0,
+      avgInvitesPerActivePartner: activePartnerCount > 0 ? invites.length / activePartnerCount : 0,
+      creditUtilizationPct:
+        totalCreditsSold > 0
+          ? Math.round(((totalCreditsSold - totalCreditsRemaining) / totalCreditsSold) * 100)
+          : 0,
+    }
+
+    // Active partners who've never spent a credit on a client invite —
+    // whether they never bought, or bought and haven't shipped anything
+    // yet. Oldest-first, so the partner waiting longest surfaces first.
+    const needsAttention = partners
+      .filter((p) => p.status === 'active' && !invitesByPartner.has(p.id))
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .slice(0, 6)
+      .map((p) => ({
+        id: p.id,
+        businessName: p.business_name,
+        creditsRemaining: p.credits_remaining,
+        hasPurchased: revenueByPartner.has(p.id),
+        createdAt: p.created_at,
+      }))
+
+    const partnerNameById = new Map(partners.map((p) => [p.id, p.business_name]))
+    const recentTransactions = purchases.slice(0, 8).map((t) => ({
+      partnerId: t.partner_id,
+      businessName: partnerNameById.get(t.partner_id) || 'Unknown partner',
+      credits: t.credits,
+      amountPaise: t.amount_paise,
+      packageId: t.package_id,
+      createdAt: t.created_at,
+    }))
+    const recentInvites = invites.slice(0, 8).map((inv) => ({
+      id: inv.id,
+      partnerId: inv.partner_id,
+      businessName: partnerNameById.get(inv.partner_id) || 'Unknown partner',
+      coupleNames: inv.couple_names,
+      venue: inv.venue,
+      createdAt: inv.created_at,
+    }))
+    const recentSignups = partners.slice(0, 8).map((p) => ({
+      id: p.id,
+      businessName: p.business_name,
+      status: p.status,
+      createdAt: p.created_at,
+    }))
+
+    res.status(200).json({
+      ok: true,
+      stats: {
+        generatedAt: new Date().toISOString(),
+        windowDays: STATS_WINDOW_DAYS,
+        partners: {
+          total: partners.length,
+          ...partnersByStatus,
+          newLast30d: partners.filter((p) => isRecent(p.created_at)).length,
+        },
+        revenue: {
+          totalPaise: totalRevenuePaise,
+          last30dPaise: revenueLast30dPaise,
+          byDay: revenueByDay,
+        },
+        credits: {
+          totalSold: totalCreditsSold,
+          totalRemaining: totalCreditsRemaining,
+        },
+        invites: {
+          total: invites.length,
+          last30d: invites.filter((i) => isRecent(i.created_at)).length,
+        },
+        signupsByDay,
+        funnel,
+        health,
+        packageBreakdown,
+        needsAttention,
+        topPartners,
+        recentTransactions,
+        recentInvites,
+        recentSignups,
+      },
+    })
+  } catch (err) {
+    console.error('[admin] failed to load stats:', err)
+    res.status(500).json({ ok: false, error: 'could not load dashboard stats' })
   }
 }
 

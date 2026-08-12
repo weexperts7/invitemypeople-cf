@@ -77,6 +77,10 @@ export function getPartnerInviteBySlug(slug) {
 
 // --- Admin-facing ------------------------------------------------------
 
+export function adminGetMe(token) {
+  return request('/api/admin/me', { token })
+}
+
 export function adminListPartners(token, status) {
   const qs = status ? `?status=${encodeURIComponent(status)}` : ''
   return request(`/api/admin/partners${qs}`, { token })
@@ -88,4 +92,8 @@ export function adminApprovePartner(token, partnerId) {
 
 export function adminRejectPartner(token, partnerId, reason) {
   return request('/api/admin/partners/reject', { method: 'POST', token, body: { partnerId, reason } })
+}
+
+export function adminGetStats(token) {
+  return request('/api/admin/stats', { token })
 }

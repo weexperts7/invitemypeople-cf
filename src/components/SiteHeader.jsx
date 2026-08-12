@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles } from 'lucide-react'
+import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Building2, LogOut } from 'lucide-react'
 import Logo from './Logo'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
+import PartnerAuthContext from '../context/PartnerAuthContext'
 
 const PRIMARY_LINKS = [{ to: '/', label: 'Home', end: true }]
 const SECONDARY_LINKS = [
@@ -29,6 +30,46 @@ const ALL_OCCASION_PATHS = [...LIVE_OCCASIONS, ...COMING_SOON_LINKS].map((l) => 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+}
+
+// Read directly off the context (not the throwing usePartnerAuth() hook —
+// see hooks/usePartnerAuth.js) since SiteHeader renders both inside the
+// B2B Partner Portal (wrapped in PartnerAuthProvider, see
+// PartnerPortalLayout.jsx) and on every public page, which isn't. Renders
+// nothing on every public page (ctx is null there) or while logged out —
+// this is purely "make an already-logged-in partner's session visible in
+// the nav they'd otherwise have no cue they're in," not a login prompt.
+function PartnerSessionBadge({ onNavigate, className = '' }) {
+  const ctx = useContext(PartnerAuthContext)
+  if (!ctx?.session) return null
+
+  const dashboardPath = ctx.partner?.status === 'active' ? '/partners/dashboard' : '/partners/pending'
+  const label = ctx.partner?.businessName || ctx.user?.email || 'Partner Account'
+
+  return (
+    <div className={`flex items-center gap-1.5 rounded-full border border-champagne-deep/50 bg-ivory/70 py-1 pl-3 pr-1.5 ${className}`}>
+      <Link
+        to={dashboardPath}
+        onClick={onNavigate}
+        className="flex items-center gap-1.5 text-xs font-medium text-ink hover:text-rose"
+      >
+        <Building2 className="h-3.5 w-3.5 text-rose" />
+        {label}
+      </Link>
+      <button
+        type="button"
+        onClick={() => {
+          ctx.signOut()
+          onNavigate?.()
+        }}
+        aria-label="Log out"
+        title="Log out"
+        className="rounded-full p-1.5 text-ink-soft transition-colors hover:text-rose"
+      >
+        <LogOut className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  )
 }
 
 // A persistent nav bar across every page — now that sections have distinct
@@ -142,6 +183,7 @@ export default function SiteHeader() {
 
           {/* "Create Invite" nav entry hidden for now — /create and
               /i/:slug still work by direct URL, just not linked from nav. */}
+          <PartnerSessionBadge className="ml-2" />
           <a
             href={getWhatsAppLink("Hi! I'd like to know more about InviteMyPeople.")}
             target="_blank"
@@ -166,6 +208,7 @@ export default function SiteHeader() {
 
       {open && (
         <nav className="flex flex-col gap-1 border-t border-champagne-deep/30 bg-ivory px-6 py-4 sm:hidden">
+          <PartnerSessionBadge onNavigate={() => setOpen(false)} className="mb-3 self-start" />
           {PRIMARY_LINKS.map((link) => (
             <NavLink key={link.to} to={link.to} end={link.end} onClick={() => setOpen(false)} className={linkClass}>
               {link.label}

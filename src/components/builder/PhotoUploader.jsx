@@ -5,13 +5,19 @@
 // the time the buyer reaches checkout — the payment step itself never has
 // to wait on file uploads. Entirely optional: skipping this leaves
 // GeneratedInvitePage to fall back to the template's stock photo set.
+//
+// `endpoint`/`token` are optional overrides — the B2B Partner Portal's
+// client-invite builder (PartnerCreateInvitePage.jsx) reuses this same
+// component but points it at its own authenticated
+// POST /api/partners/photos (its own `partner-invite-photos` bucket, never
+// the consumer one) instead of the default public /api/photos.
 import { useRef, useState } from 'react'
 import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react'
 import { ALLOWED_MIME_TYPES, MAX_PHOTOS } from '../../utils/photoUpload'
 
 let nextItemId = 0
 
-export default function PhotoUploader({ photos, onChange }) {
+export default function PhotoUploader({ photos, onChange, endpoint = '/api/photos', token }) {
   const [items, setItems] = useState([]) // { id, previewUrl, uploading, error, url }
   const inputRef = useRef(null)
 
@@ -40,7 +46,11 @@ export default function PhotoUploader({ photos, onChange }) {
       try {
         const formData = new FormData()
         formData.append('photo', file)
-        const res = await fetch('/api/photos', { method: 'POST', body: formData })
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          body: formData,
+        })
         const result = await res.json().catch(() => null)
         if (!res.ok || !result?.ok) throw new Error(result?.error || 'Upload failed')
 

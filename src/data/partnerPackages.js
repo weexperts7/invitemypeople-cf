@@ -4,7 +4,7 @@
 // checkout (see src/data/sale.js for that flow).
 //
 // PLACEHOLDER PRICING: these three tiers exist so the purchase flow
-// (PartnerDashboardPage.jsx → POST /api/partners/purchase/create-order →
+// (PartnerCreditsPage.jsx → POST /api/partners/purchase/create-order →
 // Razorpay Checkout → POST /api/partners/purchase/verify) has something
 // real to buy end-to-end. Swap in the actual tiers/pricing here once
 // they're decided — nothing else needs to change: both the server (re-

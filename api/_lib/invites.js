@@ -61,6 +61,14 @@ export function rowToInvite(row) {
     bgSongArtist: row.bg_song_artist,
     bgSongAlbumArt: row.bg_song_album_art,
     bgSongPreviewUrl: row.bg_song_preview_url,
+    // "Family Details" (see CreateInvitePage.jsx) — optional groom's/
+    // bride's name + parents, rendered as the two cards under the couple's
+    // names on WelcomeSplash.jsx (couple.people). All four nullable; blank
+    // on invites created before this column existed.
+    groomName: row.groom_name,
+    groomParents: row.groom_parents,
+    brideName: row.bride_name,
+    brideParents: row.bride_parents,
     createdAt: row.created_at,
   }
 }

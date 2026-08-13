@@ -551,6 +551,12 @@ export async function createClientInvite(req, res) {
     // own email/phone on their `partners` row.
     const clientEmail = clean(body.clientEmail, 200)
     const clientPhone = clean(body.clientPhone, 30)
+    // "Family Details" (see PartnerCreateInvitePage.jsx) — optional, no
+    // required-field validation, same as eventTitle/message above.
+    const groomName = clean(body.groomName, 120)
+    const groomParents = clean(body.groomParents, 200)
+    const brideName = clean(body.brideName, 120)
+    const brideParents = clean(body.brideParents, 200)
     if (!coupleNames) return res.status(400).json({ ok: false, error: 'coupleNames is required' })
     if (!weddingDate) return res.status(400).json({ ok: false, error: 'weddingDate is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
@@ -581,6 +587,10 @@ export async function createClientInvite(req, res) {
           bgSongPreviewUrl: bgSongPreviewUrl || null,
           clientEmail,
           clientPhone,
+          groomName: groomName || null,
+          groomParents: groomParents || null,
+          brideName: brideName || null,
+          brideParents: brideParents || null,
         })
         console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
 

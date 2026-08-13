@@ -225,6 +225,14 @@ export default function LiveInvitePreview({
         venue: values.venue.trim() || template.example.venue,
         locationUrl: values.locationUrl,
         message: values.message,
+        // "Family Details" — wedding-only in both CreateInvitePage.jsx and
+        // PartnerCreateInvitePage.jsx; undefined for Ganesh Chaturthi's
+        // `values`, which is harmless since buildGaneshExperienceTemplate.js
+        // never reads these.
+        groomName: values.groomName,
+        groomParents: values.groomParents,
+        brideName: values.brideName,
+        brideParents: values.brideParents,
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —

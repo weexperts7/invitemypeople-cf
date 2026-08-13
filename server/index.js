@@ -354,6 +354,12 @@ app.post('/api/invites', async (req, res) => {
         bgSongArtist: clean(body.bgSongArtist, 200),
         bgSongAlbumArt: clean(body.bgSongAlbumArt, 500),
         bgSongPreviewUrl: clean(body.bgSongPreviewUrl, 500),
+        // "Family Details" (see CreateInvitePage.jsx) — optional, mirrors
+        // api/invites/index.js's identical block.
+        groomName: clean(body.groomName, 120),
+        groomParents: clean(body.groomParents, 200),
+        brideName: clean(body.brideName, 120),
+        brideParents: clean(body.brideParents, 200),
         hostName,
         hostEmail,
         hostToken: randomBytes(24).toString('base64url'),

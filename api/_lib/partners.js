@@ -73,6 +73,13 @@ export function rowToPartnerInvite(row) {
     bgSongPreviewUrl: row.bg_song_preview_url,
     clientEmail: row.client_email,
     clientPhone: row.client_phone,
+    // "Family Details" (see PartnerCreateInvitePage.jsx) — same optional
+    // groom's/bride's name+parents fields as the consumer `invites` table
+    // (see api/_lib/invites.js's rowToInvite()).
+    groomName: row.groom_name,
+    groomParents: row.groom_parents,
+    brideName: row.bride_name,
+    brideParents: row.bride_parents,
     createdAt: row.created_at,
   }
 }
@@ -149,6 +156,10 @@ export async function spendCreditForInvite(partnerId, {
   bgSongPreviewUrl,
   clientEmail,
   clientPhone,
+  groomName,
+  groomParents,
+  brideName,
+  brideParents,
 }) {
   const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
     p_partner_id: partnerId,
@@ -169,6 +180,10 @@ export async function spendCreditForInvite(partnerId, {
     p_bg_song_preview_url: bgSongPreviewUrl || null,
     p_client_email: clientEmail || null,
     p_client_phone: clientPhone || null,
+    p_groom_name: groomName || null,
+    p_groom_parents: groomParents || null,
+    p_bride_name: brideName || null,
+    p_bride_parents: brideParents || null,
   })
   if (error) throw error
   return rowToPartnerInvite(Array.isArray(data) ? data[0] : data)

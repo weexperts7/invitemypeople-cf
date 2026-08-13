@@ -56,6 +56,12 @@ export default async function handler(req, res) {
       bg_song_artist: clean(body.bgSongArtist, 200),
       bg_song_album_art: clean(body.bgSongAlbumArt, 500),
       bg_song_preview_url: clean(body.bgSongPreviewUrl, 500),
+      // "Family Details" (see CreateInvitePage.jsx) — optional, no
+      // required-field validation, same as eventTitle/message above.
+      groom_name: clean(body.groomName, 120),
+      groom_parents: clean(body.groomParents, 200),
+      bride_name: clean(body.brideName, 120),
+      bride_parents: clean(body.brideParents, 200),
       host_name: hostName,
       host_email: hostEmail,
       host_token: generateHostToken(),

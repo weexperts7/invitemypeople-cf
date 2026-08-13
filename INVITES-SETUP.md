@@ -91,6 +91,20 @@ alter table public.invites
   add column if not exists bg_song_preview_url text;
 ```
 
+Add the `groom_name`/`groom_parents`/`bride_name`/`bride_parents` columns
+(optional "family names" — rendered as two cards under the couple's names
+on `/i/:slug`, e.g. "Son of Mr. Rajesh & Mrs. Kavita Malhotra", see
+`WelcomeSplash.jsx`'s `couple.people` and `CreateInvitePage.jsx`'s "Family
+Details" section) with:
+
+```sql
+alter table public.invites
+  add column if not exists groom_name text,
+  add column if not exists groom_parents text,
+  add column if not exists bride_name text,
+  add column if not exists bride_parents text;
+```
+
 ### 1b. Create the `invite-photos` Storage bucket
 
 Buyers can optionally upload their own photos (see `CreateInvitePage.jsx`) —

@@ -55,7 +55,21 @@ const MUSIC_VOLUME = 0.7
 // hear *something* when the envelope opens, not silence by default.
 const DEFAULT_BG_MUSIC_URL = '/audio/default-background-music.mp3'
 
-export default function InvitationExperience({ template, onBack, isPreview = false, invitationSlug: slugOverride }) {
+export default function InvitationExperience({
+  template,
+  onBack,
+  isPreview = false,
+  invitationSlug: slugOverride,
+  // False for the B2B Partner Portal's white-label /p/:slug viewer (see
+  // PartnerInviteViewerPage.jsx) — that flow deliberately doesn't have
+  // guest RSVP/Wishes Wall yet (partner invites live in their own
+  // partner_invites table, never the consumer rsvps/invites tables an RSVP
+  // submission here would need to write against). Every other caller
+  // (GeneratedInvitePage.jsx, every pre-built template route,
+  // LiveDraftPreviewPage.jsx for a consumer's own in-progress builder
+  // preview) keeps the default and renders it exactly as before.
+  showRsvp = true,
+}) {
   // Every invitation is identified by a slug — by default one derived from
   // the couple's names (e.g. "Meenal & Avinash" -> "meenal-avinash"), which
   // is what every gallery preview still uses. A Builder-generated invite
@@ -295,8 +309,12 @@ export default function InvitationExperience({ template, onBack, isPreview = fal
                 heading={template?.ceremoniesHeading}
               />
               <PhotoGallery culture={template?.weddingType} photos={template?.photos} />
-              <RsvpForm palette={template?.palette} slug={invitationSlug} />
-              <WishesWall slug={invitationSlug} />
+              {showRsvp && (
+                <>
+                  <RsvpForm palette={template?.palette} slug={invitationSlug} />
+                  <WishesWall slug={invitationSlug} />
+                </>
+              )}
               <motion.footer
                 className="py-12 text-center text-sm text-ink-soft"
                 initial={{ opacity: 0, y: 20 }}

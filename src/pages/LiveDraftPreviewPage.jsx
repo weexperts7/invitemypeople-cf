@@ -96,6 +96,7 @@ export default function LiveDraftPreviewPage() {
       <InvitationExperience
         template={buildWeddingExperienceTemplate(draft, template)}
         invitationSlug={invitationSlug}
+        showRsvp={draft.showRsvp ?? true}
       />
     </>
   )

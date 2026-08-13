@@ -157,7 +157,20 @@ const DEVICE_HEIGHT = 812
 const FRAME_SCREEN_WIDTH = 292
 const DEVICE_SCALE = FRAME_SCREEN_WIDTH / DEVICE_WIDTH
 
-export default function LiveInvitePreview({ template, values, occasionId, photos = [], events = [], song = null }) {
+export default function LiveInvitePreview({
+  template,
+  values,
+  occasionId,
+  photos = [],
+  events = [],
+  song = null,
+  // False for the B2B Partner Portal's invite builder (see
+  // PartnerCreateInvitePage.jsx) — its live preview stays honest about
+  // what the final /p/:slug page will actually show (no guest RSVP/Wishes
+  // Wall yet, see InvitationExperience.jsx). Every consumer caller keeps
+  // the default.
+  showRsvp = true,
+}) {
   const isWedding = occasionId === 'wedding'
   // Wedding and Ganesh Chaturthi both render the real bespoke component
   // tree in the iframe below (InvitationExperience / GaneshExperience — see
@@ -212,6 +225,14 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
         venue: values.venue.trim() || template.example.venue,
         locationUrl: values.locationUrl,
         message: values.message,
+        // "Family Details" — wedding-only in both CreateInvitePage.jsx and
+        // PartnerCreateInvitePage.jsx; undefined for Ganesh Chaturthi's
+        // `values`, which is harmless since buildGaneshExperienceTemplate.js
+        // never reads these.
+        groomName: values.groomName,
+        groomParents: values.groomParents,
+        brideName: values.brideName,
+        brideParents: values.brideParents,
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —
@@ -222,10 +243,11 @@ export default function LiveInvitePreview({ template, values, occasionId, photos
         bgSongArtist: song?.artist || '',
         bgSongAlbumArt: song?.albumArt || '',
         bgSongPreviewUrl: song?.previewUrl || '',
+        showRsvp,
       })
     }, 300)
     return () => clearTimeout(draftTimer.current)
-  }, [isRichPreview, occasionId, template, values, events, photos, song])
+  }, [isRichPreview, occasionId, template, values, events, photos, song, showRsvp])
 
   const showIframe = isRichPreview && iframeReady
 

@@ -48,12 +48,24 @@ export function buildWeddingExperienceTemplate(invite, template) {
   })
   const additionalEvents = (invite.events ?? []).map(toCeremony)
 
+  // "Family Details" (see CreateInvitePage.jsx) — the two cards
+  // WelcomeSplash.jsx renders under the couple's names (couple.people, same
+  // { name, parents } shape every demo template in templatesData.js
+  // already ships, e.g. "Son of Mr. Rajesh & Mrs. Kavita Malhotra"). Both
+  // sides are independently optional: a buyer who fills in only one still
+  // gets that one card, and leaving both blank reproduces today's
+  // behavior (an empty array — WelcomeSplash renders nothing there).
+  const people = [
+    invite.groomName?.trim() && { name: invite.groomName.trim(), parents: invite.groomParents?.trim() || '' },
+    invite.brideName?.trim() && { name: invite.brideName.trim(), parents: invite.brideParents?.trim() || '' },
+  ].filter(Boolean)
+
   return {
     ...template,
     couple: {
       names: invite.names,
       invitationLine: invite.message?.trim() || template.connective,
-      people: [],
+      people,
     },
     ceremoniesHeading: 'Event Details',
     ceremonies: [mainEvent, ...additionalEvents],

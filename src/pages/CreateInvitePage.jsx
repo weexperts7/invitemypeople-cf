@@ -19,6 +19,7 @@ import {
   Music2,
   ShieldCheck,
   User,
+  Users,
   Wand2,
 } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
@@ -52,6 +53,13 @@ const EMPTY_FORM = {
   message: '',
   hostName: '',
   hostEmail: '',
+  // "Family Details" (wedding only — see the groomName/brideName fields
+  // below) — rendered as two cards under the couple's names on the live
+  // invitation (see WelcomeSplash.jsx's couple.people).
+  groomName: '',
+  groomParents: '',
+  brideName: '',
+  brideParents: '',
 }
 
 // Ganesh Chaturthi's "Festival Schedule" reuses the generic "Additional
@@ -253,6 +261,10 @@ export default function CreateInvitePage() {
           message: form.message.trim(),
           hostName: form.hostName.trim(),
           hostEmail: form.hostEmail.trim(),
+          groomName: form.groomName.trim(),
+          groomParents: form.groomParents.trim(),
+          brideName: form.brideName.trim(),
+          brideParents: form.brideParents.trim(),
           amount: activePrice,
           paymentId,
           photos,
@@ -390,6 +402,58 @@ export default function CreateInvitePage() {
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                       />
                     </div>
+
+                    {occasionId === 'wedding' && (
+                      <div>
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Users className="h-3.5 w-3.5 text-rose" />
+                          Family Details <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <p className="mb-3 text-xs text-ink-soft">
+                          Shown as two cards under your names — e.g. &ldquo;Son
+                          of Mr. Rajesh &amp; Mrs. Kavita Malhotra&rdquo;. Leave
+                          blank to skip this section.
+                        </p>
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <div className="space-y-3">
+                            <input
+                              id="groomName"
+                              type="text"
+                              value={form.groomName}
+                              onChange={handleField('groomName')}
+                              placeholder="Groom's full name"
+                              className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                            />
+                            <input
+                              id="groomParents"
+                              type="text"
+                              value={form.groomParents}
+                              onChange={handleField('groomParents')}
+                              placeholder="e.g. Son of Mr. Rajesh & Mrs. Kavita Malhotra"
+                              className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <input
+                              id="brideName"
+                              type="text"
+                              value={form.brideName}
+                              onChange={handleField('brideName')}
+                              placeholder="Bride's full name"
+                              className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                            />
+                            <input
+                              id="brideParents"
+                              type="text"
+                              value={form.brideParents}
+                              onChange={handleField('brideParents')}
+                              placeholder="e.g. Daughter of Mr. Anil & Mrs. Sunita Kapoor"
+                              className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {occasionId === 'wedding' && (
                       <div>

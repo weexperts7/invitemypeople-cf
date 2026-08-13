@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Routes, Route, useLocation, useParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import LandingPage from './components/LandingPage'
 import AboutPage from './pages/AboutPage'
@@ -17,6 +17,22 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import TermsOfServicePage from './pages/TermsOfServicePage'
 import RefundPolicyPage from './pages/RefundPolicyPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PartnerPortalLayout from './components/partners/PartnerPortalLayout'
+import PartnerLandingPage from './pages/partners/PartnerLandingPage'
+import PartnerSignupPage from './pages/partners/PartnerSignupPage'
+import PartnerLoginPage from './pages/partners/PartnerLoginPage'
+import PartnerPendingPage from './pages/partners/PartnerPendingPage'
+import { RequirePartnerPortal } from './components/partners/PartnerPortalShell'
+import PartnerOverviewPage from './pages/partners/PartnerOverviewPage'
+import PartnerCreateInvitePage from './pages/partners/PartnerCreateInvitePage'
+import PartnerInvitesPage from './pages/partners/PartnerInvitesPage'
+import PartnerCreditsPage from './pages/partners/PartnerCreditsPage'
+import PartnerBrandingPage from './pages/partners/PartnerBrandingPage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminPartnersPage from './pages/admin/AdminPartnersPage'
+import { RequireAdminPortal } from './components/admin/AdminShell'
+import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
@@ -129,9 +145,46 @@ function App() {
             <Route path="/create/live-preview" element={<LiveDraftPreviewPage />} />
             <Route path="/i/:slug" element={<GeneratedInvitePage />} />
             <Route path="/i/:slug/host/:hostToken" element={<HostDashboardPage />} />
+            {/* Partner-generated client invite — public, no auth, isolated
+                from the B2C /i/:slug viewer above (see
+                PartnerInviteViewerPage.jsx). */}
+            <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/refund" element={<RefundPolicyPage />} />
+            {/* B2B Partner Program landing page — public marketing page, not
+                gated behind PartnerAuthProvider (unlike the routes grouped
+                under PartnerPortalLayout just below), same as any other
+                marketing route (About, Weddings, ...). Both its CTAs route
+                into the actual signup/login flow. */}
+            <Route path="/partners" element={<PartnerLandingPage />} />
+            {/* B2B Partner Portal — see PartnerPortalLayout.jsx. One shared
+                Supabase Auth session (PartnerAuthProvider) covers both the
+                partner-facing routes and the internal /admin/* routes, so
+                they're grouped under a single layout route here. */}
+            <Route element={<PartnerPortalLayout />}>
+              <Route path="/partners/signup" element={<PartnerSignupPage />} />
+              <Route path="/partners/login" element={<PartnerLoginPage />} />
+              <Route path="/partners/pending" element={<PartnerPendingPage />} />
+              {/* The actual portal "app" — persistent sidebar, routed
+                  pages, no marketing SiteHeader/SiteFooter in between them.
+                  See PartnerPortalShell.jsx. */}
+              <Route element={<RequirePartnerPortal />}>
+                <Route path="/partners/dashboard" element={<PartnerOverviewPage />} />
+                <Route path="/partners/dashboard/create" element={<PartnerCreateInvitePage />} />
+                <Route path="/partners/dashboard/invites" element={<PartnerInvitesPage />} />
+                <Route path="/partners/dashboard/credits" element={<PartnerCreditsPage />} />
+                <Route path="/partners/dashboard/branding" element={<PartnerBrandingPage />} />
+              </Route>
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              {/* The internal Admin Panel — persistent sidebar chrome, same
+                  pattern as RequirePartnerPortal above. See AdminShell.jsx. */}
+              <Route element={<RequireAdminPortal />}>
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/admin/partners" element={<AdminPartnersPage />} />
+              </Route>
+            </Route>
             {COMING_SOON_OCCASIONS.map((occasion) => (
               <Route
                 key={occasion.slug}

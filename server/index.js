@@ -22,6 +22,29 @@ import { cleanEvents } from '../src/utils/cleanEvents.js'
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../src/utils/email.js'
 import { searchSpotifyTracks } from '../src/utils/spotify.js'
 import { randomBytes } from 'node:crypto'
+// B2B Partner Portal — these routes need real Supabase (Auth + the
+// `partners`/`partner_credit_transactions` tables), in both dev and prod,
+// so unlike the flat-file RSVP/invites routes above they share their exact
+// handler implementations with the Vercel Serverless Functions under
+// api/partners/* and api/admin/* rather than duplicating them — see
+// api/_lib/partnerHandlers.js's header for why.
+import {
+  signupPartner,
+  getMyProfile,
+  updateProfile,
+  uploadPartnerLogo,
+  uploadPartnerInvitePhoto,
+  getMyCredits,
+  createPurchaseOrder,
+  verifyPurchase,
+  partnerInvitesIndex,
+  getPartnerInviteBySlug,
+  adminListPartners,
+  adminApprovePartner,
+  adminRejectPartner,
+  adminGetStats,
+  adminGetMe,
+} from '../api/_lib/partnerHandlers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -331,6 +354,12 @@ app.post('/api/invites', async (req, res) => {
         bgSongArtist: clean(body.bgSongArtist, 200),
         bgSongAlbumArt: clean(body.bgSongAlbumArt, 500),
         bgSongPreviewUrl: clean(body.bgSongPreviewUrl, 500),
+        // "Family Details" (see CreateInvitePage.jsx) — optional, mirrors
+        // api/invites/index.js's identical block.
+        groomName: clean(body.groomName, 120),
+        groomParents: clean(body.groomParents, 200),
+        brideName: clean(body.brideName, 120),
+        brideParents: clean(body.brideParents, 200),
         hostName,
         hostEmail,
         hostToken: randomBytes(24).toString('base64url'),
@@ -537,6 +566,32 @@ app.post('/api/verify-payment', (req, res) => {
     res.status(500).json({ ok: false, error: 'could not verify payment' })
   }
 })
+
+// B2B Partner Portal routes — same handlers as the Vercel Serverless
+// Functions under api/partners/* and api/admin/* (see the import above and
+// api/_lib/partnerHandlers.js). Requires SUPABASE_URL/
+// SUPABASE_SERVICE_ROLE_KEY to be set even in dev (see .env.example) —
+// there's no flat-file fallback for a real login system.
+app.post('/api/partners/signup', signupPartner)
+app.get('/api/partners/me', getMyProfile)
+app.post('/api/partners/profile', updateProfile)
+app.post('/api/partners/logo', uploadPartnerLogo)
+app.post('/api/partners/photos', uploadPartnerInvitePhoto)
+app.get('/api/partners/credits', getMyCredits)
+app.post('/api/partners/purchase/create-order', createPurchaseOrder)
+app.post('/api/partners/purchase/verify', verifyPurchase)
+app.get('/api/partners/invites', partnerInvitesIndex)
+app.post('/api/partners/invites', partnerInvitesIndex)
+// Public shareable link — see api/_lib/partnerHandlers.js's pathParam()
+// helper for why this reads req.params.slug fine even though the shared
+// handler is written against req.query?.slug for the Vercel [slug].js
+// counterpart.
+app.get('/api/partners/invites/:slug', getPartnerInviteBySlug)
+app.get('/api/admin/me', adminGetMe)
+app.get('/api/admin/partners', adminListPartners)
+app.post('/api/admin/partners/approve', adminApprovePartner)
+app.post('/api/admin/partners/reject', adminRejectPartner)
+app.get('/api/admin/stats', adminGetStats)
 
 function escapeHtml(str) {
   return String(str)

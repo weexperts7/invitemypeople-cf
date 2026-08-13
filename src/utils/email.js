@@ -5,10 +5,12 @@
 // (api/invites/index.js). Server-side only.
 //
 // Used for the order-confirmation email sent right after a paid invite is
-// created (POST /api/invites, both runtimes). The separate 4-hour reminder
-// email (supabase/functions/send-event-reminders) runs on Deno, which can't
-// import this file — it duplicates a small parseFromAddress() of its own,
-// matching that file's existing style of self-contained duplicated helpers.
+// created (POST /api/invites, both runtimes), and the B2B Partner Portal's
+// application/approval emails (api/_lib/partnerHandlers.js). The separate
+// 4-hour reminder email (supabase/functions/send-event-reminders) runs on
+// Deno, which can't import this file — it duplicates a small
+// parseFromAddress() of its own, matching that file's existing style of
+// self-contained duplicated helpers.
 import { SITE_URL } from '../data/routesSeo.js'
 import { formatInviteDate, formatInviteTime } from './formatInviteDateTime.js'
 
@@ -134,5 +136,118 @@ export function buildOrderConfirmationEmail(invite) {
     </div>
   `
 
+  return { subject, html }
+}
+
+/**
+ * Sent right after POST /api/partners/signup saves a new pending partner —
+ * confirms the application was received and sets expectations (manual
+ * admin review, no instant access). Accepts the camelCase partner shape
+ * rowToPartner() (api/_lib/partners.js) returns.
+ */
+export function buildPartnerApplicationReceivedEmail(partner) {
+  const subject = `We've received your partner application`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">Thanks for applying! 👋</h2>
+      <p>We've received <strong>${escapeHtml(partner.businessName)}</strong>'s application to join our
+      B2B Partner Program.</p>
+      <p>Our team reviews every application by hand — you'll get another email as soon as a decision is
+      made, usually within a couple of business days.</p>
+    </div>
+  `
+  return { subject, html }
+}
+
+/**
+ * Sent to ADMIN_EMAILS[0] right after a new partner signs up — the only
+ * heads-up an admin gets that something is waiting in
+ * /admin/partners besides checking the dashboard themselves.
+ */
+export function buildPartnerAdminNotificationEmail(partner) {
+  const subject = `New partner application: ${partner.businessName}`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">New partner application</h2>
+      <p><strong>${escapeHtml(partner.businessName)}</strong> (${escapeHtml(partner.email)},
+      ${escapeHtml(partner.phone || '')}) is waiting for review.</p>
+      <p><a href="${SITE_URL}/admin/partners" style="color: #b3541e;">Review in the admin dashboard →</a></p>
+    </div>
+  `
+  return { subject, html }
+}
+
+/** Sent when an admin approves a pending partner. */
+export function buildPartnerApprovedEmail(partner) {
+  const subject = `You're approved — welcome to the Partner Program`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">You're in! 🎉</h2>
+      <p><strong>${escapeHtml(partner.businessName)}</strong> has been approved. You can now log in,
+      purchase invite credits, and start creating client invites.</p>
+      <p><a href="${SITE_URL}/partners/login" style="color: #b3541e;">Log in to your dashboard →</a></p>
+    </div>
+  `
+  return { subject, html }
+}
+
+/**
+ * Sent to the CLIENT right after a partner spends a credit to create their
+ * invite (POST /api/partners/invites) — the couple/host themselves, not the
+ * partner. Mirrors buildOrderConfirmationEmail()'s shape but points at
+ * /p/:slug (not /i/:slug) and has no host-dashboard link, since partner
+ * invites have no host-dashboard concept (see PartnerInviteViewerPage.jsx /
+ * InvitationExperience.jsx's showRsvp prop). Accepts the camelCase invite
+ * shape rowToPartnerInvite() (api/_lib/partners.js) returns, plus the
+ * partner row (rowToPartner()) so the email can credit who made it.
+ */
+export function buildPartnerInviteReadyEmail(invite, partner) {
+  const inviteUrl = `${SITE_URL}/p/${invite.slug}`
+  const dateLabel = formatInviteDate(invite.weddingDate)
+  const timeLabel = formatInviteTime(invite.weddingTime)
+  const whenLabel = [dateLabel, timeLabel].filter(Boolean).join(' at ')
+
+  const subject = `Your invitation for ${invite.coupleNames} is live!`
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">Your invitation is ready 🎉</h2>
+      <p><strong>${escapeHtml(partner.businessName)}</strong> has created your invitation for
+      <strong>${escapeHtml(invite.coupleNames)}</strong>.</p>
+      ${
+        whenLabel || invite.venue
+          ? `<p>${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
+          : ''
+      }
+
+      <p style="margin-top: 24px;"><strong>Share this with your guests:</strong><br/>
+      <a href="${inviteUrl}" style="color: #b3541e;">${inviteUrl}</a></p>
+
+      <p style="color: #7a6a63; font-size: 12px; margin-top: 24px;">
+        Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
+        they created this for you.
+      </p>
+    </div>
+  `
+
+  return { subject, html }
+}
+
+/** Sent when an admin rejects a pending partner. `partner.rejectedReason` is optional. */
+export function buildPartnerRejectedEmail(partner) {
+  const subject = `Update on your partner application`
+  const reasonLine = partner.rejectedReason
+    ? `<p><strong>Reason:</strong> ${escapeHtml(partner.rejectedReason)}</p>`
+    : ''
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
+      <h2 style="margin-bottom: 4px;">About your application</h2>
+      <p>We reviewed <strong>${escapeHtml(partner.businessName)}</strong>'s application and aren't able to
+      approve it at this time.</p>
+      ${reasonLine}
+      <p>If you think this was a mistake or your circumstances have changed, reply to this email and
+      we're happy to take another look.</p>
+    </div>
+  `
   return { subject, html }
 }

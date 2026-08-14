@@ -40,6 +40,17 @@
 // trade-off for a low-stakes dev preview; don't reuse these credentials
 // anywhere that matters, and don't use this as the only thing standing
 // between the public and real user/payment data.
+//
+// Bearer passthrough: a request can only carry one Authorization header,
+// and partnerApi.js/adminApi.js explicitly set `Bearer <token>` on every
+// partner/admin portal API call — which silently replaces whatever Basic
+// credentials a browser would otherwise auto-attach for this origin.
+// Without letting Bearer through below, every logged-in partner/admin API
+// call gets rejected right here before api/_lib/auth.js's own
+// requireUser()/requireAdmin() session check ever runs, breaking the whole
+// portal on any Basic-Auth-gated deployment. This doesn't newly expose
+// anything — those routes already enforce their own session check
+// server-side regardless of this middleware.
 
 import { next } from '@vercel/functions'
 
@@ -62,6 +73,13 @@ export default function middleware(request) {
   }
 
   const authHeader = request.headers.get('authorization')
+
+  // See "Bearer passthrough" above — must be checked before the Basic
+  // check below, since these are mutually exclusive prefixes on the same
+  // header.
+  if (authHeader?.startsWith('Bearer ')) {
+    return next()
+  }
 
   if (authHeader?.startsWith('Basic ')) {
     try {

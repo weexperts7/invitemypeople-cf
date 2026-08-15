@@ -27,6 +27,13 @@ export function signupPartner(payload) {
   return request('/api/partners/signup', { method: 'POST', body: payload })
 }
 
+// Public, unauthenticated. Always resolves ok — see the handler's own
+// comment (api/_lib/partnerHandlers.js's forgotPassword()) on why it never
+// reports whether the email matched an account.
+export function requestPasswordReset(email) {
+  return request('/api/partners/forgot-password', { method: 'POST', body: { email } })
+}
+
 // Public, unauthenticated (same trust model as api/photos.js) — the signup
 // form uploads the logo first and gets back a URL to submit with the rest
 // of the application. Not JSON, so this bypasses request()'s helper.

@@ -50,7 +50,9 @@ import {
   buildPartnerApprovedEmail,
   buildPartnerRejectedEmail,
   buildPartnerInviteReadyEmail,
+  buildPartnerPasswordResetEmail,
 } from '../../src/utils/email.js'
+import { SITE_URL } from '../../src/data/routesSeo.js'
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -165,6 +167,72 @@ export async function signupPartner(req, res) {
   } catch (err) {
     console.error('[partners] signup failed:', err)
     res.status(500).json({ ok: false, error: 'could not create your account' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/partners/forgot-password — public. body: { email }
+//
+// Deliberately does NOT call supabase.auth.resetPasswordForEmail() (the
+// client-side call PartnerForgotPasswordPage.jsx used to make) — that
+// sends through Supabase Auth's own built-in mailer, which comes from
+// Supabase's shared noreply@mail.app.supabase.io address instead of this
+// app's own domain and skips Brevo (this app's actual transactional-email
+// provider for everything else — see src/utils/email.js) entirely. Instead
+// this uses the admin-only generateLink() to produce the same kind of
+// Supabase recovery link without Supabase sending anything itself, then
+// emails that link out through sendTransactionalEmail() like every other
+// email in this app. PartnerResetPasswordPage.jsx, where the link lands,
+// doesn't change at all — generateLink() produces the identical
+// /auth/v1/verify → redirect flow resetPasswordForEmail()'s email used to.
+//
+// Always responds ok:true whether or not the email matches an account, so
+// this can't be used to enumerate partner/admin emails (mirrors
+// PartnerForgotPasswordPage.jsx's own "check your email" copy either way).
+// ---------------------------------------------------------------------------
+export async function forgotPassword(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  try {
+    const email = clean((req.body || {}).email, 200).toLowerCase()
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ ok: false, error: 'a valid email is required' })
+    }
+
+    const { data, error } = await getSupabase().auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: `${SITE_URL}/partners/reset-password` },
+    })
+
+    // A nonexistent email is the overwhelmingly common "error" here (a
+    // partner mistyping their address) — still respond ok:true for it so
+    // the response can't be used to probe which emails have accounts.
+    // Anything else (Supabase misconfigured, admin API down) is worth
+    // logging but still shouldn't surface as a failure to the visitor.
+    if (error) {
+      console.error('[partners] generateLink failed:', error)
+    } else {
+      const link = data?.properties?.action_link
+      if (link) {
+        try {
+          await sendTransactionalEmail({ to: email, ...buildPartnerPasswordResetEmail(link) })
+        } catch (emailErr) {
+          console.error('[partners] password-reset email failed:', emailErr)
+        }
+      }
+    }
+
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('[partners] forgot-password failed:', err)
+    // Still ok:true — see the comment above on not leaking account
+    // existence, which an error response here would do just as much as a
+    // success one would.
+    res.status(200).json({ ok: true })
   }
 }
 

@@ -44,6 +44,69 @@ function escapeHtml(str: string) {
     .replace(/>/g, '&gt;')
 }
 
+// Same branded shell as src/utils/email.js's renderEmailShell() — duplicated
+// rather than imported for the same Deno-can't-import-the-Node-codebase
+// reason as parseFromAddress()/escapeHtml() above. Keep both copies' BRAND
+// colors in sync with src/index.css's @theme block if the palette changes.
+const BRAND = {
+  rose: '#6b1d2b',
+  champagne: '#f0e2c8',
+  champagneDeep: '#e3cd9c',
+  ivory: '#fdfaf4',
+  linen: '#f6efe4',
+  ink: '#4a3f3a',
+  inkSoft: '#7a6a63',
+}
+const SERIF_STACK = "Georgia, 'Times New Roman', serif"
+const SANS_STACK = "'Segoe UI', Helvetica, Arial, sans-serif"
+const SITE_URL = 'https://www.invitemypeople.com'
+
+function renderLogoMark() {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+      <tr>
+        <td style="padding-right: 10px; vertical-align: middle;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="36" height="36" style="background: ${BRAND.rose}; border-radius: 10px;">
+            <tr><td align="center" valign="middle" style="width: 36px; height: 36px; font-size: 16px; line-height: 1; color: ${BRAND.ivory};">&#9993;</td></tr>
+          </table>
+        </td>
+        <td style="vertical-align: middle; font-family: ${SERIF_STACK}; font-size: 22px; color: ${BRAND.ink};">
+          Invite<span style="color: ${BRAND.rose};">My</span>People
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function renderEmailShell(bodyHtml: string) {
+  const year = new Date().getFullYear()
+  return `
+    <div style="background: ${BRAND.linen}; padding: 32px 16px; font-family: ${SANS_STACK};">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 520px; margin: 0 auto;">
+        <tr>
+          <td style="padding-bottom: 24px; text-align: center;">
+            <a href="${SITE_URL}" style="text-decoration: none;">${renderLogoMark()}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="background: ${BRAND.ivory}; border-radius: 16px; padding: 32px; border: 1px solid ${BRAND.champagneDeep};">
+            <div style="color: ${BRAND.ink}; font-size: 15px; line-height: 1.6;">${bodyHtml}</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top: 24px; text-align: center; color: ${BRAND.inkSoft}; font-size: 12px; line-height: 1.6;">
+            <p style="margin: 0 0 4px;">Beautifully interactive digital invitations for every celebration.</p>
+            <p style="margin: 0 0 4px;">
+              <a href="mailto:invitemypeople@gmail.com" style="color: ${BRAND.inkSoft}; text-decoration: underline;">invitemypeople@gmail.com</a>
+            </p>
+            <p style="margin: 0;">&copy; ${year} InviteMyPeople. Crafted with love.</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `
+}
+
 function formatEventDateTime(date: string, time: string) {
   try {
     const dt = new Date(`${date}T${time}:00`)
@@ -70,24 +133,23 @@ function buildEmailHtml(invite: any, rsvps: any[], summary: any) {
     )
     .join('')
 
-  return `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2>${escapeHtml(invite.names)} — RSVP Summary</h2>
-      <p>Your event is coming up in about 4 hours:</p>
-      <p><strong>${escapeHtml(formatEventDateTime(invite.date, invite.time))}</strong><br/>
-      ${escapeHtml(invite.venue)}</p>
-      <p>
-        ${summary.totalResponses} response${summary.totalResponses === 1 ? '' : 's'} —
-        ${summary.attendingCount} attending (${summary.totalGuests} guests total),
-        ${summary.decliningCount} declined.
-      </p>
-      ${attendingRows ? `<p><strong>Attending guests:</strong></p><ul>${attendingRows}</ul>` : ''}
-      <p style="color: #7a6a63; font-size: 12px; margin-top: 24px;">
-        See the full guest list any time at your host dashboard link
-        (sent when you created this invite).
-      </p>
-    </div>
+  const body = `
+    <h2 style="margin: 0 0 12px; font-family: ${SERIF_STACK}; font-size: 22px; font-weight: 600; color: ${BRAND.ink};">${escapeHtml(invite.names)} — RSVP Summary</h2>
+    <p style="margin: 0;">Your event is coming up in about 4 hours:</p>
+    <p style="margin: 12px 0 0;"><strong>${escapeHtml(formatEventDateTime(invite.date, invite.time))}</strong><br/>
+    ${escapeHtml(invite.venue)}</p>
+    <p style="margin: 12px 0 0;">
+      ${summary.totalResponses} response${summary.totalResponses === 1 ? '' : 's'} —
+      ${summary.attendingCount} attending (${summary.totalGuests} guests total),
+      ${summary.decliningCount} declined.
+    </p>
+    ${attendingRows ? `<p style="margin: 12px 0 0;"><strong>Attending guests:</strong></p><ul style="margin: 4px 0 0; padding-left: 20px;">${attendingRows}</ul>` : ''}
+    <p style="color: ${BRAND.inkSoft}; font-size: 12px; margin: 20px 0 0;">
+      See the full guest list any time at your host dashboard link
+      (sent when you created this invite).
+    </p>
   `
+  return renderEmailShell(body)
 }
 
 Deno.serve(async (_req) => {

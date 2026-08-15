@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import LandingPage from './components/LandingPage'
 import AboutPage from './pages/AboutPage'
 import WeddingsPage from './pages/WeddingsPage'
@@ -37,17 +36,31 @@ import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
-import PreviewContext from './context/PreviewContext'
 import { getTemplateById } from './data/templatesData'
 import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
 import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from './data/occasionsData'
-import { satsangSeo, ganeshSeo } from './data/routesSeo'
+import { satsangSeo, ganeshSeo, weddingSeo } from './data/routesSeo'
+
+// A wedding invitation is likewise a shareable, directly-linkable page under
+// /templates/wedding/:id — its "Preview" button (TemplateCard.jsx) opens
+// this in a new tab rather than the in-app modal overlay the other two
+// routes below briefly needed as a stopgap.
+function WeddingRoute() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const template = getTemplateById(id)
+
+  return (
+    <>
+      {template && <SEO {...weddingSeo(template)} path={`/templates/wedding/${id}`} />}
+      <InvitationExperience template={template} isPreview onBack={() => navigate('/')} />
+    </>
+  )
+}
 
 // A Satsang invitation is a shareable, directly-linkable page — see
-// satsangTemplatesData.js — rather than only living behind in-app preview
-// state like the wedding templates (which stay state-driven via
-// PreviewContext/openPreview below).
+// satsangTemplatesData.js.
 function SatsangRoute() {
   const { slug } = useParams()
   const template = getSatsangTemplateBySlug(slug)
@@ -78,14 +91,6 @@ function GaneshRoute() {
 
 function App() {
   const location = useLocation()
-  const [previewId, setPreviewId] = useState(null)
-
-  const openPreview = useCallback((id) => {
-    setPreviewId(id)
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-  }, [])
-
-  const closePreview = useCallback(() => setPreviewId(null), [])
 
   // Client-side navigation doesn't reset scroll position the way a full
   // page load does — without this, following a link (e.g. "Preview" on a
@@ -100,103 +105,82 @@ function App() {
   }, [location.pathname])
 
   return (
-    <PreviewContext.Provider value={openPreview}>
-      <AnimatePresence>
-        {previewId && (
-          <motion.div
-            key="preview"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-          >
-            <InvitationExperience
-              template={getTemplateById(previewId)}
-              onBack={closePreview}
-              isPreview
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {!previewId && (
-        // A plain CSS fade-in, not framer-motion — wrapping this route tree
-        // in AnimatePresence's exit-then-enter sequencing froze client-side
-        // navigations at opacity:0, and even a bare motion.div's JS-driven
-        // tween was observed getting interrupted mid-fade on rapid
-        // successive navigations (React 19 + Framer Motion 12 + React
-        // Router 7). A CSS keyframe animation runs on the compositor, so a
-        // remount always completes it regardless of React's render timing.
-        <div key={location.pathname} className="page-fade-in">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/weddings" element={<WeddingsPage />} />
-            <Route path="/guruji-satsangs" element={<GurujiSatsangsPage />} />
-            <Route path="/satsang/:slug" element={<SatsangRoute />} />
-            <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
-            <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
-            <Route path="/create" element={<CreateInvitePage />} />
-            <Route path="/blog" element={<BlogListPage />} />
-            <Route path="/blog/:slug" element={<BlogPostPage />} />
-            {/* Not a real destination — only ever loaded in the same-origin
-                iframe inside the Invitation Builder's own live preview (see
-                builder/LiveInvitePreview.jsx / draftInvitePreview.js). */}
-            <Route path="/create/live-preview" element={<LiveDraftPreviewPage />} />
-            <Route path="/i/:slug" element={<GeneratedInvitePage />} />
-            <Route path="/i/:slug/host/:hostToken" element={<HostDashboardPage />} />
-            {/* Partner-generated client invite — public, no auth, isolated
-                from the B2C /i/:slug viewer above (see
-                PartnerInviteViewerPage.jsx). */}
-            <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsOfServicePage />} />
-            <Route path="/refund" element={<RefundPolicyPage />} />
-            {/* B2B Partner Program landing page — public marketing page, not
-                gated behind PartnerAuthProvider (unlike the routes grouped
-                under PartnerPortalLayout just below), same as any other
-                marketing route (About, Weddings, ...). Both its CTAs route
-                into the actual signup/login flow. */}
-            <Route path="/partners" element={<PartnerLandingPage />} />
-            {/* B2B Partner Portal — see PartnerPortalLayout.jsx. One shared
-                Supabase Auth session (PartnerAuthProvider) covers both the
-                partner-facing routes and the internal /admin/* routes, so
-                they're grouped under a single layout route here. */}
-            <Route element={<PartnerPortalLayout />}>
-              <Route path="/partners/signup" element={<PartnerSignupPage />} />
-              <Route path="/partners/login" element={<PartnerLoginPage />} />
-              <Route path="/partners/pending" element={<PartnerPendingPage />} />
-              {/* The actual portal "app" — persistent sidebar, routed
-                  pages, no marketing SiteHeader/SiteFooter in between them.
-                  See PartnerPortalShell.jsx. */}
-              <Route element={<RequirePartnerPortal />}>
-                <Route path="/partners/dashboard" element={<PartnerOverviewPage />} />
-                <Route path="/partners/dashboard/create" element={<PartnerCreateInvitePage />} />
-                <Route path="/partners/dashboard/invites" element={<PartnerInvitesPage />} />
-                <Route path="/partners/dashboard/credits" element={<PartnerCreditsPage />} />
-                <Route path="/partners/dashboard/branding" element={<PartnerBrandingPage />} />
-              </Route>
-              <Route path="/admin/login" element={<AdminLoginPage />} />
-              {/* The internal Admin Panel — persistent sidebar chrome, same
-                  pattern as RequirePartnerPortal above. See AdminShell.jsx. */}
-              <Route element={<RequireAdminPortal />}>
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-                <Route path="/admin/partners" element={<AdminPartnersPage />} />
-              </Route>
-            </Route>
-            {COMING_SOON_OCCASIONS.map((occasion) => (
-              <Route
-                key={occasion.slug}
-                path={`/${occasion.slug}`}
-                element={<ComingSoonPage occasion={occasion} />}
-              />
-            ))}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </div>
-      )}
-    </PreviewContext.Provider>
+    // A plain CSS fade-in, not framer-motion — wrapping this route tree in
+    // AnimatePresence's exit-then-enter sequencing froze client-side
+    // navigations at opacity:0, and even a bare motion.div's JS-driven tween
+    // was observed getting interrupted mid-fade on rapid successive
+    // navigations (React 19 + Framer Motion 12 + React Router 7). A CSS
+    // keyframe animation runs on the compositor, so a remount always
+    // completes it regardless of React's render timing.
+    <div key={location.pathname} className="page-fade-in">
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/weddings" element={<WeddingsPage />} />
+        <Route path="/templates/wedding/:id" element={<WeddingRoute />} />
+        <Route path="/guruji-satsangs" element={<GurujiSatsangsPage />} />
+        <Route path="/satsang/:slug" element={<SatsangRoute />} />
+        <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
+        <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
+        <Route path="/create" element={<CreateInvitePage />} />
+        <Route path="/blog" element={<BlogListPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        {/* Not a real destination — only ever loaded in the same-origin
+            iframe inside the Invitation Builder's own live preview (see
+            builder/LiveInvitePreview.jsx / draftInvitePreview.js). */}
+        <Route path="/create/live-preview" element={<LiveDraftPreviewPage />} />
+        <Route path="/i/:slug" element={<GeneratedInvitePage />} />
+        <Route path="/i/:slug/host/:hostToken" element={<HostDashboardPage />} />
+        {/* Partner-generated client invite — public, no auth, isolated
+            from the B2C /i/:slug viewer above (see
+            PartnerInviteViewerPage.jsx). */}
+        <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/refund" element={<RefundPolicyPage />} />
+        {/* B2B Partner Program landing page — public marketing page, not
+            gated behind PartnerAuthProvider (unlike the routes grouped
+            under PartnerPortalLayout just below), same as any other
+            marketing route (About, Weddings, ...). Both its CTAs route
+            into the actual signup/login flow. */}
+        <Route path="/partners" element={<PartnerLandingPage />} />
+        {/* B2B Partner Portal — see PartnerPortalLayout.jsx. One shared
+            Supabase Auth session (PartnerAuthProvider) covers both the
+            partner-facing routes and the internal /admin/* routes, so
+            they're grouped under a single layout route here. */}
+        <Route element={<PartnerPortalLayout />}>
+          <Route path="/partners/signup" element={<PartnerSignupPage />} />
+          <Route path="/partners/login" element={<PartnerLoginPage />} />
+          <Route path="/partners/pending" element={<PartnerPendingPage />} />
+          {/* The actual portal "app" — persistent sidebar, routed
+              pages, no marketing SiteHeader/SiteFooter in between them.
+              See PartnerPortalShell.jsx. */}
+          <Route element={<RequirePartnerPortal />}>
+            <Route path="/partners/dashboard" element={<PartnerOverviewPage />} />
+            <Route path="/partners/dashboard/create" element={<PartnerCreateInvitePage />} />
+            <Route path="/partners/dashboard/invites" element={<PartnerInvitesPage />} />
+            <Route path="/partners/dashboard/credits" element={<PartnerCreditsPage />} />
+            <Route path="/partners/dashboard/branding" element={<PartnerBrandingPage />} />
+          </Route>
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          {/* The internal Admin Panel — persistent sidebar chrome, same
+              pattern as RequirePartnerPortal above. See AdminShell.jsx. */}
+          <Route element={<RequireAdminPortal />}>
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/partners" element={<AdminPartnersPage />} />
+          </Route>
+        </Route>
+        {COMING_SOON_OCCASIONS.map((occasion) => (
+          <Route
+            key={occasion.slug}
+            path={`/${occasion.slug}`}
+            element={<ComingSoonPage occasion={occasion} />}
+          />
+        ))}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </div>
   )
 }
 

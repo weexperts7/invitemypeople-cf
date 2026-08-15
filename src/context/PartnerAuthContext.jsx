@@ -5,9 +5,8 @@ import { getMyProfile } from '../utils/partnerApi'
 // Session + partner-profile state for everything under /partners/* and
 // /admin/* — see PartnerPortalLayout.jsx (the only place this Provider is
 // mounted) and ../hooks/usePartnerAuth.js for the consuming hook. Kept out
-// of the rest of the app (unlike PreviewContext, which App.jsx provides
-// globally) since public pages have no reason to check a Supabase Auth
-// session on every load.
+// of the rest of the app since public pages have no reason to check a
+// Supabase Auth session on every load.
 const PartnerAuthContext = createContext(null)
 
 export function PartnerAuthProvider({ children }) {

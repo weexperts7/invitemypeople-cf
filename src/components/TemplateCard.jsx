@@ -6,7 +6,7 @@ import { PRICING } from '../data/templatesData'
 import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
 import { buildCreateLink } from '../utils/createLink'
 
-export default function TemplateCard({ template, onPreview }) {
+export default function TemplateCard({ template }) {
   const reduceMotion = useReducedMotion()
   const activePrice = getActivePrice()
   const savingsPercent = getSavingsPercent()
@@ -60,16 +60,19 @@ export default function TemplateCard({ template, onPreview }) {
         </div>
 
         <div className="mt-auto flex items-center gap-2 pt-2">
-          <motion.button
-            type="button"
-            onClick={() => onPreview(template.id)}
+          <motion.div
             whileHover={reduceMotion ? undefined : { scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-rose px-4 py-2.5 text-sm font-medium text-ivory shadow-card"
+            className="flex flex-1"
           >
-            <Eye className="w-3.5 h-3.5" />
-            Preview
-          </motion.button>
+            <Link
+              to={`/templates/wedding/${template.id}`}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-rose px-4 py-2.5 text-sm font-medium text-ivory shadow-card"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Preview
+            </Link>
+          </motion.div>
           <motion.div
             whileHover={reduceMotion ? undefined : { scale: 1.03 }}
             whileTap={{ scale: 0.97 }}

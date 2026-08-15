@@ -52,7 +52,11 @@ export default function RsvpForm({ palette, slug }) {
           guestName: form.name,
           guestEmail: form.email,
           attendanceStatus: form.attending,
-          guests: isAttending ? Number(form.guests) || 1 : 0,
+          // "5+" (see the <select> below) isn't itself a number — Number('5+')
+          // is NaN — so strip the trailing "+" before parsing. Everyone who
+          // picks it is counted as exactly 5; there's no way to RSVP for more
+          // than that today.
+          guests: isAttending ? Number(String(form.guests).replace('+', '')) || 1 : 0,
           song: form.song,
           advice: form.advice,
           message: form.message,
@@ -280,7 +284,7 @@ export default function RsvpForm({ palette, slug }) {
                       onChange={handleChange('guests')}
                       className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-gold-soft"
                     >
-                      {['1', '2', '3', '4'].map((n) => (
+                      {['1', '2', '3', '4', '5+'].map((n) => (
                         <option key={n} value={n}>
                           {n}
                         </option>

@@ -123,7 +123,7 @@ function renderEmailShell(bodyHtml) {
           <td style="padding-top: 24px; text-align: center; color: ${BRAND.inkSoft}; font-size: 12px; line-height: 1.6;">
             <p style="margin: 0 0 4px;">Beautifully interactive digital invitations for every celebration.</p>
             <p style="margin: 0 0 4px;">
-              <a href="mailto:invitemypeople@gmail.com" style="color: ${BRAND.inkSoft}; text-decoration: underline;">invitemypeople@gmail.com</a>
+              <a href="mailto:hello@invitemypeople.com" style="color: ${BRAND.inkSoft}; text-decoration: underline;">hello@invitemypeople.com</a>
             </p>
             <p style="margin: 0;">&copy; ${year} InviteMyPeople. Crafted with love.</p>
           </td>

@@ -6,13 +6,11 @@ import {
   BadgeCheck,
   ClipboardCheck,
   Gift,
-  IndianRupee,
   MessageCircle,
   Music2,
   Plus,
   QrCode,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
@@ -24,34 +22,6 @@ const WHATSAPP_NUMBER = '918847044554'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }
-
-// The financial breakdown — the entire pitch in three numbers. Order reads
-// as a flow (cost → charge → profit) rather than the arithmetic operators
-// literally implying "cost + charge = profit"; the connecting "→"/"="
-// glyphs between cards (rendered inline below) are directional, not signs.
-const FINANCIAL_STEPS = [
-  {
-    label: 'Wholesale Price To You',
-    value: '₹600',
-    sub: 'per invite credit, in bulk packs',
-    icon: IndianRupee,
-    tone: 'light',
-  },
-  {
-    label: 'What You Charge Your Client',
-    value: '₹2,000–₹3,000',
-    sub: 'as a luxury digital box upgrade',
-    icon: Sparkles,
-    tone: 'light',
-  },
-  {
-    label: 'Your Clean Profit',
-    value: '₹1,400–₹2,400',
-    sub: "pure profit, per wedding order — on software you didn't have to code",
-    icon: TrendingUp,
-    tone: 'dark',
-  },
-]
 
 const BUNDLE_FEATURES = [
   {
@@ -243,82 +213,6 @@ export default function PartnerLandingPage() {
             >
               Free to apply &middot; Approved in 2–3 business days &middot; 100% white-labeled
             </motion.p>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Why Partner With Us — the financial breakdown */}
-        {/* ---------------------------------------------------------------- */}
-        <section className="bg-ivory px-6 py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <div className="mb-4 flex justify-center">
-                <SectionEyebrow icon={IndianRupee} tone="rose">The Math, Simplified</SectionEyebrow>
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">
-                Turn Every Box Into Pure Profit
-              </h2>
-              <p className="mx-auto max-w-xl text-ink-soft leading-relaxed">
-                No app to build, no developer to hire, no server to maintain — just three numbers that make this an
-                easy yes.
-              </p>
-            </motion.div>
-
-            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
-              {FINANCIAL_STEPS.map((step, i) => {
-                const Icon = step.icon
-                const isDark = step.tone === 'dark'
-                return (
-                  <motion.div key={step.label} className="flex flex-1 items-center gap-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.4 }}
-                      transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                      whileHover={reduceMotion ? undefined : { y: -4 }}
-                      className={`flex-1 rounded-3xl border p-6 text-center shadow-card sm:text-left ${
-                        isDark
-                          ? 'border-ink bg-ink text-ivory'
-                          : 'border-white/70 bg-linen text-ink'
-                      }`}
-                    >
-                      <div
-                        className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
-                          isDark ? 'bg-gold text-ink' : 'bg-rose text-ivory'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" strokeWidth={1.75} />
-                      </div>
-                      <p
-                        className={`text-xs uppercase tracking-[0.15em] ${
-                          isDark ? 'text-ivory/70' : 'text-ink-soft'
-                        }`}
-                      >
-                        {step.label}
-                      </p>
-                      <p className={`mt-1 font-serif text-3xl sm:text-4xl ${isDark ? 'text-gold-soft' : 'text-ink'}`}>
-                        {step.value}
-                      </p>
-                      <p className={`mt-2 text-sm leading-relaxed ${isDark ? 'text-ivory/80' : 'text-ink-soft'}`}>
-                        {step.sub}
-                      </p>
-                    </motion.div>
-
-                    {i < FINANCIAL_STEPS.length - 1 && (
-                      <span className="hidden flex-none font-serif text-2xl text-ink-soft/60 sm:block">
-                        {i === 0 ? '→' : '='}
-                      </span>
-                    )}
-                  </motion.div>
-                )
-              })}
-            </div>
           </div>
         </section>
 

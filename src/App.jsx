@@ -20,6 +20,8 @@ import PartnerPortalLayout from './components/partners/PartnerPortalLayout'
 import PartnerLandingPage from './pages/partners/PartnerLandingPage'
 import PartnerSignupPage from './pages/partners/PartnerSignupPage'
 import PartnerLoginPage from './pages/partners/PartnerLoginPage'
+import PartnerForgotPasswordPage from './pages/partners/PartnerForgotPasswordPage'
+import PartnerResetPasswordPage from './pages/partners/PartnerResetPasswordPage'
 import PartnerPendingPage from './pages/partners/PartnerPendingPage'
 import { RequirePartnerPortal } from './components/partners/PartnerPortalShell'
 import PartnerOverviewPage from './pages/partners/PartnerOverviewPage'
@@ -151,6 +153,12 @@ function App() {
         <Route element={<PartnerPortalLayout />}>
           <Route path="/partners/signup" element={<PartnerSignupPage />} />
           <Route path="/partners/login" element={<PartnerLoginPage />} />
+          {/* Password reset, shared by both /partners/login and
+              /admin/login since they're one Supabase Auth account model —
+              see PartnerAuthContext.jsx's sendPasswordReset()/
+              updatePassword(). */}
+          <Route path="/partners/forgot-password" element={<PartnerForgotPasswordPage />} />
+          <Route path="/partners/reset-password" element={<PartnerResetPasswordPage />} />
           <Route path="/partners/pending" element={<PartnerPendingPage />} />
           {/* The actual portal "app" — persistent sidebar, routed
               pages, no marketing SiteHeader/SiteFooter in between them.

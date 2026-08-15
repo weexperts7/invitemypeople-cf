@@ -31,6 +31,7 @@ import { randomBytes } from 'node:crypto'
 // api/_lib/partnerHandlers.js's header for why.
 import {
   signupPartner,
+  forgotPassword,
   getMyProfile,
   updateProfile,
   uploadPartnerLogo,
@@ -574,6 +575,7 @@ app.post('/api/verify-payment', (req, res) => {
 // SUPABASE_SERVICE_ROLE_KEY to be set even in dev (see .env.example) —
 // there's no flat-file fallback for a real login system.
 app.post('/api/partners/signup', signupPartner)
+app.post('/api/partners/forgot-password', forgotPassword)
 app.get('/api/partners/me', getMyProfile)
 app.post('/api/partners/profile', updateProfile)
 app.post('/api/partners/logo', uploadPartnerLogo)

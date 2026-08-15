@@ -46,7 +46,7 @@ import SEO from './SEO'
 import Logo from './Logo'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from './PageDecor'
 
-const WHATSAPP_NUMBER = '919877647707'
+const WHATSAPP_NUMBER = '918847044554'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }

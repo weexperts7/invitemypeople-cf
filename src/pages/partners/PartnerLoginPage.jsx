@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import Logo from '../../components/Logo'
 import SEO from '../../components/SEO'
@@ -19,6 +19,7 @@ const FIELD_CLASS =
 // a plain copyright line.
 export default function PartnerLoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn } = usePartnerAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,6 +52,12 @@ export default function PartnerLoginPage() {
           <p className="text-center text-xs uppercase tracking-[0.2em] text-ink-soft">Partner Program</p>
           <h1 className="mt-1 text-center font-serif text-3xl text-ink">Log in</h1>
 
+          {location.state?.passwordReset && (
+            <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-700">
+              Password updated — log in with your new password.
+            </p>
+          )}
+
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-ink-soft">Email</label>
@@ -63,7 +70,12 @@ export default function PartnerLoginPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">Password</label>
+              <div className="mb-1 flex items-center justify-between">
+                <label className="block text-xs font-medium text-ink-soft">Password</label>
+                <Link to="/partners/forgot-password" className="text-xs font-medium text-rose">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 required
                 type="password"

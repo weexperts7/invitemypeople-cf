@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Logo from './Logo'
 import { SITE_URL } from '../data/routesSeo'
 
-const WHATSAPP_NUMBER = '919877647707'
+const WHATSAPP_NUMBER = '918847044554'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }

@@ -8,9 +8,11 @@
 // created (POST /api/invites, both runtimes), and the B2B Partner Portal's
 // application/approval emails (api/_lib/partnerHandlers.js). The separate
 // 4-hour reminder email (supabase/functions/send-event-reminders) runs on
-// Deno, which can't import this file — it duplicates a small
-// parseFromAddress() of its own, matching that file's existing style of
-// self-contained duplicated helpers.
+// Deno, which can't import this file — it duplicates parseFromAddress() and
+// the branded renderEmailShell()/BRAND palette below, matching that file's
+// existing style of self-contained duplicated helpers. Keep both copies of
+// BRAND in sync with src/index.css's @theme block if the site palette ever
+// changes.
 import { SITE_URL } from '../data/routesSeo.js'
 import { formatInviteDate, formatInviteTime } from './formatInviteDateTime.js'
 
@@ -21,6 +23,114 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+}
+
+// ---------------------------------------------------------------------------
+// Shared branded chrome — every build*Email() below renders its own content
+// into renderEmailShell() instead of hand-rolling its own bare
+// `<div style="font-family: sans-serif...">` wrapper the way this file used
+// to. Brings every outgoing email in line with the actual site: the same
+// "InviteMyPeople" logo mark (see Logo.jsx), the same brand palette (see
+// src/index.css's @theme block — keep these two in sync if that palette
+// changes), and a real footer instead of no footer at all.
+//
+// Email clients can't load this app's Tailwind classes or web fonts
+// (Cormorant Garamond/Poppins), and Gmail strips <style> blocks in the
+// body, so this leans on web-safe stand-ins with the same character
+// (Georgia for serif headings, a system sans stack for body copy) and
+// inlines every style. Table-based layout, not flex/grid, for the same
+// reason — the only markup old and new email clients agree on.
+// ---------------------------------------------------------------------------
+const BRAND = {
+  rose: '#6b1d2b',
+  gold: '#c9a24b',
+  champagne: '#f0e2c8',
+  champagneDeep: '#e3cd9c',
+  blush: '#f6e2df',
+  ivory: '#fdfaf4',
+  linen: '#f6efe4',
+  ink: '#4a3f3a',
+  inkSoft: '#7a6a63',
+}
+const SERIF_STACK = "Georgia, 'Times New Roman', serif"
+const SANS_STACK = "'Segoe UI', Helvetica, Arial, sans-serif"
+
+/** `<h2>`-equivalent for email body copy — serif, brand ink, consistent spacing. */
+function emailHeading(html) {
+  return `<h2 style="margin: 0 0 12px; font-family: ${SERIF_STACK}; font-size: 22px; font-weight: 600; color: ${BRAND.ink};">${html}</h2>`
+}
+
+/** The one button style every email's primary CTA uses — rose fill, pill shape, matches the site's own buttons. */
+function emailButton(label, url) {
+  return `<a href="${url}" style="display: inline-block; margin-top: 20px; padding: 12px 26px; background: ${BRAND.rose}; color: ${BRAND.ivory}; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 14px;">${escapeHtml(label)}</a>`
+}
+
+/** A plain inline link in brand rose, for secondary URLs that aren't the email's main CTA. */
+function emailLink(label, url) {
+  return `<a href="${url}" style="color: ${BRAND.rose}; font-weight: 600;">${escapeHtml(label)}</a>`
+}
+
+/** Highlighted callout box (champagne tint) for a second, secondary link/detail — e.g. a host dashboard link below the main CTA. */
+function emailCallout(html) {
+  return `<div style="margin-top: 20px; padding: 16px; background: ${BRAND.champagne}; border-radius: 12px;">${html}</div>`
+}
+
+// Same "envelope + heart" mark as Logo.jsx, reduced to table+CSS an email
+// client can actually render — a rose circle badge (✉) beside the
+// "InviteMyPeople" wordmark with "My" picked out in rose. No external image
+// request for it to block, unlike an actual <img> logo would need.
+function renderLogoMark() {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+      <tr>
+        <td style="padding-right: 10px; vertical-align: middle;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="36" height="36" style="background: ${BRAND.rose}; border-radius: 10px;">
+            <tr><td align="center" valign="middle" style="width: 36px; height: 36px; font-size: 16px; line-height: 1; color: ${BRAND.ivory};">&#9993;</td></tr>
+          </table>
+        </td>
+        <td style="vertical-align: middle; font-family: ${SERIF_STACK}; font-size: 22px; color: ${BRAND.ink};">
+          Invite<span style="color: ${BRAND.rose};">My</span>People
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+/**
+ * Wraps a build*Email() function's inner content (already-escaped HTML) in
+ * the shared branded shell: logo header linking back to the site, an ivory
+ * content card on a linen background (mirrors the on-site card treatment —
+ * see e.g. PartnerLoginPage.jsx's own `bg-ivory`/`shadow-card` panel), and a
+ * consistent footer with the same tagline/contact/copyright SiteFooter.jsx
+ * uses.
+ */
+function renderEmailShell(bodyHtml) {
+  const year = new Date().getFullYear()
+  return `
+    <div style="background: ${BRAND.linen}; padding: 32px 16px; font-family: ${SANS_STACK};">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 520px; margin: 0 auto;">
+        <tr>
+          <td style="padding-bottom: 24px; text-align: center;">
+            <a href="${SITE_URL}" style="text-decoration: none;">${renderLogoMark()}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="background: ${BRAND.ivory}; border-radius: 16px; padding: 32px; border: 1px solid ${BRAND.champagneDeep};">
+            <div style="color: ${BRAND.ink}; font-size: 15px; line-height: 1.6;">${bodyHtml}</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top: 24px; text-align: center; color: ${BRAND.inkSoft}; font-size: 12px; line-height: 1.6;">
+            <p style="margin: 0 0 4px;">Beautifully interactive digital invitations for every celebration.</p>
+            <p style="margin: 0 0 4px;">
+              <a href="mailto:invitemypeople@gmail.com" style="color: ${BRAND.inkSoft}; text-decoration: underline;">invitemypeople@gmail.com</a>
+            </p>
+            <p style="margin: 0;">&copy; ${year} InviteMyPeople. Crafted with love.</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `
 }
 
 /**
@@ -109,34 +219,32 @@ export function buildOrderConfirmationEmail(invite) {
 
   const subject = `Your invitation for ${invite.names} is live!`
 
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">You're all set, ${escapeHtml(invite.hostName || 'there')} 🎉</h2>
-      <p>Your invitation for <strong>${escapeHtml(invite.names)}</strong> has been created${amountLabel ? ` (payment of ${amountLabel} received)` : ''}.</p>
-      ${
-        whenLabel || invite.venue
-          ? `<p>${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
-          : ''
-      }
+  const body = `
+    ${emailHeading(`You're all set, ${escapeHtml(invite.hostName || 'there')} 🎉`)}
+    <p style="margin: 0;">Your invitation for <strong>${escapeHtml(invite.names)}</strong> has been created${amountLabel ? ` (payment of ${amountLabel} received)` : ''}.</p>
+    ${
+      whenLabel || invite.venue
+        ? `<p style="margin: 12px 0 0;">${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
+        : ''
+    }
 
-      <p style="margin-top: 24px;"><strong>Share this with your guests:</strong><br/>
-      <a href="${inviteUrl}" style="color: #b3541e;">${inviteUrl}</a></p>
+    <p style="margin: 20px 0 0; font-size: 13px; color: ${BRAND.inkSoft};">Share this with your guests:</p>
+    ${emailButton('View your invitation', inviteUrl)}
 
-      <p style="margin-top: 24px; padding: 16px; background: #fbf3ea; border-radius: 8px;">
-        <strong>Your private host dashboard</strong> — view live RSVPs and download your guest list as a CSV:<br/>
-        <a href="${hostUrl}" style="color: #b3541e;">${hostUrl}</a>
-      </p>
+    ${emailCallout(`
+      <strong>Your private host dashboard</strong> — view live RSVPs and download your guest list as a CSV:<br/>
+      ${emailLink(hostUrl, hostUrl)}
+    `)}
 
-      <p style="color: #7a6a63; font-size: 12px; margin-top: 24px;">
-        Save the host dashboard link now — it's shown only this once and can't be recovered if
-        lost (there's no login system, no "resend my link" flow). Keep it private; anyone with
-        this link can see your guest responses. It's safe to share the invitation link above with
-        guests — it never exposes your dashboard.
-      </p>
-    </div>
+    <p style="color: ${BRAND.inkSoft}; font-size: 12px; margin: 20px 0 0;">
+      Save the host dashboard link now — it's shown only this once and can't be recovered if
+      lost (there's no login system, no "resend my link" flow). Keep it private; anyone with
+      this link can see your guest responses. It's safe to share the invitation link above with
+      guests — it never exposes your dashboard.
+    </p>
   `
 
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
 }
 
 /**
@@ -147,16 +255,14 @@ export function buildOrderConfirmationEmail(invite) {
  */
 export function buildPartnerApplicationReceivedEmail(partner) {
   const subject = `We've received your partner application`
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">Thanks for applying! 👋</h2>
-      <p>We've received <strong>${escapeHtml(partner.businessName)}</strong>'s application to join our
-      B2B Partner Program.</p>
-      <p>Our team reviews every application by hand — you'll get another email as soon as a decision is
-      made, usually within a couple of business days.</p>
-    </div>
+  const body = `
+    ${emailHeading('Thanks for applying! 👋')}
+    <p style="margin: 0;">We've received <strong>${escapeHtml(partner.businessName)}</strong>'s application to join our
+    B2B Partner Program.</p>
+    <p style="margin: 12px 0 0;">Our team reviews every application by hand — you'll get another email as soon as a decision is
+    made, usually within a couple of business days.</p>
   `
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
 }
 
 /**
@@ -166,29 +272,25 @@ export function buildPartnerApplicationReceivedEmail(partner) {
  */
 export function buildPartnerAdminNotificationEmail(partner) {
   const subject = `New partner application: ${partner.businessName}`
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">New partner application</h2>
-      <p><strong>${escapeHtml(partner.businessName)}</strong> (${escapeHtml(partner.email)},
-      ${escapeHtml(partner.phone || '')}) is waiting for review.</p>
-      <p><a href="${SITE_URL}/admin/partners" style="color: #b3541e;">Review in the admin dashboard →</a></p>
-    </div>
+  const body = `
+    ${emailHeading('New partner application')}
+    <p style="margin: 0;"><strong>${escapeHtml(partner.businessName)}</strong> (${escapeHtml(partner.email)},
+    ${escapeHtml(partner.phone || '')}) is waiting for review.</p>
+    ${emailButton('Review in the admin dashboard', `${SITE_URL}/admin/partners`)}
   `
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
 }
 
 /** Sent when an admin approves a pending partner. */
 export function buildPartnerApprovedEmail(partner) {
   const subject = `You're approved — welcome to the Partner Program`
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">You're in! 🎉</h2>
-      <p><strong>${escapeHtml(partner.businessName)}</strong> has been approved. You can now log in,
-      purchase invite credits, and start creating client invites.</p>
-      <p><a href="${SITE_URL}/partners/login" style="color: #b3541e;">Log in to your dashboard →</a></p>
-    </div>
+  const body = `
+    ${emailHeading("You're in! 🎉")}
+    <p style="margin: 0;"><strong>${escapeHtml(partner.businessName)}</strong> has been approved. You can now log in,
+    purchase invite credits, and start creating client invites.</p>
+    ${emailButton('Log in to your dashboard', `${SITE_URL}/partners/login`)}
   `
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
 }
 
 /**
@@ -209,45 +311,68 @@ export function buildPartnerInviteReadyEmail(invite, partner) {
 
   const subject = `Your invitation for ${invite.coupleNames} is live!`
 
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">Your invitation is ready 🎉</h2>
-      <p><strong>${escapeHtml(partner.businessName)}</strong> has created your invitation for
-      <strong>${escapeHtml(invite.coupleNames)}</strong>.</p>
-      ${
-        whenLabel || invite.venue
-          ? `<p>${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
-          : ''
-      }
+  const body = `
+    ${emailHeading('Your invitation is ready 🎉')}
+    <p style="margin: 0;"><strong>${escapeHtml(partner.businessName)}</strong> has created your invitation for
+    <strong>${escapeHtml(invite.coupleNames)}</strong>.</p>
+    ${
+      whenLabel || invite.venue
+        ? `<p style="margin: 12px 0 0;">${whenLabel ? `<strong>${escapeHtml(whenLabel)}</strong><br/>` : ''}${invite.venue ? escapeHtml(invite.venue) : ''}</p>`
+        : ''
+    }
 
-      <p style="margin-top: 24px;"><strong>Share this with your guests:</strong><br/>
-      <a href="${inviteUrl}" style="color: #b3541e;">${inviteUrl}</a></p>
+    <p style="margin: 20px 0 0; font-size: 13px; color: ${BRAND.inkSoft};">Share this with your guests:</p>
+    ${emailButton('View your invitation', inviteUrl)}
 
-      <p style="color: #7a6a63; font-size: 12px; margin-top: 24px;">
-        Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
-        they created this for you.
-      </p>
-    </div>
+    <p style="color: ${BRAND.inkSoft}; font-size: 12px; margin: 20px 0 0;">
+      Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
+      they created this for you.
+    </p>
   `
 
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
+}
+
+/**
+ * Sent by POST /api/partners/forgot-password (api/_lib/partnerHandlers.js)
+ * with the recovery link Supabase Auth's admin.generateLink() produced.
+ * Routed through Brevo — same as every other transactional email this app
+ * sends — specifically so this lands from EMAIL_FROM's own domain instead
+ * of Supabase's default noreply@mail.app.supabase.io, which is what
+ * supabase.auth.resetPasswordForEmail()'s own built-in email would have
+ * sent from. `link` still points at Supabase's /auth/v1/verify endpoint
+ * (which then redirects into /partners/reset-password) — only where the
+ * email itself comes from changes, not the recovery mechanism.
+ */
+export function buildPartnerPasswordResetEmail(link) {
+  const subject = 'Reset your Partner Portal password'
+  const body = `
+    ${emailHeading('Reset your password')}
+    <p style="margin: 0;">We got a request to reset the password on your Partner Portal account. Click below to choose a
+    new one:</p>
+    ${emailButton('Reset password', link)}
+
+    <p style="color: ${BRAND.inkSoft}; font-size: 12px; margin: 20px 0 0;">
+      This link expires soon and can only be used once. If you didn't request this, you can safely
+      ignore this email — your password won't change.
+    </p>
+  `
+  return { subject, html: renderEmailShell(body) }
 }
 
 /** Sent when an admin rejects a pending partner. `partner.rejectedReason` is optional. */
 export function buildPartnerRejectedEmail(partner) {
   const subject = `Update on your partner application`
   const reasonLine = partner.rejectedReason
-    ? `<p><strong>Reason:</strong> ${escapeHtml(partner.rejectedReason)}</p>`
+    ? `<p style="margin: 12px 0 0;"><strong>Reason:</strong> ${escapeHtml(partner.rejectedReason)}</p>`
     : ''
-  const html = `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2320;">
-      <h2 style="margin-bottom: 4px;">About your application</h2>
-      <p>We reviewed <strong>${escapeHtml(partner.businessName)}</strong>'s application and aren't able to
-      approve it at this time.</p>
-      ${reasonLine}
-      <p>If you think this was a mistake or your circumstances have changed, reply to this email and
-      we're happy to take another look.</p>
-    </div>
+  const body = `
+    ${emailHeading('About your application')}
+    <p style="margin: 0;">We reviewed <strong>${escapeHtml(partner.businessName)}</strong>'s application and aren't able to
+    approve it at this time.</p>
+    ${reasonLine}
+    <p style="margin: 12px 0 0;">If you think this was a mistake or your circumstances have changed, reply to this email and
+    we're happy to take another look.</p>
   `
-  return { subject, html }
+  return { subject, html: renderEmailShell(body) }
 }

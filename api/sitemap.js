@@ -1,5 +1,5 @@
 // Dynamic sitemap.xml — generated from the same route data every other SEO
-// surface reads from (routesSeo.js, satsangTemplatesData.js,
+// surface reads from (routesSeo.js, templatesData.js, satsangTemplatesData.js,
 // ganeshTemplatesData.js) instead of a hand-maintained public/sitemap.xml
 // that silently goes stale every time a template ships. vercel.json rewrites
 // GET /sitemap.xml here.
@@ -8,6 +8,7 @@
 // see GeneratedInvitePage.jsx) and /i/:slug/host/:hostToken (private host
 // dashboards — see robots.txt's explicit Disallow for these).
 import { ROUTES_SEO } from '../src/data/routesSeo.js'
+import { TEMPLATES } from '../src/data/templatesData.js'
 import { SATSANG_TEMPLATES } from '../src/data/satsangTemplatesData.js'
 import { GANESH_TEMPLATES } from '../src/data/ganeshTemplatesData.js'
 import { BLOG_POSTS } from '../src/data/blogPosts.js'
@@ -48,6 +49,9 @@ function buildSitemap() {
   for (const path of Object.keys(ROUTES_SEO)) {
     const meta = STATIC_META[path] || COMING_SOON_META
     entries.push(urlEntry(path, meta))
+  }
+  for (const t of TEMPLATES) {
+    entries.push(urlEntry(`/templates/wedding/${t.id}`, TEMPLATE_META))
   }
   for (const t of SATSANG_TEMPLATES) {
     entries.push(urlEntry(`/satsang/${t.slug}`, TEMPLATE_META))

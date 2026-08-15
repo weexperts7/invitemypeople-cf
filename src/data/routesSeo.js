@@ -483,3 +483,18 @@ export function ganeshSeo(template) {
     h1: template.host?.familyName || template.name,
   }
 }
+
+// Every wedding template's <h1> is the couple's names (see WelcomeSplash.jsx,
+// which renders `coupleNames` as its aria-label'd <h1>) — mirrors
+// ganeshSeo()'s single, unbranched h1 source above.
+export function weddingSeo(template) {
+  const title = `${template.name} — Wedding Invitation Template | InviteMyPeople`
+  const description = template.metaDescription || template.description
+  return {
+    title,
+    description,
+    ogTitle: title,
+    ogDescription: description,
+    h1: template.couple?.names || template.name,
+  }
+}

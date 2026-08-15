@@ -1,5 +1,5 @@
 // Time-boxed "Launch Special" sale config — the single source of truth for
-// the ₹1,100 introductory price (10 days from SALE_START). Imported by:
+// the ₹2,499 introductory price (10 days from SALE_START). Imported by:
 //  - the client: SaleBanner.jsx (the homepage announcement bar),
 //    TemplateCard.jsx, InvitationExperience.jsx/SatsangExperience.jsx/
 //    GaneshExperience.jsx's "Create Your Own" CTA, LandingPage.jsx's
@@ -20,7 +20,7 @@
 // bundle — see pricing.js's own comment.
 import { PRICING } from './pricing.js'
 
-export const SALE_PRICE = 1100
+export const SALE_PRICE = 2499
 
 // The window is always exactly SALE_DURATION_DAYS after SALE_START, so
 // rescheduling the sale is a one-line change to SALE_START — nothing else
@@ -45,7 +45,7 @@ export function isSaleActive(now = new Date()) {
 // The price actually charged right now: the sale price during the window,
 // PRICING.shagunPrice (the standing launch price) once it closes. Every
 // price shown anywhere on the site should read from this, never from
-// SALE_PRICE directly, so nothing keeps advertising ₹1,100 after the sale
+// SALE_PRICE directly, so nothing keeps advertising the sale price after it
 // ends.
 export function getActivePrice(now = new Date()) {
   return isSaleActive(now) ? SALE_PRICE : PRICING.shagunPrice

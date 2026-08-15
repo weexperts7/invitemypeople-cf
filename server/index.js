@@ -5,9 +5,10 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
+import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo, weddingSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
+import { getTemplateById } from '../src/data/templatesData.js'
 import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
@@ -699,6 +700,15 @@ function resolveSeoForPath(pathname) {
   if (ganeshMatch) {
     const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
     if (template) return ganeshSeo(template)
+  }
+
+  const weddingMatch = pathname.match(/^\/templates\/wedding\/([^/]+)\/?$/)
+  if (weddingMatch) {
+    // getTemplateById falls back to TEMPLATES[0] rather than returning
+    // undefined for an unknown id (see templatesData.js) — always truthy,
+    // same as every other pre-built template lookup on this page.
+    const template = getTemplateById(decodeURIComponent(weddingMatch[1]))
+    if (template) return weddingSeo(template)
   }
 
   const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/)

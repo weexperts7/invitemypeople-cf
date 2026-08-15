@@ -8,7 +8,6 @@ import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDec
 import TemplateCard from '../components/TemplateCard'
 import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
 import { ROUTES_SEO } from '../data/routesSeo'
-import { usePreview } from '../hooks/usePreview'
 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
@@ -19,7 +18,6 @@ function getWhatsAppLink(message) {
 // homepage's wedding section stays a lighter teaser marquee that links here
 // for the complete browsing experience (see LandingPage.jsx).
 export default function WeddingsPage() {
-  const onPreview = usePreview()
   const reduceMotion = useReducedMotion()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
@@ -116,11 +114,7 @@ export default function WeddingsPage() {
             ) : (
               <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((template) => (
-                  <TemplateCard
-                    key={template.id}
-                    template={template}
-                    onPreview={onPreview}
-                  />
+                  <TemplateCard key={template.id} template={template} />
                 ))}
               </motion.div>
             )}

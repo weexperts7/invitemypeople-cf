@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   Search,
@@ -45,7 +45,6 @@ import SiteFooter from './SiteFooter'
 import SEO from './SEO'
 import Logo from './Logo'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from './PageDecor'
-import { usePreview } from '../hooks/usePreview'
 
 const WHATSAPP_NUMBER = '919877647707'
 function getWhatsAppLink(message) {
@@ -286,8 +285,6 @@ const TESTIMONIALS = [
 ]
 
 export default function LandingPage() {
-  const onPreview = usePreview()
-  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
   // All FAQ answers are visible by default — see FaqItem below — rather
@@ -504,12 +501,7 @@ export default function LandingPage() {
             keyExtractor={(t) => t.id}
             itemWidth={300}
             reverse
-            renderItem={(template) => (
-              <TemplateCard
-                template={template}
-                onPreview={onPreview}
-              />
-            )}
+            renderItem={(template) => <TemplateCard template={template} />}
           />
         )}
       </section>
@@ -550,12 +542,7 @@ export default function LandingPage() {
           itemWidth={300}
           secondsPerItem={7}
           reverse
-          renderItem={(template) => (
-            <SatsangTemplateCard
-              template={template}
-              onExplore={(slug) => navigate(`/satsang/${slug}`)}
-            />
-          )}
+          renderItem={(template) => <SatsangTemplateCard template={template} />}
         />
 
         <motion.div
@@ -612,12 +599,7 @@ export default function LandingPage() {
           keyExtractor={(t) => t.slug}
           itemWidth={300}
           secondsPerItem={7}
-          renderItem={(template) => (
-            <GaneshTemplateCard
-              template={template}
-              onExplore={(slug) => navigate(`/templates/ganesh-chaturthi/${slug}`)}
-            />
-          )}
+          renderItem={(template) => <GaneshTemplateCard template={template} />}
         />
 
         <motion.div

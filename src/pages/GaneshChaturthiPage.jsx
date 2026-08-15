@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Flame, Eye, MessageCircle } from 'lucide-react'
 import { GaneshIcon } from '../components/icons/GaneshIcon'
@@ -18,7 +17,6 @@ function getWhatsAppLink(message) {
 // The dedicated Ganesh Chaturthi template gallery — mirrors
 // GurujiSatsangsPage.jsx's role for the Satsang category.
 export default function GaneshChaturthiPage() {
-  const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
 
   return (
@@ -55,11 +53,7 @@ export default function GaneshChaturthiPage() {
           <div className="mx-auto max-w-6xl">
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {GANESH_TEMPLATES.map((template) => (
-                <GaneshTemplateCard
-                  key={template.slug}
-                  template={template}
-                  onExplore={(slug) => navigate(`/templates/ganesh-chaturthi/${slug}`)}
-                />
+                <GaneshTemplateCard key={template.slug} template={template} />
               ))}
             </motion.div>
 

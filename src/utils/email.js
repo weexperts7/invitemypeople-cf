@@ -104,7 +104,7 @@ export function buildOrderConfirmationEmail(invite) {
   // converts to paise right at the Razorpay order-creation call
   // (`amount: Math.round(amount * 100)`); the persisted/returned invite
   // amount (and this label) stays in the same rupee units the checkout UI
-  // already displays (e.g. "₹2,100").
+  // already displays (e.g. "₹2,499").
   const amountLabel = Number(invite.amount) > 0 ? `₹${Number(invite.amount).toLocaleString('en-IN')}` : null
 
   const subject = `Your invitation for ${invite.names} is live!`

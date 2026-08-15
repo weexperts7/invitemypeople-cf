@@ -35,9 +35,10 @@
 // src/components/SEO.jsx only patches that meta tag after React mounts.
 import fs from 'node:fs'
 import path from 'node:path'
-import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo } from '../src/data/routesSeo.js'
+import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo, weddingSeo } from '../src/data/routesSeo.js'
 import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
 import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
+import { getTemplateById } from '../src/data/templatesData.js'
 import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 
 function escapeHtml(str) {
@@ -162,6 +163,15 @@ function resolveSeoForPath(pathname) {
   if (ganeshMatch) {
     const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
     if (template) return ganeshSeo(template)
+  }
+
+  const weddingMatch = pathname.match(/^\/templates\/wedding\/([^/]+)\/?$/)
+  if (weddingMatch) {
+    // getTemplateById falls back to TEMPLATES[0] rather than returning
+    // undefined for an unknown id (see templatesData.js) — always truthy,
+    // same as every other pre-built template lookup on this page.
+    const template = getTemplateById(decodeURIComponent(weddingMatch[1]))
+    if (template) return weddingSeo(template)
   }
 
   // Unlike satsang/ganesh templates, a blog post's raw SSR shell carries the

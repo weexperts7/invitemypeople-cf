@@ -227,13 +227,6 @@ export default function InvitationExperience({
               >
                 <Link
                   to={buildCreateLink({ occasion: 'wedding', sourceId: template?.id })}
-                  // The preview overlay (see App.jsx) renders outside the
-                  // <Routes> tree while previewId is set — a plain Link
-                  // changes the URL but leaves this overlay mounted on top
-                  // of it, so the route change is invisible. Clearing the
-                  // preview first (same as "Back to Templates" does via
-                  // onBack) lets the new route actually show through.
-                  onClick={onBack}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
                 >
                   <Heart className="w-4 h-4" />

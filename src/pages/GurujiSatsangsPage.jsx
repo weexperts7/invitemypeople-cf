@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Flame, Eye, MessageCircle } from 'lucide-react'
 import { FoldedHandsIcon } from '../components/icons/FoldedHandsIcon'
@@ -19,7 +18,6 @@ function getWhatsAppLink(message) {
 // section stays a lighter teaser marquee that links here for the complete
 // browsing experience (see LandingPage.jsx).
 export default function GurujiSatsangsPage() {
-  const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
 
   return (
@@ -56,11 +54,7 @@ export default function GurujiSatsangsPage() {
           <div className="mx-auto max-w-6xl">
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {SATSANG_TEMPLATES.map((template) => (
-                <SatsangTemplateCard
-                  key={template.slug}
-                  template={template}
-                  onExplore={(slug) => navigate(`/satsang/${slug}`)}
-                />
+                <SatsangTemplateCard key={template.slug} template={template} />
               ))}
             </motion.div>
 

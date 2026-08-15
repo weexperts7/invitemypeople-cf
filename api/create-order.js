@@ -24,8 +24,8 @@ export default async function handler(req, res) {
     // Re-derives today's real package price on the server, in paise, rather
     // than trusting whatever amount the client happens to send — so a
     // tampered client can never buy an invite below the price actually in
-    // effect right now, and the ₹1,100 launch-sale rate can't be replayed
-    // once its 10-day window (see ../src/data/sale.js) has closed.
+    // effect right now, and the launch-sale rate can't be replayed once its
+    // 10-day window (see ../src/data/sale.js) has closed.
     const expectedAmount = Math.round(getActivePrice() * 100)
     if (amount !== expectedAmount) {
       return res.status(400).json({ ok: false, error: 'amount does not match the current price' })

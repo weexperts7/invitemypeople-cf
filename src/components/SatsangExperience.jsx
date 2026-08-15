@@ -47,15 +47,12 @@ export default function SatsangExperience({ template }) {
         All Invitations
       </motion.button>
 
-      {/* Every Satsang template lives at its own directly-linkable page
-          rather than behind an in-app preview overlay (see App.jsx's
-          previewId, used only for wedding templates) — so unlike
-          InvitationExperience.jsx's floating "Create Your Own" bar, this CTA never
-          has to fight a preview overlay for the route to actually show. A
-          small floating pill (not a full-width bottom bar) so it never
-          fights each bespoke layout's own footer/RSVP content for space —
-          same floating-over-content pattern as the site-wide WhatsApp
-          button (see LandingPage.jsx). Label/icon match
+      {/* Every Satsang template lives at its own directly-linkable page (see
+          SatsangRoute in App.jsx), same as wedding templates now do (see
+          WeddingRoute) — a small floating pill (not a full-width bottom bar)
+          so it never fights each bespoke layout's own footer/RSVP content
+          for space — same floating-over-content pattern as the site-wide
+          WhatsApp button (see LandingPage.jsx). Label/icon match
           InvitationExperience.jsx's own CTA — same "Create Your Own —
           price" copy site-wide rather than this occasion alone saying
           "Customize This Template". */}

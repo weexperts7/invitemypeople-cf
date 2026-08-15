@@ -413,7 +413,7 @@ const STATIC_ROUTES_SEO = {
       { h2: 'How We Protect Your Information' },
       'We implement robust security measures — including encrypted database storage and secure payment gateways — to protect your personal information and event data against unauthorized access, alteration, or disclosure.',
       { h2: 'Contact Us' },
-      'If you have additional questions or require more information about our Privacy Policy, our digital wedding invitation maker, or how your guest data is handled, contact us at invitemypeople@gmail.com and we will get back to you.',
+      'If you have additional questions or require more information about our Privacy Policy, our digital wedding invitation maker, or how your guest data is handled, contact us at hello@invitemypeople.com and we will get back to you.',
     ],
   },
   '/terms': {

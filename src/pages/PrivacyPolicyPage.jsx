@@ -48,7 +48,7 @@ const SECTIONS = [
   {
     heading: 'Contact Us',
     blocks: [
-      'If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at invitemypeople@gmail.com.',
+      'If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at hello@invitemypeople.com.',
     ],
   },
 ]

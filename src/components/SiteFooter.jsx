@@ -112,7 +112,7 @@ export default function SiteFooter() {
             </p>
             <div className="mt-4 flex items-center gap-3">
               <a
-                href="mailto:invitemypeople@gmail.com"
+                href="mailto:hello@invitemypeople.com"
                 aria-label="Email"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-champagne-deep/50 text-ink-soft hover:text-rose hover:border-rose/50 transition-colors"
               >
@@ -187,7 +187,7 @@ export default function SiteFooter() {
               </li>
               <li>
                 <a
-                  href="mailto:invitemypeople@gmail.com"
+                  href="mailto:hello@invitemypeople.com"
                   className="text-ink-soft hover:text-rose transition-colors"
                 >
                   Contact Us

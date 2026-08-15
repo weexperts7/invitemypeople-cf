@@ -22,7 +22,7 @@ const DEFAULT_PALETTE = {
   blushDeep: '#e8bfba',
   ivory: '#fdfaf4',
   linen: '#f6efe4',
-  rose: '#c98f8a',
+  rose: '#6b1d2b',
 }
 
 // Keyed off the same `weddingType` values used in templatesData.js.

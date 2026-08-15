@@ -5,7 +5,7 @@ const DEFAULT_CONFETTI_COLORS = [
   '#c9a24b', // gold
   '#ddc186', // gold soft
   '#e8bfba', // blush deep
-  '#c98f8a', // rose
+  '#6b1d2b', // rose
   '#f0e2c8', // champagne
   '#fdfaf4', // ivory
 ]

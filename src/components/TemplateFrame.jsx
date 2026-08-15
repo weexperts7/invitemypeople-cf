@@ -597,7 +597,7 @@ const CORNERS = {
 const DEFAULT_C = {
   gold: '#c9a24b',
   goldSoft: '#ddc186',
-  rose: '#c98f8a',
+  rose: '#6b1d2b',
   blush: '#f6e2df',
 }
 

@@ -27,7 +27,7 @@ const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
 }))
 const ALL_OCCASION_PATHS = [...LIVE_OCCASIONS, ...COMING_SOON_LINKS].map((l) => l.to)
 
-const WHATSAPP_NUMBER = '919877647707'
+const WHATSAPP_NUMBER = '918847044554'
 function getWhatsAppLink(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }

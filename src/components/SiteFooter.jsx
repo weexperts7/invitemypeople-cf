@@ -181,6 +181,11 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/partners" className="text-ink-soft hover:text-rose transition-colors">
+                  Partner With Us
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:invitemypeople@gmail.com"
                   className="text-ink-soft hover:text-rose transition-colors"

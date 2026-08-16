@@ -10,4 +10,4 @@
 // Same price across every template today, so it's one shared constant
 // rather than a per-template field — add per-template pricing later only
 // if templates actually start to differ in price.
-export const PRICING = { price: 3000, shagunPrice: 2499 }
+export const PRICING = { price: 4500, shagunPrice: 2100 }

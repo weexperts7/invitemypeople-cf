@@ -17,6 +17,17 @@ export function randomSlugSuffix() {
   return Math.random().toString(36).slice(2, 8)
 }
 
+// Best-effort text `date` ("YYYY-MM-DD", from <input type="date">) -> the
+// typed `event_date` column (see supabase/migrations/0008_invites_event_date.sql).
+// Returns null for anything that isn't a clean ISO date rather than
+// throwing, so a malformed value never blocks the whole insert — event_date
+// is a convenience/reporting column, not the sole source of truth for
+// expiry: src/utils/eventStatus.js reads the `date`/`time` text columns
+// directly and only falls back to this one.
+export function toEventDateColumn(date) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? '')) ? date : null
+}
+
 // A private, unguessable per-invite token — the only thing standing between
 // "anyone with the shareable /i/:slug link" and "the host, who can see every
 // guest's email and RSVP details on /i/:slug/host/:hostToken". There's no
@@ -48,6 +59,11 @@ export function rowToInvite(row) {
     names: row.names,
     date: row.date,
     time: row.time,
+    // Typed mirror of `date` (see 0008_invites_event_date.sql) — null on
+    // rows saved before that column existed or whose `date` didn't parse;
+    // getEventStatus() (src/utils/eventStatus.js) treats that the same as
+    // any other unknown date and reads `date`/`time` directly instead.
+    eventDate: row.event_date,
     venue: row.venue,
     locationUrl: row.location_url,
     message: row.message,

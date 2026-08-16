@@ -336,6 +336,12 @@ app.post('/api/invites', async (req, res) => {
         templateName: clean(body.templateName, 120),
         names,
         date,
+        // Local-dev mirror of the `event_date` column api/invites/index.js
+        // populates in production (see toEventDateColumn() /
+        // supabase/migrations/0008_invites_event_date.sql) — same
+        // best-effort ISO-date check, kept inline here since this file
+        // doesn't import from api/_lib (see its own header comment on why).
+        eventDate: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null,
         time: clean(body.time, 10),
         venue,
         locationUrl: clean(body.locationUrl, 500),

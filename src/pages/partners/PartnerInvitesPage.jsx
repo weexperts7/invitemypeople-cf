@@ -6,8 +6,30 @@ import Pagination from '../../components/partners/Pagination'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { getMyInvites } from '../../utils/partnerApi'
 import { SITE_URL } from '../../data/routesSeo'
+import { formatInviteDate } from '../../utils/formatInviteDateTime'
+import { getEventStatus } from '../../utils/eventStatus'
 
 const PAGE_SIZE = 5
+
+// Active/Closed — computed client-side from the invite's own wedding date
+// (see getEventStatus()), same "event + 24h buffer" rule the public
+// /i/:slug page uses to swap in its "Event Concluded" view. Purely a status
+// label here: a partner's own /p/:slug client link never auto-closes (see
+// PartnerInviteViewerPage.jsx), so guest lists and analytics for a
+// "Closed" invite stay fully viewable — this badge just tells the partner
+// at a glance whether the event itself has already happened.
+function EventStatusBadge({ status }) {
+  const isActive = status === 'active'
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+        isActive ? 'bg-blush text-rose' : 'bg-ink/10 text-ink-soft'
+      }`}
+    >
+      {isActive ? 'Active' : 'Closed'}
+    </span>
+  )
+}
 
 function CopyLinkButton({ url }) {
   const [copied, setCopied] = useState(false)
@@ -93,15 +115,24 @@ export default function PartnerInvitesPage() {
             <div className="space-y-2">
               {pageInvites.map((inv) => {
                 const url = `${SITE_URL}/p/${inv.slug}`
+                const status = getEventStatus({
+                  date: inv.weddingDate,
+                  time: inv.weddingTime,
+                  events: inv.events,
+                })
+                const eventDateLabel = formatInviteDate(inv.weddingDate) || inv.weddingDate || 'No date set'
                 return (
                   <div
                     key={inv.id}
                     className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/60 bg-ivory/50 px-4 py-3 text-sm"
                   >
-                    <div>
-                      <p className="text-ink">{inv.coupleNames}</p>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-ink">{inv.coupleNames}</p>
+                        <EventStatusBadge status={status} />
+                      </div>
                       <p className="text-xs text-ink-soft/70">
-                        {inv.venue} · {new Date(inv.createdAt).toLocaleDateString('en-IN')}
+                        {inv.venue} · Event Date: {eventDateLabel}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

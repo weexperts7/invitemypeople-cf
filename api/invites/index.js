@@ -5,7 +5,7 @@
 // has no writable, persistent filesystem to keep one on.
 import { slugify } from '../../src/utils/slugify.js'
 import { getSupabase } from '../_lib/supabase.js'
-import { clean, randomSlugSuffix, rowToInvite, generateHostToken } from '../_lib/invites.js'
+import { clean, randomSlugSuffix, rowToInvite, generateHostToken, toEventDateColumn } from '../_lib/invites.js'
 import { MAX_PHOTOS } from '../../src/utils/photoUpload.js'
 import { cleanEvents } from '../../src/utils/cleanEvents.js'
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../../src/utils/email.js'
@@ -38,6 +38,7 @@ export default async function handler(req, res) {
       template_name: clean(body.templateName, 120),
       names,
       date,
+      event_date: toEventDateColumn(date),
       time: clean(body.time, 10),
       venue,
       location_url: clean(body.locationUrl, 500),

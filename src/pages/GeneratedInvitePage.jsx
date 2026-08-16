@@ -18,9 +18,11 @@ import WishesWall from '../components/WishesWall'
 import InvitePreviewCard from '../components/builder/InvitePreviewCard'
 import InvitationExperience from '../components/InvitationExperience'
 import GaneshExperience from '../components/GaneshExperience'
+import EventConcludedView from '../components/EventConcludedView'
 import { getBuilderTemplateById } from '../data/builderTemplates'
 import { getInviteBySlug } from '../utils/inviteApi'
 import { formatInviteDate } from '../utils/formatInviteDateTime'
+import { getEventStatus } from '../utils/eventStatus'
 import { buildWeddingExperienceTemplate } from '../utils/buildWeddingExperienceTemplate'
 import { buildGaneshExperienceTemplate } from '../utils/buildGaneshExperienceTemplate'
 import { SITE_URL } from '../data/routesSeo'
@@ -88,6 +90,27 @@ export default function GeneratedInvitePage() {
         </div>
         <SiteFooter />
       </div>
+    )
+  }
+
+  // Automated event expiration: once the event (plus a 24-hour post-event
+  // buffer — see getEventStatus()) has passed, every occasion's live page
+  // below is replaced with a single, calm "thank you" view instead of an
+  // RSVP form asking guests to respond to something that's already
+  // happened. Checked here, before any occasion branch, so it applies
+  // uniformly regardless of template — active events fall through
+  // completely unchanged.
+  if (getEventStatus(invite) === 'closed') {
+    return (
+      <>
+        <SEO
+          title={`${invite.names} — Thank You | InviteMyPeople`}
+          description={`${invite.names}'s celebration has concluded. Thank you for being part of it.`}
+          path={`/i/${invite.slug}`}
+          noindex
+        />
+        <EventConcludedView invite={invite} />
+      </>
     )
   }
 

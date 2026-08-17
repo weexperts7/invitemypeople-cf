@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import LandingPage from './components/LandingPage'
 import AboutPage from './pages/AboutPage'
@@ -43,6 +43,7 @@ import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
 import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from './data/occasionsData'
 import { satsangSeo, ganeshSeo, weddingSeo } from './data/routesSeo'
+import { trackPageView } from './utils/metaPixel'
 
 // A wedding invitation is likewise a shareable, directly-linkable page under
 // /templates/wedding/:id — its "Preview" button (TemplateCard.jsx) opens
@@ -104,6 +105,23 @@ function App() {
     // had scrolled, and gets visibly thrown off by the new page's own
     // layout shifting under it while that animation is still running.
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [location.pathname])
+
+  // Meta Pixel PageView for client-side route changes — index.html's base
+  // snippet only ever fires once, for the very first real page load, so an
+  // SPA navigation (React Router swapping routes with no full reload) would
+  // otherwise never register as a new PageView. Skips the first run here
+  // specifically to avoid double-counting that same initial load (already
+  // tracked by the base snippet) — every pathname change after that is a
+  // genuine new page. trackPageView() (utils/metaPixel.js) itself is a
+  // no-op outside production, so this is inert in dev/preview.
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    trackPageView()
   }, [location.pathname])
 
   return (

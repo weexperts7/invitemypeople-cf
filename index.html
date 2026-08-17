@@ -25,6 +25,26 @@
         })(window, document, "clarity", "script", "xy77ug199p");
     </script>
 
+    <!-- Facebook Pixel Code -->
+    <script>
+      // Production only: the apex domain (invitemypeople.com) 308-redirects
+      // to this www subdomain (see SITE_URL's comment in
+      // src/data/routesSeo.js), so real visitor traffic lands on
+      // www.invitemypeople.com — both are checked so the pixel actually
+      // fires on the live site, not just the bare apex. Anything else
+      // (localhost, 127.0.0.1, a Vercel preview URL, ...) is skipped, so
+      // dev/staging traffic never reaches Meta. There's no
+      // process.env.NODE_ENV here — this is a Vite SPA's static index.html,
+      // served byte-for-byte to every environment with no build-time
+      // templating, so a runtime hostname check is the only way to gate it.
+      if (window.location.hostname === 'invitemypeople.com' || window.location.hostname === 'www.invitemypeople.com') {
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1814892512853341');
+        fbq('track', 'PageView');
+      }
+    </script>
+    <!-- End Facebook Pixel Code -->
+
     <title>InviteMyPeople | Digital Invites for Weddings &amp; Events</title>
     <meta
       name="description"
@@ -111,6 +131,15 @@
     </script>
   </head>
   <body>
+    <!-- Facebook Pixel noscript fallback — HTML5 disallows <img> inside a
+         <noscript> in <head> (see the pixel <script>'s own comment above),
+         so this half lives here instead, right at the top of <body>, same
+         as Meta's own base code places it. It has no JS to run a hostname
+         check against, so — unlike the tracked <script> above — it fires
+         unconditionally on every environment for visitors with JavaScript
+         disabled; that's an acceptably narrow gap (no-JS + non-prod host)
+         rather than a real leak. -->
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1814892512853341&amp;ev=PageView&amp;noscript=1" /></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

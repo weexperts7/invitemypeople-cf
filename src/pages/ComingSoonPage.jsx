@@ -73,10 +73,19 @@ export default function ComingSoonPage({ occasion }) {
               transition={{ duration: 0.7, delay: 0.18 }}
               className="mx-auto max-w-lg text-base sm:text-lg text-ink-soft mb-9"
             >
-              {occasion.tagline} We&rsquo;re building interactive, WhatsApp-delivered
-              invitations for {occasion.label.toLowerCase()} next — with the
-              same envelope reveals, scratch-to-reveal cards and live RSVP
-              tracking already live for weddings and Satsangs.
+              {/* Most entries here are genuinely still being built, and get
+                  that generic framing — but Ganesh Chaturthi/Guruji Satsang
+                  (see routesSeo.js's COMING_SOON_ROUTES comment) are already
+                  finished, just not advertised yet, so those two carry their
+                  own accurate `blurb` instead of this default sentence. */}
+              {occasion.blurb ?? (
+                <>
+                  {occasion.tagline} We&rsquo;re building interactive, WhatsApp-delivered
+                  invitations for {occasion.label.toLowerCase()} next — with the
+                  same envelope reveals, scratch-to-reveal cards and live RSVP
+                  tracking already live for weddings.
+                </>
+              )}
             </motion.p>
 
             <motion.div
@@ -115,20 +124,18 @@ export default function ComingSoonPage({ occasion }) {
             <h2 className="font-serif text-2xl sm:text-3xl text-ink mb-8">
               Available Today
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-14">
+            {/* Only Weddings is advertised as live right now — Guruji
+                Satsang used to have a card here too, but it's one of the
+                "launching soon" entries above ahead of the ad campaign (see
+                routesSeo.js's COMING_SOON_ROUTES comment), so it moved out
+                of this section and into the grid below instead. */}
+            <div className="flex justify-center mb-14">
               <Link
                 to="/weddings"
-                className="rounded-3xl border border-rose/30 bg-blush/40 p-6 text-left shadow-card transition-colors hover:bg-blush/60"
+                className="w-full max-w-sm rounded-3xl border border-rose/30 bg-blush/40 p-6 text-left shadow-card transition-colors hover:bg-blush/60"
               >
                 <h3 className="font-serif text-xl text-ink mb-1">Weddings</h3>
                 <p className="text-sm text-ink-soft">Interactive wedding invitations across every tradition.</p>
-              </Link>
-              <Link
-                to="/guruji-satsangs"
-                className="rounded-3xl border border-gold-soft/50 bg-champagne/50 p-6 text-left shadow-card transition-colors hover:bg-champagne/70"
-              >
-                <h3 className="font-serif text-xl text-ink mb-1">Guruji Satsangs</h3>
-                <p className="text-sm text-ink-soft">Devotional invitations with a Divine Blessing scratch card.</p>
               </Link>
             </div>
 

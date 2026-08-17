@@ -2,8 +2,6 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Building2, LogOut } from 'lucide-react'
 import Logo from './Logo'
-import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
-import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import PartnerAuthContext from '../context/PartnerAuthContext'
 
@@ -15,11 +13,13 @@ const SECONDARY_LINKS = [
 
 // The "browse by occasion" list behind the Occasions menu — live categories
 // first, then everything still on the roadmap (see occasionsData.js).
-const LIVE_OCCASIONS = [
-  { to: '/weddings', label: 'Weddings', icon: Heart },
-  { to: '/guruji-satsangs', label: 'Guruji Satsangs', icon: FoldedHandsIcon },
-  { to: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi', icon: GaneshIcon },
-]
+//
+// Guruji Satsangs and Ganesh Chaturthi are fully built and live at their own
+// routes, but deliberately sit out of this "live" list and fall into
+// COMING_SOON_LINKS below instead — not advertised yet ahead of the ad
+// campaign launch (see routesSeo.js's COMING_SOON_ROUTES comment for the
+// full picture).
+const LIVE_OCCASIONS = [{ to: '/weddings', label: 'Weddings', icon: Heart }]
 const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
   to: `/${o.slug}`,
   label: o.label,

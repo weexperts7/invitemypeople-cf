@@ -174,7 +174,11 @@ export default function CreateInvitePage() {
   // TemplateStyleSelector skips the occasion tabs entirely rather than
   // inviting them to go browse a category they didn't ask for.
   const requestedOccasionId = searchParams.get('occasion')
-  const occasionPreselected = OCCASIONS.some((o) => o.id === requestedOccasionId)
+  // `!o.disabled` — a stale/hand-typed ?occasion=ganesh-chaturthi or
+  // ?occasion=guruji-satsang link (see OCCASIONS' own comment in
+  // builderTemplates.js) falls back to the default wedding occasion below,
+  // same as if the param were missing or invalid, rather than honoring it.
+  const occasionPreselected = OCCASIONS.some((o) => o.id === requestedOccasionId && !o.disabled)
   const initialOccasionId = occasionPreselected ? requestedOccasionId : OCCASIONS[0].id
 
   const [occasionId, setOccasionId] = useState(initialOccasionId)

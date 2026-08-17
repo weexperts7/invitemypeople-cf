@@ -45,6 +45,9 @@ function FacebookIcon({ className }) {
   )
 }
 
+// Kept defined but unreferenced while the YouTube link is hidden from
+// SOCIAL_LINKS below (for now) — one-line re-enable when it comes back.
+// eslint-disable-next-line no-unused-vars
 function YoutubeIcon({ className }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -78,10 +81,11 @@ function LinkedInIcon({ className }) {
 const SOCIAL_LINKS = [
   { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/invitemypeople' },
   { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
-  { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
+  // YouTube hidden for now — re-add when the channel's ready to link to.
+  // { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
 ]
 
-const SHARE_TEXT = 'Check out InviteMyPeople — beautifully interactive digital invitations for weddings, Guruji Satsangs, Ganesh Chaturthi and more.'
+const SHARE_TEXT = 'Check out InviteMyPeople — beautifully interactive digital wedding invitations, with more celebrations launching soon.'
 
 // Site-wide footer, shared across every page (Home, About, category pages)
 // so quick links and contact info are one edit, not duplicated per page.
@@ -155,14 +159,20 @@ export default function SiteFooter() {
                   Wedding Invitations
                 </Link>
               </li>
+              {/* Both point at the "launching soon" landing pages, not the
+                  real live /guruji-satsangs and /templates/ganesh-chaturthi
+                  routes — not advertised yet ahead of the ad campaign
+                  launch (see routesSeo.js's COMING_SOON_ROUTES comment). */}
               <li>
-                <Link to="/guruji-satsangs" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/guruji-satsang-invites" className="text-ink-soft hover:text-rose transition-colors">
                   Guruji Satsang Invitations
+                  <span className="ml-1.5 text-[10px] uppercase tracking-[0.1em] text-ink-soft/60">Soon</span>
                 </Link>
               </li>
               <li>
-                <Link to="/templates/ganesh-chaturthi" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/ganesh-chaturthi-invites" className="text-ink-soft hover:text-rose transition-colors">
                   Ganesh Chaturthi Invitations
+                  <span className="ml-1.5 text-[10px] uppercase tracking-[0.1em] text-ink-soft/60">Soon</span>
                 </Link>
               </li>
               <li>

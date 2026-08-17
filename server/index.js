@@ -47,6 +47,16 @@ import {
   adminGetStats,
   adminGetMe,
 } from '../api/_lib/partnerHandlers.js'
+// GET /api/admin/invites needs its own dev mirror, unlike the admin routes
+// above: it reads the consumer `invites` store, which (like every other
+// consumer-invites route in this file) is the local INVITES_FILE here but
+// Supabase in production — see api/_lib/adminInvites.js and this file's own
+// "Invitation Builder saves" comment above. The partner_invites half reuses
+// the exact same Supabase reads + row formatting either way, via these
+// shared helpers.
+import { requireAdmin } from '../api/_lib/auth.js'
+import { getSupabase } from '../api/_lib/supabase.js'
+import { formatDirectInvite, formatPartnerInvite, sortInvitesByCreatedAtDesc } from '../api/_lib/adminInvites.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -601,6 +611,41 @@ app.get('/api/admin/partners', adminListPartners)
 app.post('/api/admin/partners/approve', adminApprovePartner)
 app.post('/api/admin/partners/reject', adminRejectPartner)
 app.get('/api/admin/stats', adminGetStats)
+
+// Dev mirror of api/_lib/adminInvites.js's adminListInvites() — same merged
+// direct+partner invite list, just sourced from INVITES_FILE instead of the
+// Supabase `invites` table for the direct half.
+app.get('/api/admin/invites', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  try {
+    const directEntries = await readAllInvites()
+    const supabase = getSupabase()
+    const [{ data: partnerRows, error: partnerError }, { data: partnerNameRows, error: partnerNameError }] =
+      await Promise.all([
+        supabase
+          .from('partner_invites')
+          .select('partner_id, slug, couple_names, venue, wedding_date, client_email, created_at')
+          .order('created_at', { ascending: false }),
+        supabase.from('partners').select('id, business_name'),
+      ])
+    if (partnerError) throw partnerError
+    if (partnerNameError) throw partnerNameError
+
+    const partnerNameById = new Map((partnerNameRows || []).map((p) => [p.id, p.business_name]))
+
+    const invites = sortInvitesByCreatedAtDesc([
+      ...directEntries.map(formatDirectInvite),
+      ...(partnerRows || []).map((row) => formatPartnerInvite(row, partnerNameById.get(row.partner_id))),
+    ])
+
+    res.json({ ok: true, invites })
+  } catch (err) {
+    console.error('[admin] failed to list invites:', err)
+    res.status(500).json({ ok: false, error: 'could not load invites' })
+  }
+})
 
 function escapeHtml(str) {
   return String(str)

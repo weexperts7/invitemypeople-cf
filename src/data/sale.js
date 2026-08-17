@@ -1,5 +1,5 @@
 // Time-boxed "Launch Special" sale config — the single source of truth for
-// the ₹2,100 introductory price (10 days from SALE_START). Imported by:
+// the ₹2,100 introductory price (17 days from SALE_START). Imported by:
 //  - the client: SaleBanner.jsx (the homepage announcement bar),
 //    TemplateCard.jsx, InvitationExperience.jsx/SatsangExperience.jsx/
 //    GaneshExperience.jsx's "Create Your Own" CTA, LandingPage.jsx's
@@ -8,7 +8,7 @@
 //  - the server: api/create-order.js and server/index.js's own
 //    /api/create-order route, which re-derive the same window/price here
 //    rather than trusting whatever `amount` a request happens to send — so
-//    the sale price can never be charged outside its own 10-day window (or
+//    the sale price can never be charged outside its own 17-day window (or
 //    undercut by a tampered client), no matter what the banner or checkout
 //    UI currently show.
 //
@@ -26,7 +26,10 @@ export const SALE_PRICE = 2100
 // rescheduling the sale is a one-line change to SALE_START — nothing else
 // below needs updating.
 export const SALE_START = '2026-08-09T00:00:00+05:30'
-const SALE_DURATION_DAYS = 10
+// Was 10 days; extended by 7 more (still counted from the same
+// SALE_START, so the original Aug 9 start date is untouched) — new
+// end-of-sale is Aug 26 instead of Aug 19.
+const SALE_DURATION_DAYS = 17
 export const SALE_END = new Date(
   new Date(SALE_START).getTime() + SALE_DURATION_DAYS * 24 * 60 * 60 * 1000,
 ).toISOString()

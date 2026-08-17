@@ -105,7 +105,7 @@ export const GANESH_TEMPLATES = [
     slug: 'golden-trunk-blessing',
     name: 'Golden Trunk Blessing',
     layout: 'golden-trunk-blessing',
-    tagline: 'Deep vermilion & gold, scratch-to-reveal modak blessing',
+    tagline: 'Deep vermilion & gold, scratch-to-reveal',
     description:
       'Bappa’s photo takes center stage inside a golden symmetric panel, framed by a modak-and-mandala border. A scratch-to-reveal golden modak card uncovers a personal blessing, alongside the full puja muhurat, RSVP and blessing wall.',
     metaDescription:
@@ -181,7 +181,7 @@ export const GANESH_TEMPLATES = [
       'A radiant vermilion-red canvas glowing with gold lotus accents — a warm, aarti-lit welcome to Bappa’s ten-day stay, with a tap-to-reveal curtain, full puja muhurat, RSVP and a blessing wall.',
     metaDescription:
       'Radiant vermilion & gold Ganesh Chaturthi invitation for Bappa’s ten-day stay, with a tap-to-reveal curtain, puja muhurat, RSVP and blessing wall.',
-    tags: ['Vermilion', 'Lotus', 'Radiant'],
+    tags: ['Vermilion', 'Lotus', 'Radiant Design'],
     motif: 'marigold-garland',
     motifAccent: '#b3122a',
     fonts: { serif: '"Rozha One", "Cormorant Garamond", serif' },
@@ -252,7 +252,7 @@ export const GANESH_TEMPLATES = [
       'A serene emerald-green canvas edged in gold, honoring the sacred doob grass offered to Bappa — a peaceful, grounded welcome with a tap-to-reveal curtain, full puja muhurat, RSVP and a blessing wall.',
     metaDescription:
       'Serene emerald-green Ganesh Chaturthi invitation honoring sacred doob grass, with a tap-to-reveal curtain, puja muhurat, RSVP and a blessing wall.',
-    tags: ['Emerald', 'Doob Grass', 'Serene'],
+    tags: ['Emerald', 'Doob Grass', 'Serene Design'],
     motif: 'modak-mandala',
     motifAccent: '#2f6d3f',
     fonts: { serif: '"Marcellus", "Cormorant Garamond", serif' },
@@ -319,7 +319,7 @@ export const GANESH_TEMPLATES = [
     slug: 'royal-durbar-darshan',
     name: 'Royal Durbar Darshan',
     layout: 'royal-durbar-darshan',
-    tagline: 'Regal maroon & gold, a full-bleed photographic durbar',
+    tagline: 'Regal maroon & gold, a full-bleed durbar',
     description:
       'A cinematic, photo-led welcome fit for a king — Bappa’s portrait rises inside a crowned jharokha niche over a full-bleed festival photograph, followed by a scrollable gallery of real festival moments and an unfurling parchment scroll of the puja muhurat, with interactive RSVP and a blessing wall.',
     metaDescription:
@@ -409,7 +409,7 @@ export const GANESH_TEMPLATES = [
     slug: 'divine-threshold',
     name: 'Divine Threshold',
     layout: 'divine-threshold',
-    tagline: 'Temple doors part on tap over a full-bleed photo, a day-by-day festival timeline',
+    tagline: 'Temple doors part on tap over a full-bleed',
     description:
       'A show-stopping, photo-driven welcome — a full-bleed festival photograph stands behind two ornate temple doors that swing open on tap to reveal Bappa, in rich marigold orange, auspicious red and sacred gold. A day-by-day festival timeline lays out Sthapana, daily Aarti and Visarjan & Maha Prasad in one glance, alongside a swipeable photo gallery, interactive RSVP and a blessing wall.',
     metaDescription:

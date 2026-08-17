@@ -7,6 +7,15 @@ import { motion } from 'framer-motion'
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import { OCCASIONS, getBuilderTemplatesForOccasion } from '../../data/builderTemplates'
 
+// Shown in place of a normal click on a `disabled` occasion tab (see
+// OCCASIONS' own comment in builderTemplates.js) — small enough not to
+// unbalance the pill's existing icon+label layout.
+const SOON_BADGE = (
+  <span className="rounded-full bg-ink-soft/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em]">
+    Soon
+  </span>
+)
+
 // How far one arrow-button click scrolls the track — a bit less than two
 // cards' worth (card + gap, see the w-32/gap-3 track below) so the card at
 // the edge is never left half-cut-off between clicks.
@@ -40,15 +49,21 @@ export default function TemplateStyleSelector({
             <button
               key={occasion.id}
               type="button"
-              onClick={() => onOccasionChange(occasion.id)}
+              disabled={occasion.disabled}
+              onClick={() => !occasion.disabled && onOccasionChange(occasion.id)}
+              aria-disabled={occasion.disabled}
+              title={occasion.disabled ? `${occasion.label} — launching soon` : undefined}
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                occasionId === occasion.id
-                  ? 'border-rose bg-rose text-ivory shadow-card'
-                  : 'border-champagne-deep/50 bg-ivory/60 text-ink-soft hover:bg-champagne/40'
+                occasion.disabled
+                  ? 'cursor-not-allowed border-champagne-deep/30 bg-ivory/40 text-ink-soft/50'
+                  : occasionId === occasion.id
+                    ? 'border-rose bg-rose text-ivory shadow-card'
+                    : 'border-champagne-deep/50 bg-ivory/60 text-ink-soft hover:bg-champagne/40'
               }`}
             >
               <occasion.icon className="h-3.5 w-3.5" />
               {occasion.label}
+              {occasion.disabled && SOON_BADGE}
             </button>
           ))}
         </div>

@@ -44,6 +44,14 @@ function fromSatsang(slug) {
 // TemplateStyleSelector plus the copy (field label/placeholder) that varies
 // by occasion, since "who" an invitation names differs (a couple vs. a
 // hosting family).
+//
+// `disabled: true` on Ganesh Chaturthi/Guruji Satsang: not pulled from the
+// builder, just gated off ahead of the ad campaign launch the same way
+// their template cards/nav/footer entries are (see routesSeo.js's
+// COMING_SOON_ROUTES comment for the full picture) — TemplateStyleSelector.jsx
+// greys these tabs out and won't fire onOccasionChange for them, and
+// CreateInvitePage.jsx refuses to honor a `?occasion=` deep link naming
+// either one.
 export const OCCASIONS = [
   {
     id: 'wedding',
@@ -58,6 +66,7 @@ export const OCCASIONS = [
     icon: GaneshIcon,
     namesLabel: 'Host Family Name',
     namesPlaceholder: 'e.g. The Deshmukh Family',
+    disabled: true,
   },
   {
     id: 'guruji-satsang',
@@ -65,6 +74,7 @@ export const OCCASIONS = [
     icon: FoldedHandsIcon,
     namesLabel: 'Host Family Name',
     namesPlaceholder: 'e.g. The Malhotra Family',
+    disabled: true,
   },
 ]
 

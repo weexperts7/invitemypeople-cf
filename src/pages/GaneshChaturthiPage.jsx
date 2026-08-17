@@ -41,10 +41,15 @@ export default function GaneshChaturthiPage() {
             <h1 className="font-serif text-3xl sm:text-5xl leading-[1.1] text-ink mb-4">
               Immersive Ganesh Chaturthi Invitations to Welcome Bappa
             </h1>
+            {/* Not advertised yet ahead of the ad campaign launch (see
+                routesSeo.js's COMING_SOON_ROUTES comment) — this page
+                itself stays reachable for anyone with a direct/bookmarked
+                link, but its copy and cards (GaneshTemplateCard.jsx) no
+                longer claim it's orderable right now. */}
             <p className="mx-auto max-w-xl text-ink-soft">
               {GANESH_TEMPLATES.length} template{GANESH_TEMPLATES.length === 1 ? '' : 's'} —
               a curtain-opening darshan reveal, full puja muhurat, interactive
-              RSVP and a blessing wall, delivered on WhatsApp in 30 minutes.
+              RSVP and a blessing wall. Launching soon.
             </p>
           </div>
         </section>
@@ -59,13 +64,13 @@ export default function GaneshChaturthiPage() {
 
             <div className="mt-12 flex justify-center">
               <a
-                href={getWhatsAppLink("Hi! I'd like to start a Ganesh Chaturthi invitation.")}
+                href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations.")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
               >
                 <Eye className="w-4 h-4" />
-                Not sure which one? Ask us on WhatsApp
+                Notify Me on WhatsApp
               </a>
             </div>
           </div>
@@ -74,20 +79,21 @@ export default function GaneshChaturthiPage() {
         <section className="bg-ink px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-2xl sm:text-3xl text-ivory mb-3">
-              Ready to welcome Bappa home?
+              Launching soon
             </h2>
             <p className="text-white/70 mb-7">
-              Message us your family details and the Sthapana date — we&rsquo;ll
-              send back a live, shareable invitation in 30 minutes.
+              We&rsquo;re putting the finishing touches on Ganesh Chaturthi
+              invitations — message us and we&rsquo;ll let you know the
+              moment they&rsquo;re live.
             </p>
             <a
-              href={getWhatsAppLink("Hi! I'd like to get started with my Ganesh Chaturthi invitation.")}
+              href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations.")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-semibold text-ink shadow-soft transition-transform hover:scale-[1.03]"
             >
               <MessageCircle className="w-4 h-4" />
-              Start on WhatsApp
+              Notify Me on WhatsApp
             </a>
           </div>
         </section>

@@ -162,7 +162,7 @@ const FAQS = [
   {
     question: 'How much does it cost?',
     answer: SALE_LIVE
-      ? `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or just ₹${ACTIVE_PRICE.toLocaleString('en-IN')} during our current 10-day launch sale — a ${SAVINGS_PERCENT}% saving, all-inclusive with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`
+      ? `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or just ₹${ACTIVE_PRICE.toLocaleString('en-IN')} during our current launch sale — a ${SAVINGS_PERCENT}% saving, all-inclusive with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`
       : `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${ACTIVE_PRICE.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`,
   },
   {
@@ -372,8 +372,8 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mx-auto mt-6 max-w-xl text-base sm:text-lg text-ink-soft"
           >
-            Interactive, mobile-first digital invitations for weddings,
-            Satsangs, and every celebration in between — tap-to-open
+            Interactive, mobile-first digital wedding invitations — with
+            Guruji Satsang and Ganesh Chaturthi launching soon — tap-to-open
             envelopes, scratch-to-reveal cards, and built-in RSVP management.
           </motion.p>
 
@@ -390,20 +390,27 @@ export default function LandingPage() {
               <Heart className="w-4 h-4" />
               Wedding Invitations
             </a>
-            <a
-              href="#satsang-templates"
+            {/* Both link to their "launching soon" landing page, not an
+                in-page scroll — the sections below still showcase the real
+                template art, just without a working Preview/Customize path
+                (see SatsangTemplateCard.jsx/GaneshTemplateCard.jsx's own
+                comment for the full picture). */}
+            <Link
+              to="/guruji-satsang-invites"
               className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-ink shadow-soft transition-transform hover:scale-[1.03]"
             >
               <FoldedHandsIcon className="w-4 h-4" />
               Guruji Satsang Invitations
-            </a>
-            <a
-              href="#ganesh-templates"
+              <span className="text-[10px] uppercase tracking-[0.15em] text-ink/60">Soon</span>
+            </Link>
+            <Link
+              to="/ganesh-chaturthi-invites"
               className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3.5 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
             >
               <GaneshIcon className="w-4 h-4" />
               Ganesh Chaturthi Invitations
-            </a>
+              <span className="text-[10px] uppercase tracking-[0.15em] text-ink-soft/60">Soon</span>
+            </Link>
           </motion.div>
 
           <motion.div
@@ -518,20 +525,24 @@ export default function LandingPage() {
           className="text-center mb-10 px-6"
         >
           <div className="mb-4 flex justify-center">
-            <SectionEyebrow icon={FoldedHandsIcon} tone="gold">Guruji Satsang Invitations</SectionEyebrow>
+            <SectionEyebrow icon={FoldedHandsIcon} tone="gold">Guruji Satsang Invitations · Launching Soon</SectionEyebrow>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
             Devotional Templates
           </h2>
           <p className="text-ink-soft">
             {SATSANG_TEMPLATES.length} template{SATSANG_TEMPLATES.length === 1 ? '' : 's'} —
-            Guruji&rsquo;s photo, a live Divine Blessing scratch card and RSVP built in
+            Guruji&rsquo;s photo, a live Divine Blessing scratch card and RSVP built in,
+            launching soon
           </p>
+          {/* Links to the "launching soon" landing page, not the real
+              /guruji-satsangs gallery — not advertised yet ahead of the ad
+              campaign launch (see routesSeo.js's COMING_SOON_ROUTES comment). */}
           <Link
-            to="/guruji-satsangs"
+            to="/guruji-satsang-invites"
             className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
           >
-            View the full Satsang collection
+            See what&rsquo;s launching soon
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
@@ -553,13 +564,13 @@ export default function LandingPage() {
           className="mt-8 flex justify-center px-6"
         >
           <a
-            href={getWhatsAppLink("Hi! I'd like to start a Guruji Satsang invitation.")}
+            href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Guruji Satsang invitations.")}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
           >
             <Eye className="w-4 h-4" />
-            Not sure which one? Ask us on WhatsApp
+            Notify Me on WhatsApp
           </a>
         </motion.div>
       </section>
@@ -576,20 +587,25 @@ export default function LandingPage() {
           className="text-center mb-10 px-6"
         >
           <div className="mb-4 flex justify-center">
-            <SectionEyebrow icon={GaneshIcon} tone="gold">Ganesh Chaturthi Invitations</SectionEyebrow>
+            <SectionEyebrow icon={GaneshIcon} tone="gold">Ganesh Chaturthi Invitations · Launching Soon</SectionEyebrow>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
             Immersive Devotional Templates
           </h2>
           <p className="text-ink-soft">
             {GANESH_TEMPLATES.length} template{GANESH_TEMPLATES.length === 1 ? '' : 's'} —
-            a curtain-opening darshan reveal, full puja muhurat and RSVP built in
+            a curtain-opening darshan reveal, full puja muhurat and RSVP built in,
+            launching soon
           </p>
+          {/* Links to the "launching soon" landing page, not the real
+              /templates/ganesh-chaturthi gallery — not advertised yet ahead
+              of the ad campaign launch (see routesSeo.js's
+              COMING_SOON_ROUTES comment). */}
           <Link
-            to="/templates/ganesh-chaturthi"
+            to="/ganesh-chaturthi-invites"
             className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
           >
-            View the full Ganesh Chaturthi collection
+            See what&rsquo;s launching soon
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
@@ -610,13 +626,13 @@ export default function LandingPage() {
           className="mt-8 flex justify-center px-6"
         >
           <a
-            href={getWhatsAppLink("Hi! I'd like to start a Ganesh Chaturthi invitation.")}
+            href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations.")}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
           >
             <Eye className="w-4 h-4" />
-            Not sure which one? Ask us on WhatsApp
+            Notify Me on WhatsApp
           </a>
         </motion.div>
       </section>
@@ -641,9 +657,9 @@ export default function LandingPage() {
               More Celebrations, Coming Soon
             </h2>
             <p className="text-ink-soft max-w-xl mx-auto">
-              Weddings, Guruji Satsangs and Ganesh Chaturthi are live
-              today — we&rsquo;re building digital invitations for every
-              celebration next.
+              Weddings are live today — Guruji Satsang and Ganesh Chaturthi
+              are launching soon, with digital invitations for every
+              celebration on the way after that.
             </p>
           </motion.div>
 

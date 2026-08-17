@@ -28,51 +28,89 @@
 export const SITE_URL = 'https://www.invitemypeople.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
-// "Coming soon" celebration categories — no live templates yet, but each
-// still gets a real, crawlable, linkable URL (see occasionsData.js, which
-// pairs this list with an icon + tagline for on-page display).
+// "Coming soon" celebration categories — each still gets a real, crawlable,
+// linkable URL (see occasionsData.js, which pairs this list with an icon +
+// tagline for on-page display) and renders through the shared
+// ComingSoonPage.jsx.
+//
+// The first two entries are a different kind of "coming soon" than the
+// rest: Ganesh Chaturthi and Guruji Satsang templates are fully built and
+// already live at their own real routes (/templates/ganesh-chaturthi/*,
+// /satsang/:slug — GaneshChaturthiPage.jsx, GurujiSatsangsPage.jsx) —
+// they're just deliberately not being *advertised* yet ahead of the ad
+// campaign launch (see GaneshTemplateCard.jsx/SatsangTemplateCard.jsx,
+// SiteHeader.jsx, SiteFooter.jsx, LandingPage.jsx, all pointed at these two
+// slugs instead of the live category pages). Deliberately distinct slugs
+// from those real routes ('-invites' suffix, vs. the live pages' bare
+// '/guruji-satsangs' and '/templates/ganesh-chaturthi') so this list's
+// dynamic route in App.jsx can never collide with them — the real pages
+// stay directly reachable for anyone with an existing/bookmarked link,
+// this is purely about what visitors get routed to when they click a card
+// or nav link right now.
 export const COMING_SOON_ROUTES = [
+  {
+    slug: 'ganesh-chaturthi-invites',
+    label: 'Ganesh Chaturthi',
+    title: 'Ganesh Chaturthi Invites (Launching Soon) | InviteMyPeople',
+    description:
+      'Digital Ganesh Chaturthi invitations are launching soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
+    // On-page paragraph for ComingSoonPage.jsx — distinct from `description`
+    // (meta-tag copy) since, unlike the other six entries below, this one
+    // isn't "still being built," it's finished and deliberately not
+    // advertised yet.
+    blurb:
+      'Our Ganesh Chaturthi templates — a curtain-opening darshan reveal, full puja muhurat and RSVP built in — are fully designed and ready. We’re opening them up very soon as part of our upcoming launch.',
+  },
+  {
+    slug: 'guruji-satsang-invites',
+    label: 'Guruji Satsang',
+    title: 'Guruji Satsang Invites (Launching Soon) | InviteMyPeople',
+    description:
+      'Digital Guruji Satsang invitations are launching soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
+    blurb:
+      'Our Guruji Satsang templates — Guruji’s photo, a live Divine Blessing scratch card and RSVP built in — are fully designed and ready. We’re opening them up very soon as part of our upcoming launch.',
+  },
   {
     slug: 'birthdays',
     label: 'Birthday Parties',
     title: 'Birthday Party Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital birthday party invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings & Satsangs.',
+      'Digital birthday party invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
   },
   {
     slug: 'engagements',
     label: 'Engagements',
     title: 'Digital Engagement Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital engagement invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings & Satsangs.',
+      'Digital engagement invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
   },
   {
     slug: 'baby-showers',
     label: 'Baby Showers',
     title: 'Baby Shower Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital baby shower invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings & Satsangs.',
+      'Digital baby shower invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
   },
   {
     slug: 'housewarmings',
     label: 'Housewarmings',
     title: 'Housewarming Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital housewarming (Griha Pravesh) invites are coming soon — the same WhatsApp delivery and RSVP tracking already live for weddings & Satsangs.',
+      'Digital housewarming (Griha Pravesh) invites are coming soon — the same WhatsApp delivery and RSVP tracking already live for weddings.',
   },
   {
     slug: 'corporate-events',
     label: 'Corporate Events',
     title: 'Corporate Event Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital corporate event invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings & Satsangs.',
+      'Digital corporate event invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
   },
   {
     slug: 'anniversaries',
     label: 'Anniversaries',
     title: 'Anniversary Invites (Coming Soon) | InviteMyPeople',
     description:
-      'Digital anniversary invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings & Satsangs.',
+      'Digital anniversary invitations are coming soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
   },
 ]
 

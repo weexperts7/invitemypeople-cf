@@ -1,8 +1,8 @@
 // Razorpay Standard Checkout — see CreateInvitePage.jsx for the caller.
-// Deliberately isolated behind one call site (amount, summary, onSuccess,
-// onClose) so this is the only file that knows about order creation,
-// Checkout.js, or signature verification; nothing that calls it needs to
-// change if the payment provider ever does.
+// Deliberately isolated behind one call site (amount, templateId, summary,
+// onSuccess, onClose) so this is the only file that knows about order
+// creation, Checkout.js, or signature verification; nothing that calls it
+// needs to change if the payment provider ever does.
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { AlertCircle, CheckCircle2, Loader2, Lock, ShieldCheck, X } from 'lucide-react'
@@ -27,7 +27,7 @@ async function verifyPayment(response) {
   return result.paymentId
 }
 
-export default function PaymentModal({ open, amount, originalAmount, summary, onSuccess, onClose }) {
+export default function PaymentModal({ open, amount, originalAmount, templateId, summary, onSuccess, onClose }) {
   const reduceMotion = useReducedMotion()
   const [stage, setStage] = useState('confirm') // confirm | processing | verifying | success | error
   const [errorMessage, setErrorMessage] = useState(null)
@@ -81,6 +81,11 @@ export default function PaymentModal({ open, amount, originalAmount, summary, on
           amount: Math.round(amount * 100), // rupees -> paise
           currency: 'INR',
           receipt: `invite_${Date.now()}`,
+          // Lets the server re-derive THIS template's real price (a Super
+          // Admin override, or the global default — see
+          // api/_lib/templatePrices.js) instead of just checking `amount`
+          // against one global price.
+          templateId,
         }),
       })
       const order = await orderRes.json().catch(() => null)

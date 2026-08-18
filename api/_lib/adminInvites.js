@@ -41,6 +41,7 @@ export function formatDirectInvite(row) {
       : null,
     hostName: row.hostName ?? row.host_name,
     hostEmail: row.hostEmail ?? row.host_email,
+    hostPhone: row.hostPhone ?? row.host_phone,
     partnerId: null,
     businessName: null,
   }
@@ -60,6 +61,7 @@ export function formatPartnerInvite(row, businessName) {
     dashboardLink: null,
     hostName: null,
     hostEmail: row.clientEmail ?? row.client_email,
+    hostPhone: row.clientPhone ?? row.client_phone,
     partnerId: row.partnerId ?? row.partner_id,
     businessName: businessName || 'Unknown partner',
   }
@@ -87,11 +89,11 @@ export async function adminListInvites(req, res) {
     ] = await Promise.all([
       supabase
         .from('invites')
-        .select('slug, names, venue, date, event_date, host_name, host_email, host_token, created_at')
+        .select('slug, names, venue, date, event_date, host_name, host_email, host_phone, host_token, created_at')
         .order('created_at', { ascending: false }),
       supabase
         .from('partner_invites')
-        .select('partner_id, slug, couple_names, venue, wedding_date, client_email, created_at')
+        .select('partner_id, slug, couple_names, venue, wedding_date, client_email, client_phone, created_at')
         .order('created_at', { ascending: false }),
       supabase.from('partners').select('id, business_name'),
     ])

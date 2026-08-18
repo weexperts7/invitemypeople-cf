@@ -5,6 +5,8 @@ import { getSatsangLayoutComponent } from './satsang/layoutRegistry'
 import LegacySatsangExperience from './satsang/LegacySatsangExperience'
 import { buildCreateLink } from '../utils/createLink'
 import { getActivePrice } from '../data/sale'
+import { findBuilderTemplateBySource } from '../data/builderTemplates'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
 // Dispatches a Satsang template to its bespoke experience component (see
 // satsang/layoutRegistry.js) by the template's optional `layout` field,
@@ -13,6 +15,9 @@ import { getActivePrice } from '../data/sale'
 // interactive presentation — this file just decides which one to render.
 export default function SatsangExperience({ template }) {
   const navigate = useNavigate()
+  // Called unconditionally, ABOVE the `!template` early return below, so
+  // this obeys the Rules of Hooks regardless of which branch renders.
+  const priceOverrides = useTemplatePriceOverrides()
 
   if (!template) {
     return (
@@ -31,6 +36,11 @@ export default function SatsangExperience({ template }) {
   }
 
   const Layout = getSatsangLayoutComponent(template.layout) ?? LegacySatsangExperience
+  // Super Admin Template Price Management — see InvitationExperience.jsx's
+  // identical comment. template.slug is the SATSANG_TEMPLATES catalog key,
+  // not the builder/pricing key.
+  const builderTemplate = findBuilderTemplateBySource('guruji-satsang', template.slug)
+  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
 
   return (
     <>
@@ -69,7 +79,7 @@ export default function SatsangExperience({ template }) {
           className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
         >
           <Heart className="w-4 h-4" />
-          Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
+          Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
         </Link>
       </motion.div>
 

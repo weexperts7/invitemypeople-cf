@@ -3,14 +3,28 @@ import { Link } from 'react-router-dom'
 import { Eye, Wand2, BadgeCheck } from 'lucide-react'
 import TemplateShowcase from './TemplateShowcase'
 import { PRICING } from '../data/templatesData'
-import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
+import { getActivePrice, isSaleActive } from '../data/sale'
+import { findBuilderTemplateBySource } from '../data/builderTemplates'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { buildCreateLink } from '../utils/createLink'
 
 export default function TemplateCard({ template }) {
   const reduceMotion = useReducedMotion()
-  const activePrice = getActivePrice()
-  const savingsPercent = getSavingsPercent()
+
+  // template.id here is the TEMPLATES catalog id (e.g. "rajasthani-royal"),
+  // not the builder/pricing key ("wedding-rajasthani-royal") — see
+  // findBuilderTemplateBySource()'s own comment. Resolve it once so this
+  // card can look itself up in the Super Admin price overrides the exact
+  // same way checkout does.
+  const builderTemplate = findBuilderTemplateBySource('wedding', template.id)
+  const overrides = useTemplatePriceOverrides()
+  const activePrice = (builderTemplate && overrides[builderTemplate.id]) ?? getActivePrice()
   const saleLive = isSaleActive()
+  // Only meaningful as a "launch sale" badge when this template is actually
+  // cheaper than the standing price — see CreateInvitePage.jsx's identical
+  // guard for why an admin override can't render as a negative-percent sale.
+  const savingsPercent =
+    activePrice < PRICING.price ? Math.round(((PRICING.price - activePrice) / PRICING.price) * 100) : 0
 
   return (
     <motion.article
@@ -51,12 +65,20 @@ export default function TemplateCard({ template }) {
           <span className="font-serif text-lg text-rose">
             &#8377;{activePrice.toLocaleString('en-IN')}
           </span>
-          <span className="text-sm text-ink-soft/70 line-through">
-            &#8377;{PRICING.price.toLocaleString('en-IN')}
-          </span>
-          <span className="rounded-full bg-blush px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-rose">
-            {saleLive ? `Save ${savingsPercent}%` : 'Shagun Price'}
-          </span>
+          {/* An admin override can price a template at or above the
+              standing price — e.g. a premium template — in which case a
+              strikethrough/"Save X%" badge would be nonsensical, so both
+              only render when this template is genuinely cheaper. */}
+          {activePrice < PRICING.price && (
+            <>
+              <span className="text-sm text-ink-soft/70 line-through">
+                &#8377;{PRICING.price.toLocaleString('en-IN')}
+              </span>
+              <span className="rounded-full bg-blush px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-rose">
+                {saleLive ? `Save ${savingsPercent}%` : 'Shagun Price'}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="mt-auto flex items-center gap-2 pt-2">

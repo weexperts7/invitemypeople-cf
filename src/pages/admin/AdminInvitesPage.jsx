@@ -127,7 +127,7 @@ export default function AdminInvitesPage() {
     const q = query.trim().toLowerCase()
     if (!q) return bySource
     return bySource.filter((inv) =>
-      [inv.names, inv.venue, inv.businessName, inv.hostEmail, inv.slug].some((field) =>
+      [inv.names, inv.venue, inv.businessName, inv.hostEmail, inv.hostPhone, inv.slug].some((field) =>
         String(field ?? '').toLowerCase().includes(q),
       ),
     )
@@ -217,6 +217,7 @@ export default function AdminInvitesPage() {
                     <p className="mt-0.5 truncate text-xs text-ink-soft/70">
                       {inv.venue}
                       {inv.hostEmail ? ` · ${inv.hostEmail}` : ''}
+                      {inv.hostPhone ? ` · ${inv.hostPhone}` : ''}
                     </p>
                     <div className="mt-3 space-y-1.5">
                       <LinkRow label="Member" url={inv.memberLink} />

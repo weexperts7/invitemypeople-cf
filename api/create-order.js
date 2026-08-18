@@ -4,7 +4,7 @@
 // logic and src/components/builder/PaymentModal.jsx for the Checkout.js
 // widget that opens against the order this returns.
 import { createOrder, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
-import { getActivePrice } from '../src/data/sale.js'
+import { getEffectivePrice } from './_lib/templatePrices.js'
 import { clean } from './_lib/invites.js'
 
 export default async function handler(req, res) {
@@ -21,12 +21,14 @@ export default async function handler(req, res) {
         .status(400)
         .json({ ok: false, error: `amount must be at least ${MIN_AMOUNT_PAISE} paise` })
     }
-    // Re-derives today's real package price on the server, in paise, rather
-    // than trusting whatever amount the client happens to send — so a
-    // tampered client can never buy an invite below the price actually in
-    // effect right now, and the launch-sale rate can't be replayed once its
-    // 17-day window (see ../src/data/sale.js) has closed.
-    const expectedAmount = Math.round(getActivePrice() * 100)
+    // Re-derives today's real price for THIS template on the server, in
+    // paise, rather than trusting whatever amount the client happens to
+    // send — so a tampered client can never buy an invite below the price
+    // actually in effect right now (a Super Admin's per-template override,
+    // see api/_lib/templatePrices.js, or the launch-sale rate before its
+    // 17-day window — ../src/data/sale.js — closes).
+    const templateKey = clean(body.templateId, 80)
+    const expectedAmount = Math.round((await getEffectivePrice(templateKey)) * 100)
     if (amount !== expectedAmount) {
       return res.status(400).json({ ok: false, error: 'amount does not match the current price' })
     }

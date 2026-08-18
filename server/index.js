@@ -12,7 +12,6 @@ import { getTemplateById } from '../src/data/templatesData.js'
 import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
-import { getActivePrice } from '../src/data/sale.js'
 import {
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
@@ -57,6 +56,16 @@ import {
 import { requireAdmin } from '../api/_lib/auth.js'
 import { getSupabase } from '../api/_lib/supabase.js'
 import { formatDirectInvite, formatPartnerInvite, sortInvitesByCreatedAtDesc } from '../api/_lib/adminInvites.js'
+// Super Admin Template Price Management — same shared handlers (no dev/prod
+// divergence, same reasoning as the B2B Partner Portal import above) as the
+// Vercel Serverless Functions under api/template-prices.js and
+// api/admin/template-prices/*. See api/_lib/templatePrices.js.
+import {
+  getEffectivePrice,
+  listTemplatePrices,
+  adminUpsertTemplatePrice,
+  adminResetTemplatePrice,
+} from '../api/_lib/templatePrices.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -325,11 +334,13 @@ app.post('/api/invites', async (req, res) => {
     const venue = clean(body.venue, 200)
     const hostName = clean(body.hostName, 120)
     const hostEmail = clean(body.hostEmail, 200)
+    const hostPhone = clean(body.hostPhone, 30)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
+    if (!hostPhone) return res.status(400).json({ ok: false, error: 'hostPhone is required' })
 
     const invite = await enqueueInvites(async () => {
       const entries = await readAllInvites()
@@ -380,6 +391,7 @@ app.post('/api/invites', async (req, res) => {
         brideParents: clean(body.brideParents, 200),
         hostName,
         hostEmail,
+        hostPhone,
         hostToken: randomBytes(24).toString('base64url'),
         reminderSentAt: null,
         createdAt: new Date().toISOString(),
@@ -415,14 +427,22 @@ app.post('/api/invites', async (req, res) => {
 })
 
 /** Powers the live /i/:slug page — loads back exactly what was saved above,
- * minus the host-only fields (hostToken/hostEmail/hostName never leave this
- * route — same PII boundary rowToInvite() enforces in production). */
+ * minus the host-only fields (hostToken/hostEmail/hostName/hostPhone never
+ * leave this route — same PII boundary rowToInvite() enforces in
+ * production). */
 app.get('/api/invites/:slug', async (req, res) => {
   try {
     const entries = await readAllInvites()
     const invite = entries.find((e) => e.slug === req.params.slug)
     if (!invite) return res.status(404).json({ ok: false, error: 'invitation not found' })
-    const { hostToken: _hostToken, hostEmail: _hostEmail, hostName: _hostName, reminderSentAt: _reminderSentAt, ...publicInvite } = invite
+    const {
+      hostToken: _hostToken,
+      hostEmail: _hostEmail,
+      hostName: _hostName,
+      hostPhone: _hostPhone,
+      reminderSentAt: _reminderSentAt,
+      ...publicInvite
+    } = invite
     res.json({ ok: true, invite: publicInvite })
   } catch (err) {
     console.error('[invites] failed to read:', err)
@@ -471,6 +491,7 @@ app.get('/api/invites/:slug/host', async (req, res) => {
         venue: invite.venue,
         hostName: invite.hostName,
         hostEmail: invite.hostEmail,
+        hostPhone: invite.hostPhone,
         createdAt: invite.createdAt,
       },
       rsvps,
@@ -538,9 +559,10 @@ app.post('/api/create-order', async (req, res) => {
         .json({ ok: false, error: `amount must be at least ${MIN_AMOUNT_PAISE} paise` })
     }
     // Mirrors api/create-order.js's own check exactly — see its comment for
-    // why this re-derives the price server-side instead of trusting the
-    // client's amount.
-    const expectedAmount = Math.round(getActivePrice() * 100)
+    // why this re-derives the per-template price server-side instead of
+    // trusting the client's amount.
+    const templateKey = clean(body.templateId, 80)
+    const expectedAmount = Math.round((await getEffectivePrice(templateKey)) * 100)
     if (amount !== expectedAmount) {
       return res.status(400).json({ ok: false, error: 'amount does not match the current price' })
     }
@@ -612,6 +634,13 @@ app.post('/api/admin/partners/approve', adminApprovePartner)
 app.post('/api/admin/partners/reject', adminRejectPartner)
 app.get('/api/admin/stats', adminGetStats)
 
+// Super Admin Template Price Management — see api/_lib/templatePrices.js.
+// GET is public (also used by the checkout flow, not just the admin page —
+// see CreateInvitePage.jsx), the two POSTs are admin only.
+app.get('/api/template-prices', listTemplatePrices)
+app.post('/api/admin/template-prices', adminUpsertTemplatePrice)
+app.post('/api/admin/template-prices/reset', adminResetTemplatePrice)
+
 // Dev mirror of api/_lib/adminInvites.js's adminListInvites() — same merged
 // direct+partner invite list, just sourced from INVITES_FILE instead of the
 // Supabase `invites` table for the direct half.
@@ -626,7 +655,7 @@ app.get('/api/admin/invites', async (req, res) => {
       await Promise.all([
         supabase
           .from('partner_invites')
-          .select('partner_id, slug, couple_names, venue, wedding_date, client_email, created_at')
+          .select('partner_id, slug, couple_names, venue, wedding_date, client_email, client_phone, created_at')
           .order('created_at', { ascending: false }),
         supabase.from('partners').select('id, business_name'),
       ])

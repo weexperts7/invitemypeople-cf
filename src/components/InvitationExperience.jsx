@@ -14,6 +14,8 @@ import CulturalMotif from './CulturalMotif'
 import AudioToggle from './AudioToggle'
 import { FrameCorners } from './TemplateFrame'
 import { getActivePrice } from '../data/sale'
+import { findBuilderTemplateBySource } from '../data/builderTemplates'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { coupleNameTier } from '../utils/coupleNameFit'
 import { slugify } from '../utils/slugify'
 import { buildCreateLink } from '../utils/createLink'
@@ -82,6 +84,13 @@ export default function InvitationExperience({
   // fog and hurts text contrast over a dark palette (see .bg-petals-royal
   // in index.css). Every other template keeps using .bg-petals unchanged.
   const isPhulkari = template?.motif === 'phulkari'
+  // Super Admin Template Price Management — the "Create Your Own" CTA
+  // below shows THIS template's real price, not a global one. template.id
+  // is the TEMPLATES catalog id (e.g. "rajasthani-royal"), not the
+  // builder/pricing key — see findBuilderTemplateBySource()'s own comment.
+  const builderTemplate = findBuilderTemplateBySource('wedding', template?.id)
+  const priceOverrides = useTemplatePriceOverrides()
+  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
   // Host-selected background music — see builder/SongSearchPicker.jsx
   // (search + preview) and buildWeddingExperienceTemplate.js (where a real
   // invite's confirmed Spotify/iTunes track becomes this `bgMusic` shape).
@@ -230,7 +239,7 @@ export default function InvitationExperience({
                   className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
                 >
                   <Heart className="w-4 h-4" />
-                  Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
+                  Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
                 </Link>
               </motion.div>
             </div>

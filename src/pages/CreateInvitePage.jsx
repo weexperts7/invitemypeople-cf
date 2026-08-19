@@ -327,6 +327,9 @@ export default function CreateInvitePage() {
         setCreatedInvite(invite)
         setPaymentOpen(false)
         setSaving(false)
+        // The success panel replaces a long scrolled-down form; without
+        // this the user lands mid-page instead of at the top of the panel.
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       } catch (err) {
         console.error('[Invitation Builder] failed to save invite after payment:', err)
         setSaveError(

@@ -40,6 +40,9 @@ import {
   verifyPurchase,
   partnerInvitesIndex,
   getPartnerInviteBySlug,
+  submitPartnerRsvp,
+  getPartnerWishes,
+  getPartnerInviteHostDashboard,
   adminListPartners,
   adminApprovePartner,
   adminRejectPartner,
@@ -628,6 +631,12 @@ app.post('/api/partners/invites', partnerInvitesIndex)
 // handler is written against req.query?.slug for the Vercel [slug].js
 // counterpart.
 app.get('/api/partners/invites/:slug', getPartnerInviteBySlug)
+// Guest RSVP + Wishes Wall + private Host Dashboard for a partner-created
+// invite — partner-side twins of the consumer /api/rsvps, /api/wishes,
+// /api/invites/:slug/host routes above (see api/_lib/partnerHandlers.js).
+app.post('/api/partners/rsvps', submitPartnerRsvp)
+app.get('/api/partners/wishes', getPartnerWishes)
+app.get('/api/partners/invites/:slug/host', getPartnerInviteHostDashboard)
 app.get('/api/admin/me', adminGetMe)
 app.get('/api/admin/partners', adminListPartners)
 app.post('/api/admin/partners/approve', adminApprovePartner)

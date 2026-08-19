@@ -6,9 +6,16 @@ import { AlertCircle, Heart, Loader2 } from 'lucide-react'
 // the flat-file counterpart in local dev (server/index.js), same response
 // shape either way. See RSVPS-AND-REMINDERS-SETUP.md; this replaced the old
 // Google Apps Script / VITE_RSVP_ENDPOINT dependency.
+//
+// `endpoint` is an optional override — the B2B Partner Portal's /p/:slug
+// viewer (see PartnerInviteViewerPage.jsx) passes '/api/partners/wishes' so
+// it reads the `partner_rsvps` table instead. Same pattern RsvpForm.jsx's
+// `endpoint` prop uses.
+const DEFAULT_ENDPOINT = '/api/wishes'
 
 export default function WishesWall({
   slug,
+  endpoint = DEFAULT_ENDPOINT,
   heading = 'Wishes Wall',
   subheading = 'Blessings from friends and family',
   sectionClassName = 'px-6 py-20',
@@ -25,7 +32,7 @@ export default function WishesWall({
     let cancelled = false
     setStatus('loading')
 
-    const url = `/api/wishes?slug=${encodeURIComponent(slug)}`
+    const url = `${endpoint}?slug=${encodeURIComponent(slug)}`
 
     fetch(url)
       .then((res) => res.json())
@@ -45,7 +52,7 @@ export default function WishesWall({
     return () => {
       cancelled = true
     }
-  }, [slug])
+  }, [slug, endpoint])
 
   // Nothing fetched yet, or there are no wishes to show — render nothing
   // rather than an empty section.

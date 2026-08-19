@@ -62,15 +62,22 @@ export default function InvitationExperience({
   onBack,
   isPreview = false,
   invitationSlug: slugOverride,
-  // False for the B2B Partner Portal's white-label /p/:slug viewer (see
-  // PartnerInviteViewerPage.jsx) — that flow deliberately doesn't have
-  // guest RSVP/Wishes Wall yet (partner invites live in their own
-  // partner_invites table, never the consumer rsvps/invites tables an RSVP
-  // submission here would need to write against). Every other caller
-  // (GeneratedInvitePage.jsx, every pre-built template route,
-  // LiveDraftPreviewPage.jsx for a consumer's own in-progress builder
-  // preview) keeps the default and renders it exactly as before.
+  // False only for callers with nowhere for an RSVP to land at all (e.g. a
+  // draft/demo preview with no persisted invite row). Every real invite —
+  // consumer or partner — collects guest RSVPs; what differs is *where*
+  // (see rsvpEndpoint/wishesEndpoint below).
   showRsvp = true,
+  // Optional overrides — the B2B Partner Portal's white-label /p/:slug
+  // viewer (see PartnerInviteViewerPage.jsx) passes '/api/partners/rsvps'
+  // and '/api/partners/wishes' so guest RSVPs on a partner-created invite
+  // land in that table's own `partner_rsvps`, never the consumer
+  // `rsvps` table (partner invites live entirely in their own
+  // partner_invites/partner_rsvps tables — see B2B-PARTNER-PORTAL-SETUP.md).
+  // Every other caller (GeneratedInvitePage.jsx, every pre-built template
+  // route, LiveDraftPreviewPage.jsx) omits these and keeps RsvpForm.jsx/
+  // WishesWall.jsx's own '/api/rsvps' / '/api/wishes' defaults.
+  rsvpEndpoint,
+  wishesEndpoint,
 }) {
   // Every invitation is identified by a slug — by default one derived from
   // the couple's names (e.g. "Meenal & Avinash" -> "meenal-avinash"), which
@@ -313,8 +320,8 @@ export default function InvitationExperience({
               <PhotoGallery culture={template?.weddingType} photos={template?.photos} />
               {showRsvp && (
                 <>
-                  <RsvpForm palette={template?.palette} slug={invitationSlug} />
-                  <WishesWall slug={invitationSlug} />
+                  <RsvpForm palette={template?.palette} slug={invitationSlug} endpoint={rsvpEndpoint} />
+                  <WishesWall slug={invitationSlug} endpoint={wishesEndpoint} />
                 </>
               )}
               <motion.footer

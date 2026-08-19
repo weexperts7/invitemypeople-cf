@@ -52,9 +52,14 @@ const EMPTY_FORM = {
 }
 
 // Shown once, right after a successful generation — the /p/:slug link this
-// partner hands off to their client. No host-dashboard link here: unlike a
-// consumer's own /create submission, a partner invite has no RSVP/host
-// dashboard concept yet (see InvitationExperience.jsx's showRsvp prop).
+// partner hands off to their client. Deliberately NOT the host-dashboard
+// link: that's the client's own private view of their live RSVPs (guest
+// emails, attendance, messages), emailed directly to the client alone (see
+// buildPartnerInviteReadyEmail()) — the partner never gets standing access
+// to it through the Portal UI or API response (see createClientInvite() in
+// api/_lib/partnerHandlers.js, which strips hostToken before this page ever
+// sees it). Mirrors CreateInvitePage.jsx's own SuccessPanel for the
+// consumer flow, minus that host-dashboard block.
 function SuccessPanel({ invite, onCopy, copiedLink, onCreateAnother }) {
   const inviteUrl = `${SITE_URL}/p/${invite.slug}`
 
@@ -66,7 +71,8 @@ function SuccessPanel({ invite, onCopy, copiedLink, onCreateAnother }) {
       <h2 className="font-serif text-2xl sm:text-3xl text-ink">Your Client&rsquo;s Invitation Is Live!</h2>
       <p className="mt-2 text-ink-soft">
         Share this link with your client — it&rsquo;s exactly what their
-        guests will see.
+        guests will see. We&rsquo;ve also emailed your client this link,
+        plus their own private dashboard link for tracking RSVPs.
       </p>
 
       <div className="mt-6 rounded-xl border border-champagne-deep/50 bg-ivory/80 p-4 text-left">

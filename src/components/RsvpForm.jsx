@@ -15,9 +15,15 @@ import Celebration from './Celebration'
 // RSVPS-AND-REMINDERS-SETUP.md. Same-origin, so a plain JSON POST works with
 // no CORS setup, unlike the old external Google Apps Script endpoint this
 // replaced.
-const ENDPOINT = '/api/rsvps'
+//
+// `endpoint` is an optional override — the B2B Partner Portal's /p/:slug
+// viewer (see PartnerInviteViewerPage.jsx) passes '/api/partners/rsvps' so
+// guest RSVPs on a partner-created invite land in that table's own
+// `partner_rsvps`, never the consumer `rsvps` table. Same pattern
+// PhotoUploader.jsx's `endpoint` prop already established.
+const DEFAULT_ENDPOINT = '/api/rsvps'
 
-export default function RsvpForm({ palette, slug }) {
+export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -44,7 +50,7 @@ export default function RsvpForm({ palette, slug }) {
 
     try {
       const isAttending = form.attending === 'joyfully'
-      const response = await fetch(ENDPOINT, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,7 +79,7 @@ export default function RsvpForm({ palette, slug }) {
       if (form.attending === 'joyfully') setCelebrate(true)
     } catch (err) {
       console.error(
-        `[RSVP] submission to ${ENDPOINT} failed — is the RSVP API running? (npm run dev starts it)`,
+        `[RSVP] submission to ${endpoint} failed — is the RSVP API running? (npm run dev starts it)`,
         err,
       )
       setStatus('error')

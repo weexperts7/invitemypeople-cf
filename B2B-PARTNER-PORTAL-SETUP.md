@@ -167,14 +167,40 @@ checkout flows, or database structures. Concretely:
   I/O), and small utilities (`slugify.js`, `formatInviteDateTime.js`,
   `cleanEvents.js`, `photoUpload.js`'s constants).
 
-## Not yet built
+## Guest RSVP / Wishes Wall / Host Dashboard (added later)
 
-Guest RSVP / a Wishes Wall for partner-created invites — the spec asked
-for a shareable invite link and a white-label viewer, not guest RSVPs, so
-`/p/:slug` renders `InvitationExperience` with `showRsvp={false}` for now
-(everything else — envelope reveal, timeline, gallery, background music —
-is the real thing). Adding RSVPs
-later would mean either a fully separate `partner_invite_rsvps` table (to
-keep the same isolation guarantee above) or a deliberate decision to let
-partner invites share the consumer `rsvps` table — worth a explicit call
-before building it, not an assumption.
+Originally not built — `/p/:slug` rendered `InvitationExperience` with
+`showRsvp={false}`, and the client's "invitation ready" email had no
+host-dashboard link (see git history on this section for the old wording).
+
+Added via `supabase/migrations/0011_partner_invite_host_dashboard.sql` as a
+full partner-side TWIN of the consumer feature, keeping the isolation
+guarantee above intact rather than sharing the consumer `rsvps` table:
+
+- `partner_invites.host_token` — generated once at creation
+  (`createClientInvite()`), same access-control model as `invites.host_token`.
+- `partner_rsvps` — structural twin of `rsvps`, FK'd to `partner_invites`
+  (uuid) instead of `invites` (bigint).
+- `POST /api/partners/rsvps`, `GET /api/partners/wishes`,
+  `GET /api/partners/invites/:slug/host` — partner-side twins of
+  `/api/rsvps`, `/api/wishes`, `/api/invites/:slug/host`. All three live in
+  `api/_lib/partnerHandlers.js` (helpers in the new `api/_lib/partnerRsvps.js`)
+  and are registered in both the Vercel functions and `server/index.js`,
+  same as every other partner route.
+- `/p/:slug` now renders `InvitationExperience` with `rsvpEndpoint`/
+  `wishesEndpoint` overrides pointed at the routes above instead of
+  `showRsvp={false}` — see `InvitationExperience.jsx`'s own comment on
+  those props (`RsvpForm.jsx`/`WishesWall.jsx` both gained the same
+  `endpoint` override `PhotoUploader.jsx` already had).
+- `/p/:slug/host/:hostToken` (`PartnerHostDashboardPage.jsx`) — a
+  near-copy of `HostDashboardPage.jsx`, gated by `host_token` the same way.
+- `buildPartnerInviteReadyEmail()` (`src/utils/email.js`) now includes the
+  host-dashboard link, mirroring `buildOrderConfirmationEmail()` — the
+  CLIENT's only delivery path for it. Deliberately NOT also surfaced in the
+  Partner Portal UI: the dashboard is the client's private view of their own
+  guest list (guest emails, attendance, messages), not something the
+  partner gets standing access to. `createClientInvite()`
+  (`api/_lib/partnerHandlers.js`) strips `hostToken` from the response
+  before it reaches the partner's browser — the partner-facing
+  `SuccessPanel` (`PartnerCreateInvitePage.jsx`) only ever shows the
+  shareable `/p/:slug` link.

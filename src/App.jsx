@@ -36,6 +36,7 @@ import AdminInvitesPage from './pages/admin/AdminInvitesPage'
 import AdminPricingPage from './pages/admin/AdminPricingPage'
 import { RequireAdminPortal } from './components/admin/AdminShell'
 import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
+import PartnerHostDashboardPage from './pages/partners/PartnerHostDashboardPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
@@ -157,6 +158,7 @@ function App() {
             from the B2C /i/:slug viewer above (see
             PartnerInviteViewerPage.jsx). */}
         <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
+        <Route path="/p/:slug/host/:hostToken" element={<PartnerHostDashboardPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/refund" element={<RefundPolicyPage />} />

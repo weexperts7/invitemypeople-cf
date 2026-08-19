@@ -4,7 +4,7 @@
 // `partner_credit_transactions` tables (see
 // supabase/migrations/0001_b2b_partner_portal.sql). None of these touch
 // the existing `invites`/`rsvps` tables in any way.
-import { randomBytes } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { getSupabase } from './supabase.js'
 
 export function clean(value, max) {
@@ -15,6 +15,31 @@ export function clean(value, max) {
 
 export function randomSlugSuffix() {
   return randomBytes(4).toString('hex')
+}
+
+// A private, unguessable per-invite token — the only thing standing between
+// "anyone with the shareable /p/:slug link" and "the partner's client, who
+// can see every guest's email and RSVP details on
+// /p/:slug/host/:hostToken". Deliberately a duplicate of
+// api/_lib/invites.js's identical generateHostToken(), not an import from
+// it — see this file's own header and partnerHandlers.js's "CRITICAL, by
+// design" isolation note for why the partner code path never imports from
+// the consumer one.
+export function generateHostToken() {
+  return randomBytes(24).toString('base64url')
+}
+
+// Constant-time comparison for the host-token check
+// (getPartnerInviteHostDashboard() in partnerHandlers.js) — a plain `===`
+// would let response timing leak how many leading characters of a guessed
+// token were correct. Mismatched lengths are handled explicitly since
+// timingSafeEqual throws instead of returning false for those. Same
+// duplication rationale as generateHostToken() above.
+export function tokensMatch(a, b) {
+  const bufA = Buffer.from(String(a ?? ''))
+  const bufB = Buffer.from(String(b ?? ''))
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
 }
 
 // `partners` uses snake_case columns like every other table in this app;
@@ -160,6 +185,7 @@ export async function spendCreditForInvite(partnerId, {
   groomParents,
   brideName,
   brideParents,
+  hostToken,
 }) {
   const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
     p_partner_id: partnerId,
@@ -184,7 +210,14 @@ export async function spendCreditForInvite(partnerId, {
     p_groom_parents: groomParents || null,
     p_bride_name: brideName || null,
     p_bride_parents: brideParents || null,
+    p_host_token: hostToken,
   })
   if (error) throw error
-  return rowToPartnerInvite(Array.isArray(data) ? data[0] : data)
+  const row = Array.isArray(data) ? data[0] : data
+  // host_token is deliberately spread in ONLY here, once, at creation —
+  // rowToPartnerInvite() is an explicit allowlist that never includes it,
+  // so every other read (listMyInvites, getPartnerInviteBySlug) can never
+  // leak it back out. Mirrors api/invites/index.js's identical
+  // `{ ...rowToInvite(data), hostToken: data.host_token }` pattern.
+  return { ...rowToPartnerInvite(row), hostToken: row.host_token }
 }

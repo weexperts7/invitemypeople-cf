@@ -17,14 +17,16 @@ import { buildWeddingExperienceTemplate } from '../../utils/buildWeddingExperien
 //
 // It DOES now render through the exact same <InvitationExperience>
 // component tree /i/:slug does — envelope reveal, timeline, gallery,
-// background music, the works — built by the same
+// background music, guest RSVP + Wishes Wall, the works — built by the same
 // buildWeddingExperienceTemplate() GeneratedInvitePage.jsx uses, just fed
 // from a partner_invites row instead of an invites row (see
 // PartnerCreateInvitePage.jsx, which saves in that same
 // { names, eventTitle, date, time, venue, locationUrl, message, events,
-// photos, bgSong* } shape). `showRsvp={false}`: partner invites don't have
-// guest RSVP/Wishes Wall yet — see InvitationExperience.jsx's own comment
-// on that prop.
+// photos, bgSong* } shape). `rsvpEndpoint`/`wishesEndpoint`: guest RSVPs
+// here land in the isolated `partner_rsvps` table via /api/partners/rsvps
+// and /api/partners/wishes — never the consumer `rsvps` table — see
+// InvitationExperience.jsx's own comment on those props and
+// api/_lib/partnerHandlers.js's submitPartnerRsvp()/getPartnerWishes().
 export default function PartnerInviteViewerPage() {
   const { slug } = useParams()
   const [status, setStatus] = useState('loading') // loading | success | error
@@ -109,8 +111,9 @@ export default function PartnerInviteViewerPage() {
       <PartnerBrandBadge partner={partner}>
         <InvitationExperience
           template={experienceTemplate}
-          invitationSlug={`p-${invite.slug}`}
-          showRsvp={false}
+          invitationSlug={invite.slug}
+          rsvpEndpoint="/api/partners/rsvps"
+          wishesEndpoint="/api/partners/wishes"
         />
       </PartnerBrandBadge>
     </>

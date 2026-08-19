@@ -16,3 +16,18 @@ export async function getHostDashboard(slug, hostToken) {
   }
   return result
 }
+
+// Same idea, for a partner-created invite's dashboard (/p/:slug/host/
+// :hostToken — see PartnerHostDashboardPage.jsx and
+// api/_lib/partnerHandlers.js's getPartnerInviteHostDashboard()). Reads
+// `partner_invites`/`partner_rsvps`, never the consumer tables.
+export async function getPartnerHostDashboard(slug, hostToken) {
+  const response = await fetch(
+    `/api/partners/invites/${encodeURIComponent(slug)}/host?token=${encodeURIComponent(hostToken)}`,
+  )
+  const result = await response.json().catch(() => null)
+  if (!response.ok || !result?.ok) {
+    throw new Error(result?.error || `HTTP ${response.status}`)
+  }
+  return result
+}

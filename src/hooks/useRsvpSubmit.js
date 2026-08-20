@@ -15,8 +15,12 @@ const ENDPOINT = '/api/rsvps'
 export function useRsvpSubmit(slug) {
   const [status, setStatus] = useState('idle') // idle | sending | success | error
 
+  // `captchaToken` comes from each calling form's own <TurnstileWidget> (see
+  // its onSuccess callback) — required server-side by api/rsvps/index.js /
+  // server/index.js's POST /api/rsvps, so every form using this hook must
+  // render the widget and pass a token, or every submit will 400.
   const submit = useCallback(
-    async (fields, honeypot = '') => {
+    async (fields, honeypot = '', captchaToken = null) => {
       if (status === 'sending') return false
       setStatus('sending')
 
@@ -24,7 +28,7 @@ export function useRsvpSubmit(slug) {
         const response = await fetch(ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invitationSlug: slug, website: honeypot, ...fields }),
+          body: JSON.stringify({ invitationSlug: slug, website: honeypot, captchaToken, ...fields }),
         })
 
         const result = await response.json().catch(() => null)

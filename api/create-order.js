@@ -6,6 +6,7 @@
 import { createOrder, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import { getEffectivePrice } from './_lib/templatePrices.js'
 import { clean } from './_lib/invites.js'
+import { verifyTurnstileToken, getClientIp } from './_lib/turnstile.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,6 +16,19 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body || {}
+
+    // Cloudflare Turnstile — see src/components/builder/PaymentModal.jsx,
+    // which mints a token via TurnstileWidget.jsx and disables the "Pay"
+    // button until one exists. Blocks scripted checkout abuse before a
+    // Razorpay order is ever created.
+    const verified = await verifyTurnstileToken(body.captchaToken, {
+      remoteIp: getClientIp(req),
+      expectedAction: 'checkout',
+    })
+    if (!verified) {
+      return res.status(400).json({ ok: false, error: 'verification failed — please try again' })
+    }
+
     const amount = Math.round(Number(body.amount))
     if (!Number.isFinite(amount) || amount < MIN_AMOUNT_PAISE) {
       return res

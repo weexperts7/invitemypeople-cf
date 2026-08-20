@@ -59,6 +59,11 @@ import {
 import { requireAdmin } from '../api/_lib/auth.js'
 import { getSupabase } from '../api/_lib/supabase.js'
 import { formatDirectInvite, formatPartnerInvite, sortInvitesByCreatedAtDesc } from '../api/_lib/adminInvites.js'
+// Cloudflare Turnstile — same shared helper the Vercel Serverless Functions
+// use (api/rsvps/index.js, api/create-order.js), so dev and prod enforce
+// the exact same verification instead of drifting apart like the flat-file
+// vs Supabase halves of this file sometimes do. See api/_lib/turnstile.js.
+import { verifyTurnstileToken, getClientIp } from '../api/_lib/turnstile.js'
 // Super Admin Template Price Management — same shared handlers (no dev/prod
 // divergence, same reasoning as the B2B Partner Portal import above) as the
 // Vercel Serverless Functions under api/template-prices.js and
@@ -216,6 +221,14 @@ app.post('/api/rsvps', async (req, res) => {
     // Honeypot: real guests never see this field. Pretend success so bots
     // don't retry, but store nothing.
     if (body.website) return res.json({ ok: true })
+
+    const verified = await verifyTurnstileToken(body.captchaToken, {
+      remoteIp: getClientIp(req),
+      expectedAction: 'rsvp_submit',
+    })
+    if (!verified) {
+      return res.status(400).json({ ok: false, error: 'verification failed — please try again' })
+    }
 
     const name = clean(body.guestName, 120)
     if (!name) return res.status(400).json({ ok: false, error: 'guestName is required' })
@@ -555,6 +568,15 @@ app.post('/api/photos', async (req, res) => {
 app.post('/api/create-order', async (req, res) => {
   try {
     const body = req.body || {}
+
+    const verified = await verifyTurnstileToken(body.captchaToken, {
+      remoteIp: getClientIp(req),
+      expectedAction: 'checkout',
+    })
+    if (!verified) {
+      return res.status(400).json({ ok: false, error: 'verification failed — please try again' })
+    }
+
     const amount = Math.round(Number(body.amount))
     if (!Number.isFinite(amount) || amount < MIN_AMOUNT_PAISE) {
       return res

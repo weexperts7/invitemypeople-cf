@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { AlertCircle, CheckCircle2, Loader2, Lock, ShieldCheck, X } from 'lucide-react'
 import { loadRazorpayCheckout } from '../../utils/loadRazorpayCheckout'
+import TurnstileWidget from '../TurnstileWidget'
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
@@ -35,6 +36,13 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
   // closed (or reopened) by the time create-order/Checkout.js resolves.
   const cancelledRef = useRef(false)
 
+  // Cloudflare Turnstile — see TurnstileWidget.jsx. "Pay" stays disabled
+  // until this is set; POST /api/create-order rejects the request outright
+  // without a valid token (see api/create-order.js), so gating here is
+  // purely UX — the real enforcement is server-side.
+  const [captchaToken, setCaptchaToken] = useState(null)
+  const turnstileRef = useRef(null)
+
   // Reset to a clean slate every time the modal is (re)opened, so a second
   // checkout after closing the first mid-flow doesn't reopen mid-"success".
   useEffect(() => {
@@ -42,6 +50,7 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
     if (open) {
       setStage('confirm')
       setErrorMessage(null)
+      setCaptchaToken(null)
     }
     return () => {
       cancelledRef.current = true
@@ -67,6 +76,7 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
       setStage('error')
       return
     }
+    if (!captchaToken) return
 
     setErrorMessage(null)
     setStage('processing')
@@ -86,8 +96,14 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
           // api/_lib/templatePrices.js) instead of just checking `amount`
           // against one global price.
           templateId,
+          captchaToken,
         }),
       })
+      // Turnstile tokens are single-use — mint a fresh one before any retry,
+      // whether this attempt succeeds or the order request itself fails.
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
+
       const order = await orderRes.json().catch(() => null)
       if (!orderRes.ok || !order?.ok) {
         throw new Error(order?.error || 'Could not start payment')
@@ -228,12 +244,21 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
                       </p>
                     </div>
 
+                    <TurnstileWidget
+                      ref={turnstileRef}
+                      action="checkout"
+                      onSuccess={setCaptchaToken}
+                      onExpire={() => setCaptchaToken(null)}
+                      onError={() => setCaptchaToken(null)}
+                    />
+
                     <motion.button
                       type="button"
                       onClick={handlePay}
-                      whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0a2540] px-5 py-3.5 text-sm font-semibold text-white shadow-card"
+                      disabled={!captchaToken}
+                      whileHover={reduceMotion || !captchaToken ? undefined : { scale: 1.02 }}
+                      whileTap={!captchaToken ? undefined : { scale: 0.98 }}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0a2540] px-5 py-3.5 text-sm font-semibold text-white shadow-card disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <Lock className="h-4 w-4" />
                       Pay &#8377;{amount.toLocaleString('en-IN')}

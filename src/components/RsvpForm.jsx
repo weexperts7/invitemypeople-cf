@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
   Quote,
 } from 'lucide-react'
 import Celebration from './Celebration'
+import TurnstileWidget from './TurnstileWidget'
 
 // Supabase-backed in production (api/rsvps/index.js) and the flat-file
 // counterpart in local dev (server/index.js) — see
@@ -39,12 +40,19 @@ export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT })
   const [celebrate, setCelebrate] = useState(false)
   const reduceMotion = useReducedMotion()
 
+  // Cloudflare Turnstile — invisible bot check, see TurnstileWidget.jsx.
+  // Submit stays disabled until onSuccess fires; reset() (called below on
+  // both success and error) mints a fresh token, since Turnstile tokens are
+  // single-use.
+  const [captchaToken, setCaptchaToken] = useState(null)
+  const turnstileRef = useRef(null)
+
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (status === 'sending') return
+    if (status === 'sending' || !captchaToken) return
 
     setStatus('sending')
 
@@ -67,6 +75,7 @@ export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT })
           advice: form.advice,
           message: form.message,
           website: honeypot,
+          captchaToken,
         }),
       })
 
@@ -83,6 +92,9 @@ export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT })
         err,
       )
       setStatus('error')
+    } finally {
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
     }
   }
 
@@ -365,9 +377,17 @@ export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT })
                 />
               </div>
 
+              <TurnstileWidget
+                ref={turnstileRef}
+                action="rsvp_submit"
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onError={() => setCaptchaToken(null)}
+              />
+
               <motion.button
                 type="submit"
-                disabled={isSending}
+                disabled={isSending || !captchaToken}
                 whileHover={reduceMotion || isSending ? undefined : { y: -2, scale: 1.01 }}
                 whileTap={isSending ? undefined : { scale: 0.98 }}
                 className="relative w-full flex items-center justify-center gap-2 rounded-xl bg-rose text-ivory font-medium py-3 shadow-card overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"

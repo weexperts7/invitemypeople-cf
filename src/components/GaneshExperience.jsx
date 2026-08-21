@@ -7,6 +7,8 @@ import LegacyGaneshExperience from './ganesh/LegacyGaneshExperience'
 import AudioToggle from './AudioToggle'
 import { buildCreateLink } from '../utils/createLink'
 import { getActivePrice } from '../data/sale'
+import { findBuilderTemplateBySource } from '../data/builderTemplates'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
 const MUSIC_VOLUME = 0.7
 // The standard track every Ganesh Chaturthi invitation opens with unless
@@ -46,6 +48,10 @@ const DEFAULT_GANESH_MUSIC_URL = '/audio/ganesh-devotional-default.mp3'
 // for its own back button/CTA bar.
 export default function GaneshExperience({ template, invitationSlug: slugOverride, showChrome = true }) {
   const navigate = useNavigate()
+  // Called unconditionally, ABOVE the `!template` early return below, so
+  // this obeys the Rules of Hooks regardless of which branch renders — see
+  // SatsangExperience.jsx's identical comment.
+  const priceOverrides = useTemplatePriceOverrides()
 
   // A real guest link always has its own stable slug — either the free
   // pre-built template's own (`ganesh-<template-slug>`, unchanged default
@@ -133,6 +139,11 @@ export default function GaneshExperience({ template, invitationSlug: slugOverrid
   }
 
   const Layout = getGaneshLayoutComponent(template.layout) ?? LegacyGaneshExperience
+  // Super Admin Template Price Management — see InvitationExperience.jsx's
+  // identical comment. template.slug is the GANESH_TEMPLATES catalog key,
+  // not the builder/pricing key.
+  const builderTemplate = findBuilderTemplateBySource('ganesh-chaturthi', template.slug)
+  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
 
   return (
     <>
@@ -194,7 +205,7 @@ export default function GaneshExperience({ template, invitationSlug: slugOverrid
             className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
           >
             <Heart className="w-4 h-4" />
-            Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
+            Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
           </Link>
         </motion.div>
       )}

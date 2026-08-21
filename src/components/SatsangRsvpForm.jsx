@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { CheckCircle2, HeartHandshake, Loader2, AlertCircle } from 'lucide-react'
 import Celebration from './Celebration'
 import Honeypot from './Honeypot'
+import TurnstileWidget from './TurnstileWidget'
 import { useRsvpSubmit } from '../hooks/useRsvpSubmit'
 
 export default function SatsangRsvpForm({ palette, slug }) {
@@ -18,11 +19,17 @@ export default function SatsangRsvpForm({ palette, slug }) {
   const reduceMotion = useReducedMotion()
   const { status, isSending, submit } = useRsvpSubmit(slug)
 
+  // Cloudflare Turnstile — see TurnstileWidget.jsx / RsvpForm.jsx's identical
+  // wiring for why this gates the submit button and resets after every attempt.
+  const [captchaToken, setCaptchaToken] = useState(null)
+  const turnstileRef = useRef(null)
+
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!captchaToken) return
     const isAttending = form.attending === 'joyfully'
     const ok = await submit(
       {
@@ -32,8 +39,11 @@ export default function SatsangRsvpForm({ palette, slug }) {
         message: form.message,
       },
       honeypot,
+      captchaToken,
     )
     if (ok && isAttending) setCelebrate(true)
+    setCaptchaToken(null)
+    turnstileRef.current?.reset()
   }
 
   return (
@@ -231,9 +241,17 @@ export default function SatsangRsvpForm({ palette, slug }) {
                 />
               </div>
 
+              <TurnstileWidget
+                ref={turnstileRef}
+                action="rsvp_submit"
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onError={() => setCaptchaToken(null)}
+              />
+
               <motion.button
                 type="submit"
-                disabled={isSending}
+                disabled={isSending || !captchaToken}
                 whileHover={reduceMotion || isSending ? undefined : { y: -2, scale: 1.01 }}
                 whileTap={isSending ? undefined : { scale: 0.98 }}
                 className="relative w-full flex items-center justify-center gap-2 rounded-xl bg-rose text-ivory font-medium py-3 shadow-card overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"

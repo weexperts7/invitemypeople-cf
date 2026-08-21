@@ -17,7 +17,12 @@ export default function GaneshTemplateCard({ template }) {
       layout
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
+      // amount: 0 (not the framer-motion default "some" ~0.3) — this card
+      // sits in a horizontally-scrolling row where the *next* card is only
+      // ever a sliver peeking in from the edge. A 30% threshold meant that
+      // sliver never crossed the bar, so it stayed invisible until scrolled
+      // further in, reading as if the row simply ended after one card.
+      viewport={{ once: true, amount: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl shadow-card"
     >

@@ -1,12 +1,13 @@
 // Razorpay Standard Checkout — see CreateInvitePage.jsx for the caller.
-// Deliberately isolated behind one call site (amount, summary, onSuccess,
-// onClose) so this is the only file that knows about order creation,
-// Checkout.js, or signature verification; nothing that calls it needs to
-// change if the payment provider ever does.
+// Deliberately isolated behind one call site (amount, templateId, summary,
+// onSuccess, onClose) so this is the only file that knows about order
+// creation, Checkout.js, or signature verification; nothing that calls it
+// needs to change if the payment provider ever does.
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { AlertCircle, CheckCircle2, Loader2, Lock, ShieldCheck, X } from 'lucide-react'
 import { loadRazorpayCheckout } from '../../utils/loadRazorpayCheckout'
+import TurnstileWidget from '../TurnstileWidget'
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
@@ -27,13 +28,20 @@ async function verifyPayment(response) {
   return result.paymentId
 }
 
-export default function PaymentModal({ open, amount, originalAmount, summary, onSuccess, onClose }) {
+export default function PaymentModal({ open, amount, originalAmount, templateId, summary, onSuccess, onClose }) {
   const reduceMotion = useReducedMotion()
   const [stage, setStage] = useState('confirm') // confirm | processing | verifying | success | error
   const [errorMessage, setErrorMessage] = useState(null)
   // Guards the async pay() call below against a modal that's already been
   // closed (or reopened) by the time create-order/Checkout.js resolves.
   const cancelledRef = useRef(false)
+
+  // Cloudflare Turnstile — see TurnstileWidget.jsx. "Pay" stays disabled
+  // until this is set; POST /api/create-order rejects the request outright
+  // without a valid token (see api/create-order.js), so gating here is
+  // purely UX — the real enforcement is server-side.
+  const [captchaToken, setCaptchaToken] = useState(null)
+  const turnstileRef = useRef(null)
 
   // Reset to a clean slate every time the modal is (re)opened, so a second
   // checkout after closing the first mid-flow doesn't reopen mid-"success".
@@ -42,6 +50,7 @@ export default function PaymentModal({ open, amount, originalAmount, summary, on
     if (open) {
       setStage('confirm')
       setErrorMessage(null)
+      setCaptchaToken(null)
     }
     return () => {
       cancelledRef.current = true
@@ -67,6 +76,7 @@ export default function PaymentModal({ open, amount, originalAmount, summary, on
       setStage('error')
       return
     }
+    if (!captchaToken) return
 
     setErrorMessage(null)
     setStage('processing')
@@ -81,8 +91,19 @@ export default function PaymentModal({ open, amount, originalAmount, summary, on
           amount: Math.round(amount * 100), // rupees -> paise
           currency: 'INR',
           receipt: `invite_${Date.now()}`,
+          // Lets the server re-derive THIS template's real price (a Super
+          // Admin override, or the global default — see
+          // api/_lib/templatePrices.js) instead of just checking `amount`
+          // against one global price.
+          templateId,
+          captchaToken,
         }),
       })
+      // Turnstile tokens are single-use — mint a fresh one before any retry,
+      // whether this attempt succeeds or the order request itself fails.
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
+
       const order = await orderRes.json().catch(() => null)
       if (!orderRes.ok || !order?.ok) {
         throw new Error(order?.error || 'Could not start payment')
@@ -223,12 +244,21 @@ export default function PaymentModal({ open, amount, originalAmount, summary, on
                       </p>
                     </div>
 
+                    <TurnstileWidget
+                      ref={turnstileRef}
+                      action="checkout"
+                      onSuccess={setCaptchaToken}
+                      onExpire={() => setCaptchaToken(null)}
+                      onError={() => setCaptchaToken(null)}
+                    />
+
                     <motion.button
                       type="button"
                       onClick={handlePay}
-                      whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0a2540] px-5 py-3.5 text-sm font-semibold text-white shadow-card"
+                      disabled={!captchaToken}
+                      whileHover={reduceMotion || !captchaToken ? undefined : { scale: 1.02 }}
+                      whileTap={!captchaToken ? undefined : { scale: 0.98 }}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0a2540] px-5 py-3.5 text-sm font-semibold text-white shadow-card disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <Lock className="h-4 w-4" />
                       Pay &#8377;{amount.toLocaleString('en-IN')}

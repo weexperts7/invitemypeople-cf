@@ -7,6 +7,7 @@
 import { getSupabase } from '../_lib/supabase.js'
 import { clean } from '../_lib/invites.js'
 import { cleanRsvp } from '../_lib/rsvps.js'
+import { verifyTurnstileToken, getClientIp } from '../_lib/turnstile.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,6 +21,18 @@ export default async function handler(req, res) {
     // Honeypot: real guests never see this field. Pretend success so bots
     // don't retry, but store nothing — same behavior as the old Sheets path.
     if (body.website) return res.status(200).json({ ok: true })
+
+    // Cloudflare Turnstile — every RSVP form (RsvpForm.jsx and its
+    // per-template siblings, all funneling through this one route) mints a
+    // token via TurnstileWidget.jsx and disables its submit button until
+    // one exists. Blocks scripted spam before it ever reaches Supabase.
+    const verified = await verifyTurnstileToken(body.captchaToken, {
+      remoteIp: getClientIp(req),
+      expectedAction: 'rsvp_submit',
+    })
+    if (!verified) {
+      return res.status(400).json({ ok: false, error: 'verification failed — please try again' })
+    }
 
     const row = cleanRsvp(body)
     if (!row.guest_name) {

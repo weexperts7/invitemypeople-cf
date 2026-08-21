@@ -14,6 +14,8 @@ import CulturalMotif from './CulturalMotif'
 import AudioToggle from './AudioToggle'
 import { FrameCorners } from './TemplateFrame'
 import { getActivePrice } from '../data/sale'
+import { findBuilderTemplateBySource } from '../data/builderTemplates'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { coupleNameTier } from '../utils/coupleNameFit'
 import { slugify } from '../utils/slugify'
 import { buildCreateLink } from '../utils/createLink'
@@ -60,15 +62,22 @@ export default function InvitationExperience({
   onBack,
   isPreview = false,
   invitationSlug: slugOverride,
-  // False for the B2B Partner Portal's white-label /p/:slug viewer (see
-  // PartnerInviteViewerPage.jsx) — that flow deliberately doesn't have
-  // guest RSVP/Wishes Wall yet (partner invites live in their own
-  // partner_invites table, never the consumer rsvps/invites tables an RSVP
-  // submission here would need to write against). Every other caller
-  // (GeneratedInvitePage.jsx, every pre-built template route,
-  // LiveDraftPreviewPage.jsx for a consumer's own in-progress builder
-  // preview) keeps the default and renders it exactly as before.
+  // False only for callers with nowhere for an RSVP to land at all (e.g. a
+  // draft/demo preview with no persisted invite row). Every real invite —
+  // consumer or partner — collects guest RSVPs; what differs is *where*
+  // (see rsvpEndpoint/wishesEndpoint below).
   showRsvp = true,
+  // Optional overrides — the B2B Partner Portal's white-label /p/:slug
+  // viewer (see PartnerInviteViewerPage.jsx) passes '/api/partners/rsvps'
+  // and '/api/partners/wishes' so guest RSVPs on a partner-created invite
+  // land in that table's own `partner_rsvps`, never the consumer
+  // `rsvps` table (partner invites live entirely in their own
+  // partner_invites/partner_rsvps tables — see B2B-PARTNER-PORTAL-SETUP.md).
+  // Every other caller (GeneratedInvitePage.jsx, every pre-built template
+  // route, LiveDraftPreviewPage.jsx) omits these and keeps RsvpForm.jsx/
+  // WishesWall.jsx's own '/api/rsvps' / '/api/wishes' defaults.
+  rsvpEndpoint,
+  wishesEndpoint,
 }) {
   // Every invitation is identified by a slug — by default one derived from
   // the couple's names (e.g. "Meenal & Avinash" -> "meenal-avinash"), which
@@ -82,6 +91,13 @@ export default function InvitationExperience({
   // fog and hurts text contrast over a dark palette (see .bg-petals-royal
   // in index.css). Every other template keeps using .bg-petals unchanged.
   const isPhulkari = template?.motif === 'phulkari'
+  // Super Admin Template Price Management — the "Create Your Own" CTA
+  // below shows THIS template's real price, not a global one. template.id
+  // is the TEMPLATES catalog id (e.g. "rajasthani-royal"), not the
+  // builder/pricing key — see findBuilderTemplateBySource()'s own comment.
+  const builderTemplate = findBuilderTemplateBySource('wedding', template?.id)
+  const priceOverrides = useTemplatePriceOverrides()
+  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
   // Host-selected background music — see builder/SongSearchPicker.jsx
   // (search + preview) and buildWeddingExperienceTemplate.js (where a real
   // invite's confirmed Spotify/iTunes track becomes this `bgMusic` shape).
@@ -230,7 +246,7 @@ export default function InvitationExperience({
                   className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
                 >
                   <Heart className="w-4 h-4" />
-                  Create Your Own — &#8377;{getActivePrice().toLocaleString('en-IN')}
+                  Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
                 </Link>
               </motion.div>
             </div>
@@ -304,8 +320,8 @@ export default function InvitationExperience({
               <PhotoGallery culture={template?.weddingType} photos={template?.photos} />
               {showRsvp && (
                 <>
-                  <RsvpForm palette={template?.palette} slug={invitationSlug} />
-                  <WishesWall slug={invitationSlug} />
+                  <RsvpForm palette={template?.palette} slug={invitationSlug} endpoint={rsvpEndpoint} />
+                  <WishesWall slug={invitationSlug} endpoint={wishesEndpoint} />
                 </>
               )}
               <motion.footer

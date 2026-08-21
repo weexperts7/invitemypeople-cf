@@ -26,11 +26,13 @@ export default async function handler(req, res) {
     const venue = clean(body.venue, 200)
     const hostName = clean(body.hostName, 120)
     const hostEmail = clean(body.hostEmail, 200)
+    const hostPhone = clean(body.hostPhone, 30)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
+    if (!hostPhone) return res.status(400).json({ ok: false, error: 'hostPhone is required' })
 
     const row = {
       occasion: clean(body.occasion, 40),
@@ -65,6 +67,7 @@ export default async function handler(req, res) {
       bride_parents: clean(body.brideParents, 200),
       host_name: hostName,
       host_email: hostEmail,
+      host_phone: hostPhone,
       host_token: generateHostToken(),
     }
 

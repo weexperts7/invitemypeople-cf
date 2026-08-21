@@ -296,15 +296,19 @@ export function buildPartnerApprovedEmail(partner) {
 /**
  * Sent to the CLIENT right after a partner spends a credit to create their
  * invite (POST /api/partners/invites) — the couple/host themselves, not the
- * partner. Mirrors buildOrderConfirmationEmail()'s shape but points at
- * /p/:slug (not /i/:slug) and has no host-dashboard link, since partner
- * invites have no host-dashboard concept (see PartnerInviteViewerPage.jsx /
- * InvitationExperience.jsx's showRsvp prop). Accepts the camelCase invite
- * shape rowToPartnerInvite() (api/_lib/partners.js) returns, plus the
- * partner row (rowToPartner()) so the email can credit who made it.
+ * partner. Mirrors buildOrderConfirmationEmail()'s shape, right down to the
+ * host-dashboard callout: points at /p/:slug (not /i/:slug) for the guest
+ * link and /p/:slug/host/:hostToken (not /i/:slug/host/:hostToken) for the
+ * dashboard — see api/_lib/partnerHandlers.js's getPartnerInviteHostDashboard()
+ * and supabase/migrations/0011_partner_invite_host_dashboard.sql. Accepts
+ * the camelCase invite shape spendCreditForInvite() (api/_lib/partners.js)
+ * returns — which, like createInvite's own response, includes `hostToken`
+ * this one time only — plus the partner row (rowToPartner()) so the email
+ * can credit who made it.
  */
 export function buildPartnerInviteReadyEmail(invite, partner) {
   const inviteUrl = `${SITE_URL}/p/${invite.slug}`
+  const hostUrl = `${SITE_URL}/p/${invite.slug}/host/${invite.hostToken}`
   const dateLabel = formatInviteDate(invite.weddingDate)
   const timeLabel = formatInviteTime(invite.weddingTime)
   const whenLabel = [dateLabel, timeLabel].filter(Boolean).join(' at ')
@@ -324,8 +328,21 @@ export function buildPartnerInviteReadyEmail(invite, partner) {
     <p style="margin: 20px 0 0; font-size: 13px; color: ${BRAND.inkSoft};">Share this with your guests:</p>
     ${emailButton('View your invitation', inviteUrl)}
 
+    ${
+      invite.hostToken
+        ? emailCallout(`
+      <strong>Your private host dashboard</strong> — view live RSVPs and download your guest list as a CSV:<br/>
+      ${emailLink(hostUrl, hostUrl)}
+    `)
+        : ''
+    }
+
     <p style="color: ${BRAND.inkSoft}; font-size: 12px; margin: 20px 0 0;">
-      Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
+      ${
+        invite.hostToken
+          ? "Save the host dashboard link now — it's shown only this once and can't be recovered if lost. Keep it private; anyone with this link can see your guest responses. It's safe to share the invitation link above with guests — it never exposes your dashboard. "
+          : ''
+      }Questions about your invitation? Reach out to ${escapeHtml(partner.businessName)} directly —
       they created this for you.
     </p>
   `

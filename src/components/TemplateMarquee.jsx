@@ -53,7 +53,7 @@ export default function TemplateMarquee({
   // first/last card room to breathe against the viewport edge.
   if (reduceMotion || coarsePointer) {
     return (
-      <div className="flex overflow-x-auto pt-2 pb-4 pl-6 pr-6 snap-x snap-mandatory">
+      <div className="flex overflow-x-auto pt-2 pb-4 pl-6 pr-6 scroll-pl-6 scroll-pr-6 snap-x snap-mandatory">
         {items.map((item) => (
           <div
             key={keyExtractor(item)}

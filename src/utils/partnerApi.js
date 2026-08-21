@@ -104,3 +104,10 @@ export function adminRejectPartner(token, partnerId, reason) {
 export function adminGetStats(token) {
   return request('/api/admin/stats', { token })
 }
+
+// Every invite in the system — both partner-created and direct/self-serve
+// — each with its shareable member link and (direct invites only) host
+// dashboard link. See api/_lib/adminInvites.js.
+export function adminListInvites(token) {
+  return request('/api/admin/invites', { token })
+}

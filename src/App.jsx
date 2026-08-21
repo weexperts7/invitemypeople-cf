@@ -32,8 +32,11 @@ import PartnerBrandingPage from './pages/partners/PartnerBrandingPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminPartnersPage from './pages/admin/AdminPartnersPage'
+import AdminInvitesPage from './pages/admin/AdminInvitesPage'
+import AdminPricingPage from './pages/admin/AdminPricingPage'
 import { RequireAdminPortal } from './components/admin/AdminShell'
 import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
+import PartnerHostDashboardPage from './pages/partners/PartnerHostDashboardPage'
 import InvitationExperience from './components/InvitationExperience'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
@@ -155,6 +158,7 @@ function App() {
             from the B2C /i/:slug viewer above (see
             PartnerInviteViewerPage.jsx). */}
         <Route path="/p/:slug" element={<PartnerInviteViewerPage />} />
+        <Route path="/p/:slug/host/:hostToken" element={<PartnerHostDashboardPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/refund" element={<RefundPolicyPage />} />
@@ -195,6 +199,8 @@ function App() {
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/partners" element={<AdminPartnersPage />} />
+            <Route path="/admin/invites" element={<AdminInvitesPage />} />
+            <Route path="/admin/pricing" element={<AdminPricingPage />} />
           </Route>
         </Route>
         {COMING_SOON_OCCASIONS.map((occasion) => (

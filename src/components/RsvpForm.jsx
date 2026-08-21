@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
   CheckCircle2,
@@ -9,15 +9,22 @@ import {
   Quote,
 } from 'lucide-react'
 import Celebration from './Celebration'
+import TurnstileWidget from './TurnstileWidget'
 
 // Supabase-backed in production (api/rsvps/index.js) and the flat-file
 // counterpart in local dev (server/index.js) — see
 // RSVPS-AND-REMINDERS-SETUP.md. Same-origin, so a plain JSON POST works with
 // no CORS setup, unlike the old external Google Apps Script endpoint this
 // replaced.
-const ENDPOINT = '/api/rsvps'
+//
+// `endpoint` is an optional override — the B2B Partner Portal's /p/:slug
+// viewer (see PartnerInviteViewerPage.jsx) passes '/api/partners/rsvps' so
+// guest RSVPs on a partner-created invite land in that table's own
+// `partner_rsvps`, never the consumer `rsvps` table. Same pattern
+// PhotoUploader.jsx's `endpoint` prop already established.
+const DEFAULT_ENDPOINT = '/api/rsvps'
 
-export default function RsvpForm({ palette, slug }) {
+export default function RsvpForm({ palette, slug, endpoint = DEFAULT_ENDPOINT }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -33,18 +40,25 @@ export default function RsvpForm({ palette, slug }) {
   const [celebrate, setCelebrate] = useState(false)
   const reduceMotion = useReducedMotion()
 
+  // Cloudflare Turnstile — invisible bot check, see TurnstileWidget.jsx.
+  // Submit stays disabled until onSuccess fires; reset() (called below on
+  // both success and error) mints a fresh token, since Turnstile tokens are
+  // single-use.
+  const [captchaToken, setCaptchaToken] = useState(null)
+  const turnstileRef = useRef(null)
+
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (status === 'sending') return
+    if (status === 'sending' || !captchaToken) return
 
     setStatus('sending')
 
     try {
       const isAttending = form.attending === 'joyfully'
-      const response = await fetch(ENDPOINT, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,6 +75,7 @@ export default function RsvpForm({ palette, slug }) {
           advice: form.advice,
           message: form.message,
           website: honeypot,
+          captchaToken,
         }),
       })
 
@@ -73,10 +88,13 @@ export default function RsvpForm({ palette, slug }) {
       if (form.attending === 'joyfully') setCelebrate(true)
     } catch (err) {
       console.error(
-        `[RSVP] submission to ${ENDPOINT} failed — is the RSVP API running? (npm run dev starts it)`,
+        `[RSVP] submission to ${endpoint} failed — is the RSVP API running? (npm run dev starts it)`,
         err,
       )
       setStatus('error')
+    } finally {
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
     }
   }
 
@@ -359,9 +377,17 @@ export default function RsvpForm({ palette, slug }) {
                 />
               </div>
 
+              <TurnstileWidget
+                ref={turnstileRef}
+                action="rsvp_submit"
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onError={() => setCaptchaToken(null)}
+              />
+
               <motion.button
                 type="submit"
-                disabled={isSending}
+                disabled={isSending || !captchaToken}
                 whileHover={reduceMotion || isSending ? undefined : { y: -2, scale: 1.01 }}
                 whileTap={isSending ? undefined : { scale: 0.98 }}
                 className="relative w-full flex items-center justify-center gap-2 rounded-xl bg-rose text-ivory font-medium py-3 shadow-card overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"

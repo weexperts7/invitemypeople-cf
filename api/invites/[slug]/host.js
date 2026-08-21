@@ -53,6 +53,7 @@ export default async function handler(req, res) {
         venue: invite.venue,
         hostName: invite.host_name,
         hostEmail: invite.host_email,
+        hostPhone: invite.host_phone,
         createdAt: invite.created_at,
       },
       rsvps: rsvps.map(rowToRsvp),

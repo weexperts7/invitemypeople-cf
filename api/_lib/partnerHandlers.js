@@ -37,7 +37,15 @@ import {
   getPartnerById,
   recordCreditTransaction,
   spendCreditForInvite,
+  generateHostToken,
+  tokensMatch,
 } from './partners.js'
+import {
+  cleanPartnerRsvp,
+  rowToPartnerWish,
+  rowToPartnerRsvp,
+  summarizePartnerRsvps,
+} from './partnerRsvps.js'
 import { getPartnerPackageById } from '../../src/data/partnerPackages.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../../src/utils/razorpay.js'
 import { slugify } from '../../src/utils/slugify.js'
@@ -659,6 +667,7 @@ export async function createClientInvite(req, res) {
           groomParents: groomParents || null,
           brideName: brideName || null,
           brideParents: brideParents || null,
+          hostToken: generateHostToken(),
         })
         console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
 
@@ -676,7 +685,14 @@ export async function createClientInvite(req, res) {
           console.error('[partners] invite-ready email failed:', emailErr)
         }
 
-        return res.status(200).json({ ok: true, invite })
+        // hostToken never goes back to the partner's own browser — the host
+        // dashboard is the CLIENT's private view of their own guest list
+        // (see buildPartnerInviteReadyEmail() above, its only delivery
+        // path), not something the partner gets standing access to. `invite`
+        // above still carries it (spendCreditForInvite() needs to, to build
+        // the email); strip it here before it ever leaves the server.
+        const { hostToken: _hostToken, ...partnerFacingInvite } = invite
+        return res.status(200).json({ ok: true, invite: partnerFacingInvite })
       } catch (err) {
         lastError = err
         // Postgres unique_violation on partner_invites.slug — vanishingly
@@ -742,6 +758,158 @@ export async function getPartnerInviteBySlug(req, res) {
   } catch (err) {
     console.error(`[partners] failed to load invite "${slug}":`, err)
     res.status(500).json({ ok: false, error: 'could not load this invitation' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/partners/rsvps — public, unauthenticated (a guest submitting the
+// RSVP form on /p/:slug). Partner-side twin of api/rsvps/index.js, writing
+// against `partner_invites`/`partner_rsvps` instead of `invites`/`rsvps` —
+// see partner_rsvps' own migration comment for why this is a separate table
+// rather than a shared one.
+// ---------------------------------------------------------------------------
+export async function submitPartnerRsvp(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  try {
+    const body = req.body || {}
+
+    // Honeypot: real guests never see this field. Pretend success so bots
+    // don't retry, but store nothing — same behavior as the consumer form.
+    if (body.website) return res.status(200).json({ ok: true })
+
+    const row = cleanPartnerRsvp(body)
+    if (!row.guest_name) {
+      return res.status(400).json({ ok: false, error: 'guestName is required' })
+    }
+
+    const slug = clean(body.invitationSlug, 200)
+    const supabase = getSupabase()
+
+    const { data: invite, error: inviteError } = await supabase
+      .from('partner_invites')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (inviteError) throw inviteError
+    if (!invite) return res.status(404).json({ ok: false, error: 'invitation not found' })
+
+    const { error: insertError } = await supabase
+      .from('partner_rsvps')
+      .insert({ ...row, invite_id: invite.id })
+    if (insertError) throw insertError
+
+    console.log(`[partners] RSVP: ${row.guest_name} — ${row.attendance} on "${slug}"`)
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('[partners] failed to save RSVP:', err)
+    res.status(500).json({ ok: false, error: 'could not save RSVP' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/partners/wishes?slug=... — public, unauthenticated. Partner-side
+// twin of api/wishes.js — the Wishes Wall data source for /p/:slug.
+// ---------------------------------------------------------------------------
+export async function getPartnerWishes(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const slug = clean(req.query?.slug, 200)
+
+  try {
+    const supabase = getSupabase()
+
+    const { data: invite, error: inviteError } = await supabase
+      .from('partner_invites')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (inviteError) throw inviteError
+    if (!invite) return res.status(200).json({ ok: true, wishes: [] })
+
+    const { data, error } = await supabase
+      .from('partner_rsvps')
+      .select('guest_name, message, created_at')
+      .eq('invite_id', invite.id)
+      .neq('message', '')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+
+    res.status(200).json({ ok: true, wishes: (data || []).map(rowToPartnerWish) })
+  } catch (err) {
+    console.error(`[partners] failed to read wishes for "${slug}":`, err)
+    res.status(500).json({ ok: false, error: 'could not load wishes' })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/partners/invites/:slug/host?token=... — the private Host
+// Dashboard's only data source for a partner-created invite (/p/:slug/host/
+// :hostToken). Partner-side twin of api/invites/[slug]/host.js: `token`
+// must match the invite's host_token (generated once, at creation, in
+// createClientInvite() above) or nothing is returned — not even whether the
+// slug exists. This IS the access control; there's no login system for the
+// partner's client either.
+// ---------------------------------------------------------------------------
+export async function getPartnerInviteHostDashboard(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    return res.status(405).json({ ok: false, error: 'method not allowed' })
+  }
+
+  const slug = clean(pathParam(req, 'slug'), 200)
+  const token = clean(req.query?.token, 200)
+
+  try {
+    const supabase = getSupabase()
+
+    const { data: invite, error: inviteError } = await supabase
+      .from('partner_invites')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (inviteError) throw inviteError
+    // Same 404-shaped 403 whether the slug doesn't exist or the token is
+    // wrong for it — don't let a guessed token confirm a slug is real, or
+    // vice versa.
+    if (!invite || !invite.host_token || !tokensMatch(token, invite.host_token)) {
+      return res.status(403).json({ ok: false, error: 'invalid host link' })
+    }
+
+    const { data: rsvpRows, error: rsvpError } = await supabase
+      .from('partner_rsvps')
+      .select('*')
+      .eq('invite_id', invite.id)
+      .order('created_at', { ascending: false })
+    if (rsvpError) throw rsvpError
+
+    const rsvps = rsvpRows || []
+
+    res.status(200).json({
+      ok: true,
+      invite: {
+        slug: invite.slug,
+        coupleNames: invite.couple_names,
+        eventTitle: invite.event_title,
+        weddingDate: invite.wedding_date,
+        weddingTime: invite.wedding_time,
+        venue: invite.venue,
+        clientEmail: invite.client_email,
+        clientPhone: invite.client_phone,
+        createdAt: invite.created_at,
+      },
+      rsvps: rsvps.map(rowToPartnerRsvp),
+      summary: summarizePartnerRsvps(rsvps),
+    })
+  } catch (err) {
+    console.error(`[partners] failed to load host dashboard for "${slug}":`, err)
+    res.status(500).json({ ok: false, error: 'could not load dashboard' })
   }
 }
 

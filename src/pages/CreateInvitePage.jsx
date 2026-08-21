@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
@@ -17,6 +17,7 @@ import {
   MapPin,
   MessageSquareText,
   Music2,
+  Phone,
   ShieldCheck,
   User,
   Users,
@@ -39,8 +40,9 @@ import {
   getOccasion,
 } from '../data/builderTemplates'
 import { PRICING } from '../data/templatesData'
-import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
+import { getActivePrice, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
+import { getTemplatePrices } from '../utils/templatePriceApi'
 import { ROUTES_SEO } from '../data/routesSeo'
 
 const EMPTY_FORM = {
@@ -53,6 +55,7 @@ const EMPTY_FORM = {
   message: '',
   hostName: '',
   hostEmail: '',
+  hostPhone: '',
   // "Family Details" (wedding only — see the groomName/brideName fields
   // below) — rendered as two cards under the couple's names on the live
   // invitation (see WelcomeSplash.jsx's couple.people).
@@ -209,14 +212,44 @@ export default function CreateInvitePage() {
   const occasion = getOccasion(occasionId)
   const template = getBuilderTemplateById(templateId)
 
-  // The price actually charged this session — the launch-sale price while
-  // it's running, the standing launch price once it ends (see
-  // ../data/sale.js). Every price shown on this page, and the amount
-  // PaymentModal actually charges via Razorpay, reads from this so nothing
-  // here can drift out of sync with what checkout enforces server-side.
-  const activePrice = getActivePrice()
+  // Super Admin Template Price Management overrides (see
+  // api/_lib/templatePrices.js) — a sparse { [templateId]: price } map of
+  // just the templates an admin has actually repriced. Fetched once and
+  // kept fresh in the background; never blocks rendering — until it
+  // resolves (or if it ever fails), every template just uses the same
+  // global default price it always has, so a slow network or a
+  // misconfigured Supabase project can never break checkout. See
+  // getTemplatePrices()'s own comment.
+  const [templatePriceOverrides, setTemplatePriceOverrides] = useState({})
+  useEffect(() => {
+    let cancelled = false
+    getTemplatePrices()
+      .then((rows) => {
+        if (cancelled) return
+        setTemplatePriceOverrides(Object.fromEntries(rows.map((row) => [row.templateKey, row.price])))
+      })
+      .catch((err) => console.error('[CreateInvitePage] failed to load template price overrides:', err))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // The price actually charged this session for the SELECTED template: a
+  // Super Admin's override for it if one exists, otherwise the same global
+  // default every template used before per-template pricing existed — the
+  // launch-sale price while it's running, the standing launch price once it
+  // ends (see ../data/sale.js). Every price shown on this page, and the
+  // amount PaymentModal actually charges via Razorpay, reads from this so
+  // nothing here can drift out of sync with what checkout enforces
+  // server-side (POST /api/create-order re-derives this exact same value).
+  const activePrice = templatePriceOverrides[template.id] ?? getActivePrice()
   const saleLive = isSaleActive()
-  const savingsPercent = getSavingsPercent()
+  // Only meaningful as a "launch sale" badge when this template is actually
+  // cheaper than the standing price — an admin override that happens to
+  // price a template ABOVE PRICING.price (a premium template, say) should
+  // never render as a negative-percent "sale".
+  const savingsPercent =
+    activePrice < PRICING.price ? Math.round(((PRICING.price - activePrice) / PRICING.price) * 100) : 0
 
   const handleOccasionChange = (nextOccasionId) => {
     setOccasionId(nextOccasionId)
@@ -231,13 +264,25 @@ export default function CreateInvitePage() {
 
   const missingRequired =
     submitAttempted &&
-    (!form.names.trim() || !form.date || !form.venue.trim() || !form.hostName.trim() || !form.hostEmail.trim())
+    (!form.names.trim() ||
+      !form.date ||
+      !form.venue.trim() ||
+      !form.hostName.trim() ||
+      !form.hostEmail.trim() ||
+      !form.hostPhone.trim())
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitAttempted(true)
     setSaveError(null)
-    if (!form.names.trim() || !form.date || !form.venue.trim() || !form.hostName.trim() || !form.hostEmail.trim())
+    if (
+      !form.names.trim() ||
+      !form.date ||
+      !form.venue.trim() ||
+      !form.hostName.trim() ||
+      !form.hostEmail.trim() ||
+      !form.hostPhone.trim()
+    )
       return
     setPaymentOpen(true)
   }
@@ -265,6 +310,7 @@ export default function CreateInvitePage() {
           message: form.message.trim(),
           hostName: form.hostName.trim(),
           hostEmail: form.hostEmail.trim(),
+          hostPhone: form.hostPhone.trim(),
           groomName: form.groomName.trim(),
           groomParents: form.groomParents.trim(),
           brideName: form.brideName.trim(),
@@ -281,6 +327,9 @@ export default function CreateInvitePage() {
         setCreatedInvite(invite)
         setPaymentOpen(false)
         setSaving(false)
+        // The success panel replaces a long scrolled-down form; without
+        // this the user lands mid-page instead of at the top of the panel.
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       } catch (err) {
         console.error('[Invitation Builder] failed to save invite after payment:', err)
         setSaveError(
@@ -586,6 +635,21 @@ export default function CreateInvitePage() {
                           className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                         />
                       </div>
+                      <div>
+                        <label htmlFor="hostPhone" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Phone className="h-3.5 w-3.5 text-rose" />
+                          Your Phone Number
+                        </label>
+                        <input
+                          id="hostPhone"
+                          type="tel"
+                          required
+                          value={form.hostPhone}
+                          onChange={handleField('hostPhone')}
+                          placeholder="+91 98765 43210"
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                      </div>
                     </div>
                     <p className="-mt-2 text-xs text-ink-soft/80">
                       Private — used only for your host dashboard link and a
@@ -720,7 +784,7 @@ export default function CreateInvitePage() {
                     <span className="font-semibold text-ink">
                       &#8377;{activePrice.toLocaleString('en-IN')}
                     </span>
-                    {saleLive && (
+                    {saleLive && savingsPercent > 0 && (
                       <>
                         <span className="text-ink-soft/60 line-through">
                           &#8377;{PRICING.price.toLocaleString('en-IN')}
@@ -747,7 +811,8 @@ export default function CreateInvitePage() {
       <PaymentModal
         open={paymentOpen}
         amount={activePrice}
-        originalAmount={saleLive ? PRICING.price : null}
+        originalAmount={saleLive && savingsPercent > 0 ? PRICING.price : null}
+        templateId={template.id}
         summary={{ templateName: template.name, names: form.names.trim() || occasion.namesPlaceholder }}
         onClose={() => (saving ? null : setPaymentOpen(false))}
         onSuccess={handlePaymentSuccess}

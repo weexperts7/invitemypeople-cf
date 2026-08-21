@@ -45,12 +45,15 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
 
   // Reset to a clean slate every time the modal is (re)opened, so a second
   // checkout after closing the first mid-flow doesn't reopen mid-"success".
+  // Deliberately does NOT reset captchaToken: the widget below is mounted
+  // unconditionally (see render), so it's usually already minted a fresh
+  // token by the time the modal opens — throwing it away here would bring
+  // back the multi-second wait this whole arrangement exists to avoid.
   useEffect(() => {
     cancelledRef.current = !open
     if (open) {
       setStage('confirm')
       setErrorMessage(null)
-      setCaptchaToken(null)
     }
     return () => {
       cancelledRef.current = true
@@ -162,7 +165,26 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
   }
 
   return (
-    <AnimatePresence>
+    <>
+      {/* Mounted unconditionally (not gated on `open` or `stage`) and
+          deliberately outside the AnimatePresence below — invisible mode
+          means this never renders anything visible, so keeping it alive
+          for this component's whole lifetime (i.e. from when the builder
+          page first loads, since PaymentModal itself is always mounted —
+          see CreateInvitePage.jsx) lets Cloudflare's script load and its
+          risk check run in the background while the customer is still
+          filling out the form. By the time they open checkout, or hit
+          "Try Again" after a failed payment, a token is usually already
+          sitting there — the button enables instantly instead of the
+          multi-second wait it used to have every time. */}
+      <TurnstileWidget
+        ref={turnstileRef}
+        action="checkout"
+        onSuccess={setCaptchaToken}
+        onExpire={() => setCaptchaToken(null)}
+        onError={() => setCaptchaToken(null)}
+      />
+      <AnimatePresence>
       {open && (
         <motion.div
           className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/60 backdrop-blur-sm px-6"
@@ -243,14 +265,6 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
                         <span className="font-medium text-ink">{summary.names}</span>
                       </p>
                     </div>
-
-                    <TurnstileWidget
-                      ref={turnstileRef}
-                      action="checkout"
-                      onSuccess={setCaptchaToken}
-                      onExpire={() => setCaptchaToken(null)}
-                      onError={() => setCaptchaToken(null)}
-                    />
 
                     <motion.button
                       type="button"
@@ -347,6 +361,7 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   )
 }

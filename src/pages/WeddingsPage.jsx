@@ -8,6 +8,7 @@ import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDec
 import TemplateCard from '../components/TemplateCard'
 import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
 import { ROUTES_SEO } from '../data/routesSeo'
+import { SHOW_WEDDING_TEMPLATE_FILTERS } from '../data/featureFlags'
 
 const WHATSAPP_NUMBER = '918847044554'
 function getWhatsAppLink(message) {
@@ -64,35 +65,39 @@ export default function WeddingsPage() {
               built-in RSVP tracking on every single one.
             </p>
 
-            <div className="mx-auto max-w-lg">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name or tradition — Hindu, Muslim, Sikh…"
-                  className="w-full rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl py-3.5 pl-12 pr-5 text-sm text-ink placeholder:text-ink-soft/70 shadow-card focus:outline-none focus:ring-2 focus:ring-gold-soft"
-                />
-              </div>
-            </div>
+            {SHOW_WEDDING_TEMPLATE_FILTERS && (
+              <>
+                <div className="mx-auto max-w-lg">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search by name or tradition — Hindu, Muslim, Sikh…"
+                      className="w-full rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl py-3.5 pl-12 pr-5 text-sm text-ink placeholder:text-ink-soft/70 shadow-card focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                    />
+                  </div>
+                </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {WEDDING_TYPES.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setActiveWeddingType(type)}
-                  className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                    activeWeddingType === type
-                      ? 'border-rose bg-rose text-ivory shadow-card'
-                      : 'border-champagne-deep/50 bg-ivory/60 text-ink-soft hover:bg-champagne/40'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  {WEDDING_TYPES.map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setActiveWeddingType(type)}
+                      className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                        activeWeddingType === type
+                          ? 'border-rose bg-rose text-ivory shadow-card'
+                          : 'border-champagne-deep/50 bg-ivory/60 text-ink-soft hover:bg-champagne/40'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </section>
 

@@ -10,7 +10,6 @@ import {
   Clock,
   Copy,
   CreditCard,
-  Eye,
   Link as LinkIcon,
   Loader2,
   Mail,
@@ -28,7 +27,7 @@ import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateStyleSelector from '../components/builder/TemplateStyleSelector'
-import LiveInvitePreview from '../components/builder/LiveInvitePreview'
+import InvitePreviewPanel from '../components/builder/InvitePreviewPanel'
 import PhotoUploader from '../components/builder/PhotoUploader'
 import EventsListEditor from '../components/builder/EventsListEditor'
 import SongSearchPicker from '../components/builder/SongSearchPicker'
@@ -43,6 +42,7 @@ import { PRICING } from '../data/templatesData'
 import { getActivePrice, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
 import { getTemplatePrices } from '../utils/templatePriceApi'
+import { todayDateInputValue } from '../utils/todayDateInput'
 import { ROUTES_SEO } from '../data/routesSeo'
 
 const EMPTY_FORM = {
@@ -262,6 +262,8 @@ export default function CreateInvitePage() {
   const handleField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
+  const isPastDate = (dateStr) => Boolean(dateStr) && dateStr < todayDateInputValue()
+
   const missingRequired =
     submitAttempted &&
     (!form.names.trim() ||
@@ -270,6 +272,8 @@ export default function CreateInvitePage() {
       !form.hostName.trim() ||
       !form.hostEmail.trim() ||
       !form.hostPhone.trim())
+
+  const pastDateError = submitAttempted && isPastDate(form.date)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -281,7 +285,8 @@ export default function CreateInvitePage() {
       !form.venue.trim() ||
       !form.hostName.trim() ||
       !form.hostEmail.trim() ||
-      !form.hostPhone.trim()
+      !form.hostPhone.trim() ||
+      isPastDate(form.date)
     )
       return
     setPaymentOpen(true)
@@ -393,15 +398,12 @@ export default function CreateInvitePage() {
           ) : (
           <form onSubmit={handleSubmit} className="mx-auto max-w-6xl">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
-              {/* Preview comes first in the DOM so mobile visitors see the
-                  payoff immediately; on desktop it flips to a sticky right
-                  rail next to the form. */}
-              <div className="order-1 lg:order-2 lg:sticky lg:top-24">
-                <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink-soft">
-                  <Eye className="h-3.5 w-3.5 text-rose" />
-                  Live Preview
-                </div>
-                <LiveInvitePreview
+              {/* On desktop, a sticky right rail next to the form. On
+                  mobile, this renders no inline box at all — just a
+                  floating "Preview" button that opens the same live
+                  preview as a bottom sheet — see InvitePreviewPanel.jsx. */}
+              <div className="lg:order-2">
+                <InvitePreviewPanel
                   template={template}
                   values={form}
                   occasionId={occasionId}
@@ -409,13 +411,9 @@ export default function CreateInvitePage() {
                   events={events}
                   song={song}
                 />
-                <p className="mt-3 text-center text-xs text-ink-soft/80">
-                  Updates instantly as you type — scroll inside the phone to
-                  see the whole page, exactly how your guests will.
-                </p>
               </div>
 
-              <div className="order-2 lg:order-1 min-w-0 space-y-8">
+              <div className="lg:order-1 min-w-0 space-y-8">
                 <div className="rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl p-6 shadow-card sm:p-8">
                   <div className="mb-5 flex items-center gap-2">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose text-xs font-semibold text-ivory">
@@ -553,10 +551,16 @@ export default function CreateInvitePage() {
                           id="date"
                           type="date"
                           required
+                          min={todayDateInputValue()}
                           value={form.date}
                           onChange={handleField('date')}
                           className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                         />
+                        {pastDateError && (
+                          <p className="mt-1.5 text-xs text-red-500">
+                            Please choose a date that isn&rsquo;t in the past.
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor="time" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
@@ -766,17 +770,22 @@ export default function CreateInvitePage() {
                     disabled={saving}
                     whileHover={reduceMotion || saving ? undefined : { y: -2, scale: 1.01 }}
                     whileTap={saving ? undefined : { scale: 0.98 }}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-gold px-7 py-4 text-base font-semibold text-ink shadow-soft transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gold px-5 py-4 text-base font-semibold text-ink shadow-soft transition-transform disabled:opacity-70 disabled:cursor-not-allowed sm:px-7"
                   >
                     {saving ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                         Saving Your Invite&hellip;
                       </>
                     ) : (
                       <>
-                        <CreditCard className="h-4 w-4" />
-                        Proceed to Checkout — Generate My Invite
+                        <CreditCard className="h-4 w-4 shrink-0" />
+                        {/* Full copy needs real room to stay on one line —
+                            a shorter mobile-only label swaps in below
+                            `sm:` rather than letting this wrap to two
+                            lines on a phone-width button. */}
+                        <span className="sm:hidden">Generate My Invite</span>
+                        <span className="hidden sm:inline">Proceed to Checkout — Generate My Invite</span>
                       </>
                     )}
                   </motion.button>

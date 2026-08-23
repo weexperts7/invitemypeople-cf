@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
 // Coarse-pointer (touch) devices get the plain swipeable row too: the
@@ -44,6 +44,30 @@ export default function TemplateMarquee({
   const reduceMotion = useReducedMotion()
   const coarsePointer = useCoarsePointer()
   const [paused, setPaused] = useState(false)
+  const containerRef = useRef(null)
+  // Seeded from the viewport so the very first paint already repeats
+  // enough copies to avoid a flash of the empty-space bug this file is
+  // fixing; the ResizeObserver below corrects it once the real container
+  // (which is edge-to-edge, so usually == viewport width anyway) mounts.
+  const [containerWidth, setContainerWidth] = useState(
+    () => (typeof window !== 'undefined' ? window.innerWidth : 0),
+  )
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    // Deferred to the next frame: setting state straight from a
+    // ResizeObserver callback can re-trigger layout inside the same pass
+    // the browser is still measuring, which is exactly what throws the
+    // (harmless but noisy) "ResizeObserver loop completed with undelivered
+    // notifications" error — rAF lets this frame finish first.
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry.contentRect.width
+      window.requestAnimationFrame(() => setContainerWidth(width))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   if (!items.length) return null
 
@@ -67,11 +91,23 @@ export default function TemplateMarquee({
     )
   }
 
-  const duration = Math.max(items.length * secondsPerItem, 14)
-  const track = [...items, ...items]
+  // The seamless-loop trick (see header comment) needs each of the two
+  // copies to be at least as wide as the container itself — otherwise, at
+  // the start/end of the animation, the visible window runs past the end
+  // of a short copy and shows empty space (e.g. a 3-item filtered category
+  // like "Christian" is nowhere near wide enough to fill a desktop
+  // viewport). So each "copy" here is itself `items` repeated as many
+  // times as it takes to cover the measured container width, with a floor
+  // of 1 for the (rare) case a single copy already exceeds it.
+  const oneWidth = items.length * (itemWidth + gap)
+  const repeatCount = containerWidth > 0 ? Math.max(1, Math.ceil(containerWidth / oneWidth)) : 1
+  const copy = Array.from({ length: repeatCount }, () => items).flat()
+  const duration = Math.max(copy.length * secondsPerItem, 14)
+  const track = [...copy, ...copy]
 
   return (
     <div
+      ref={containerRef}
       className="overflow-hidden pt-2 pb-4"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -94,7 +130,7 @@ export default function TemplateMarquee({
             key={`${keyExtractor(item)}-${i}`}
             className="shrink-0"
             style={{ width: itemWidth, marginRight: gap }}
-            aria-hidden={i >= items.length}
+            aria-hidden={i >= copy.length}
           >
             {renderItem(item)}
           </div>

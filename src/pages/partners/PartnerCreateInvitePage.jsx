@@ -9,7 +9,6 @@ import {
   Check,
   Clock,
   Copy,
-  Eye,
   Link as LinkIcon,
   Loader2,
   Mail,
@@ -22,7 +21,7 @@ import {
 } from 'lucide-react'
 import SEO from '../../components/SEO'
 import TemplateStyleSelector from '../../components/builder/TemplateStyleSelector'
-import LiveInvitePreview from '../../components/builder/LiveInvitePreview'
+import InvitePreviewPanel from '../../components/builder/InvitePreviewPanel'
 import PhotoUploader from '../../components/builder/PhotoUploader'
 import EventsListEditor from '../../components/builder/EventsListEditor'
 import SongSearchPicker from '../../components/builder/SongSearchPicker'
@@ -30,6 +29,7 @@ import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { getBuilderTemplateById, getBuilderTemplatesForOccasion, getOccasion } from '../../data/builderTemplates'
 import { getMyCredits, createClientInvite } from '../../utils/partnerApi'
 import { SITE_URL } from '../../data/routesSeo'
+import { todayDateInputValue } from '../../utils/todayDateInput'
 
 const OCCASION_ID = 'wedding' // Partner Portal is wedding-only for now — see B2B-PARTNER-PORTAL-SETUP.md.
 
@@ -155,16 +155,20 @@ export default function PartnerCreateInvitePage() {
   const handleField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
+  const isPastDate = (dateStr) => Boolean(dateStr) && dateStr < todayDateInputValue()
+
   const isMissingRequired = () =>
     !form.names.trim() || !form.date || !form.venue.trim() || !form.clientEmail.trim() || !form.clientPhone.trim()
 
   const missingRequired = submitAttempted && isMissingRequired()
+  const pastDateError = submitAttempted && isPastDate(form.date)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitAttempted(true)
     setCreateError(null)
     if (isMissingRequired()) return
+    if (isPastDate(form.date)) return
     if (noCredits) return
 
     setCreating(true)
@@ -254,15 +258,13 @@ export default function PartnerCreateInvitePage() {
           ) : (
             <form onSubmit={handleSubmit} className="mx-auto max-w-6xl">
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
-                {/* Preview comes first in the DOM so mobile visitors see the
-                    payoff immediately; on desktop it flips to a sticky right
-                    rail next to the form — same layout as CreateInvitePage.jsx. */}
-                <div className="order-1 lg:order-2 lg:sticky lg:top-24">
-                  <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink-soft">
-                    <Eye className="h-3.5 w-3.5 text-rose" />
-                    Live Preview
-                  </div>
-                  <LiveInvitePreview
+                {/* On desktop, a sticky right rail next to the form. On
+                    mobile, this renders no inline box at all — just a
+                    floating "Preview" button that opens the same live
+                    preview as a bottom sheet — see InvitePreviewPanel.jsx
+                    (same layout as CreateInvitePage.jsx). */}
+                <div className="lg:order-2">
+                  <InvitePreviewPanel
                     template={template}
                     values={form}
                     occasionId={OCCASION_ID}
@@ -270,14 +272,11 @@ export default function PartnerCreateInvitePage() {
                     events={events}
                     song={song}
                     showRsvp={false}
+                    caption="Updates instantly as you type — this is exactly what your client’s guests will see."
                   />
-                  <p className="mt-3 text-center text-xs text-ink-soft/80">
-                    Updates instantly as you type — this is exactly what
-                    your client&rsquo;s guests will see.
-                  </p>
                 </div>
 
-                <div className="order-2 lg:order-1 min-w-0 space-y-8">
+                <div className="lg:order-1 min-w-0 space-y-8">
                   <div className="rounded-3xl border border-white/60 bg-ivory/60 backdrop-blur-xl p-6 shadow-card sm:p-8">
                     <div className="mb-5 flex items-center gap-2">
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose text-xs font-semibold text-ivory">
@@ -430,10 +429,16 @@ export default function PartnerCreateInvitePage() {
                             id="date"
                             type="date"
                             required
+                            min={todayDateInputValue()}
                             value={form.date}
                             onChange={handleField('date')}
                             className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                           />
+                          {pastDateError && (
+                            <p className="mt-1.5 text-xs text-red-500">
+                              Please choose a date that isn&rsquo;t in the past.
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label htmlFor="time" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
@@ -579,17 +584,22 @@ export default function PartnerCreateInvitePage() {
                       disabled={creating || noCredits}
                       whileHover={reduceMotion || creating || noCredits ? undefined : { y: -2, scale: 1.01 }}
                       whileTap={creating || noCredits ? undefined : { scale: 0.98 }}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-gold px-7 py-4 text-base font-semibold text-ink shadow-soft transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gold px-5 py-4 text-base font-semibold text-ink shadow-soft transition-transform disabled:opacity-70 disabled:cursor-not-allowed sm:px-7"
                     >
                       {creating ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                           Generating&hellip;
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-4 w-4" />
-                          Generate Invite (1 credit)
+                          <Sparkles className="h-4 w-4 shrink-0" />
+                          {/* Shorter mobile-only label — the full "(1
+                              credit)" wording needs more room than a
+                              phone-width button has without wrapping to
+                              two lines. */}
+                          <span className="sm:hidden">Generate Invite</span>
+                          <span className="hidden sm:inline">Generate Invite (1 credit)</span>
                         </>
                       )}
                     </motion.button>

@@ -40,6 +40,7 @@ import {
   generateHostToken,
   tokensMatch,
 } from './partners.js'
+import { isPastDate } from './invites.js'
 import {
   cleanPartnerRsvp,
   rowToPartnerWish,
@@ -635,6 +636,7 @@ export async function createClientInvite(req, res) {
     const brideParents = clean(body.brideParents, 200)
     if (!coupleNames) return res.status(400).json({ ok: false, error: 'coupleNames is required' })
     if (!weddingDate) return res.status(400).json({ ok: false, error: 'weddingDate is required' })
+    if (isPastDate(weddingDate)) return res.status(400).json({ ok: false, error: 'weddingDate cannot be in the past' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
     if (!clientEmail) return res.status(400).json({ ok: false, error: 'clientEmail is required' })
     if (!clientPhone) return res.status(400).json({ ok: false, error: 'clientPhone is required' })

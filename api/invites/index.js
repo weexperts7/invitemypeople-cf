@@ -5,7 +5,7 @@
 // has no writable, persistent filesystem to keep one on.
 import { slugify } from '../../src/utils/slugify.js'
 import { getSupabase } from '../_lib/supabase.js'
-import { clean, randomSlugSuffix, rowToInvite, generateHostToken, toEventDateColumn } from '../_lib/invites.js'
+import { clean, randomSlugSuffix, rowToInvite, generateHostToken, toEventDateColumn, isPastDate } from '../_lib/invites.js'
 import { MAX_PHOTOS } from '../../src/utils/photoUpload.js'
 import { cleanEvents } from '../../src/utils/cleanEvents.js'
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../../src/utils/email.js'
@@ -29,6 +29,7 @@ export default async function handler(req, res) {
     const hostPhone = clean(body.hostPhone, 30)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
+    if (isPastDate(date)) return res.status(400).json({ ok: false, error: 'date cannot be in the past' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })

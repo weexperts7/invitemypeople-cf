@@ -215,7 +215,7 @@ export default function InvitationExperience({
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ x: -2 }}
             whileTap={{ scale: 0.96 }}
-            className="fixed top-4 left-4 z-[70] flex items-center gap-2 rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl px-4 py-2 text-sm text-ink shadow-card"
+            className="fixed top-4 left-4 z-[70] hidden items-center gap-2 rounded-full border border-white/60 bg-ivory/70 backdrop-blur-xl px-4 py-2 text-sm text-ink shadow-card sm:flex"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Templates

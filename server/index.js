@@ -173,6 +173,16 @@ function clean(value, max) {
     .slice(0, max)
 }
 
+// True when `date` ("YYYY-MM-DD") parses and is strictly before today —
+// server-side backstop for the <input type="date" min=...> guard in
+// CreateInvitePage.jsx, since a client can always send a raw POST body that
+// skips the browser's date picker. Mirrors api/_lib/invites.js's isPastDate.
+function isPastDate(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date ?? ''))) return false
+  const today = new Date().toISOString().slice(0, 10)
+  return date < today
+}
+
 /** Same read-modify-write-via-queue discipline as the RSVP store, kept as
  * its own queue/file so a burst of invite saves can never interleave with
  * (or wait behind) a burst of RSVP saves. */
@@ -353,6 +363,7 @@ app.post('/api/invites', async (req, res) => {
     const hostPhone = clean(body.hostPhone, 30)
     if (!names) return res.status(400).json({ ok: false, error: 'names is required' })
     if (!date) return res.status(400).json({ ok: false, error: 'date is required' })
+    if (isPastDate(date)) return res.status(400).json({ ok: false, error: 'date cannot be in the past' })
     if (!venue) return res.status(400).json({ ok: false, error: 'venue is required' })
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })

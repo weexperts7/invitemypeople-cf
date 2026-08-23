@@ -4,6 +4,7 @@ import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Building2, LogOut
 import Logo from './Logo'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import PartnerAuthContext from '../context/PartnerAuthContext'
+import useBodyScrollLock from '../hooks/useBodyScrollLock'
 
 const PRIMARY_LINKS = [{ to: '/', label: 'Home', end: true }]
 const SECONDARY_LINKS = [
@@ -82,6 +83,12 @@ export default function SiteHeader() {
   const location = useLocation()
 
   const isOccasionActive = ALL_OCCASION_PATHS.includes(location.pathname)
+
+  // Lock page scroll while the mobile menu is open — it's a normal-flow
+  // panel (not a `fixed` overlay), so without this the page underneath
+  // still scrolls right along with it, letting a visitor scroll the menu
+  // out of view without ever closing it.
+  useBodyScrollLock(open)
 
   // Close the dropdown on an outside click, Escape, or whenever the route
   // changes (picking a link should always close it, even a same-path click).

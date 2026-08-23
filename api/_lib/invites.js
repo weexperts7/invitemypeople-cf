@@ -28,6 +28,18 @@ export function toEventDateColumn(date) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? '')) ? date : null
 }
 
+// True when `date` ("YYYY-MM-DD") parses and is strictly before today —
+// server-side backstop for the <input type="date" min=...> guard in
+// CreateInvitePage.jsx/PartnerCreateInvitePage.jsx, since a client can
+// always send a raw POST body that skips the browser's date picker.
+// Plain string comparison (not Date math) so it can't drift with timezone
+// offsets: "YYYY-MM-DD" sorts lexicographically the same as chronologically.
+export function isPastDate(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date ?? ''))) return false
+  const today = new Date().toISOString().slice(0, 10)
+  return date < today
+}
+
 // A private, unguessable per-invite token — the only thing standing between
 // "anyone with the shareable /i/:slug link" and "the host, who can see every
 // guest's email and RSVP details on /i/:slug/host/:hostToken". There's no

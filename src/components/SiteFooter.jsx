@@ -80,7 +80,8 @@ function LinkedInIcon({ className }) {
 
 const SOCIAL_LINKS = [
   { icon: InstagramIcon, label: 'Instagram', href: 'https://instagram.com/invitemypeople' },
-  { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
+  // Facebook hidden for now — no live page to link to yet.
+  // { icon: FacebookIcon, label: 'Facebook', href: 'https://facebook.com/invitemypeople' },
   // YouTube hidden for now — re-add when the channel's ready to link to.
   // { icon: YoutubeIcon, label: 'YouTube', href: 'https://youtube.com/@invitemypeople' },
 ]

@@ -12,7 +12,6 @@ import {
   IndianRupee,
   Leaf,
   Camera,
-  RefreshCw,
   LayoutTemplate,
   MessageCircle,
   Timer,
@@ -75,7 +74,6 @@ const HIGHLIGHTS = [
   { icon: IndianRupee, label: 'Cost-Effective' },
   { icon: Leaf, label: 'Eco-Friendly Design' },
   { icon: Camera, label: 'Event Highlights' },
-  { icon: RefreshCw, label: '2 Free Revisions' },
   { icon: LayoutTemplate, label: 'Ready-Made Templates' },
 ]
 
@@ -126,7 +124,7 @@ const COMPARISON_ROWS = [
     feature: 'Custom design',
     ours: {
       state: 'yes',
-      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion + 2 free revisions`,
+      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion`,
     },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
@@ -169,7 +167,7 @@ const FAQS = [
   {
     question: 'Can I make changes after I see my invitation?',
     answer:
-      'Yes — you can edit every detail live in the builder before you pay, so nothing is locked in until you\'re happy with it. And every invitation still includes 2 free revisions after it\'s live — just message us on WhatsApp with what you\'d like changed and we\'ll update it and send the link back.',
+      'Yes — you can edit every detail live in the builder before you pay, so nothing is locked in until you\'re happy with it.',
   },
   {
     question: 'Do my guests need to install an app?',

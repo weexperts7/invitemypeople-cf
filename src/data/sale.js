@@ -1,5 +1,5 @@
 // Time-boxed "Launch Special" sale config — the single source of truth for
-// the ₹2,100 introductory price (17 days from SALE_START). Imported by:
+// the ₹2,399 introductory price (17 days from SALE_START). Imported by:
 //  - the client: SaleBanner.jsx (the homepage announcement bar),
 //    TemplateCard.jsx, InvitationExperience.jsx/SatsangExperience.jsx/
 //    GaneshExperience.jsx's "Create Your Own" CTA, LandingPage.jsx's
@@ -20,7 +20,7 @@
 // bundle — see pricing.js's own comment.
 import { PRICING } from './pricing.js'
 
-export const SALE_PRICE = 2100
+export const SALE_PRICE = 2399
 
 // The window is always exactly SALE_DURATION_DAYS after SALE_START, so
 // rescheduling the sale is a one-line change to SALE_START — nothing else

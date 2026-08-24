@@ -242,8 +242,8 @@ export default function AboutPage() {
               <p className="text-ink-soft leading-relaxed text-base text-center sm:text-left">
                 Every invitation ships cost-effective, eco-friendly and
                 mobile-first, backed by ready-made templates across every
-                tradition, plus 2 free revisions. Pricing is all-inclusive,
-                with no per-guest or courier costs added on — a celebration
+                tradition. Pricing is all-inclusive, with no per-guest or
+                courier costs added on — a celebration
                 that's as unforgettable as the day itself never has to start
                 with a complicated setup.
               </p>

@@ -3,20 +3,18 @@
 // their own clients instead of paying per invite through the consumer
 // checkout (see src/data/sale.js for that flow).
 //
-// PLACEHOLDER PRICING: these three tiers exist so the purchase flow
-// (PartnerCreditsPage.jsx → POST /api/partners/purchase/create-order →
-// Razorpay Checkout → POST /api/partners/purchase/verify) has something
-// real to buy end-to-end. Swap in the actual tiers/pricing here once
-// they're decided — nothing else needs to change: both the server (re-
-// derives the charge from `id`, exactly like getActivePrice() in sale.js —
-// never trusts a client-sent amount) and the client import this one list,
-// and every purchase snapshots its own price/credits into
-// partner_credit_transactions at the time it's made, so changing a tier
-// here never rewrites past purchases' history.
+// These three tiers exist so the purchase flow (PartnerCreditsPage.jsx →
+// POST /api/partners/purchase/create-order → Razorpay Checkout →
+// POST /api/partners/purchase/verify) has something real to buy
+// end-to-end. Both the server (re-derives the charge from `id`, exactly
+// like getActivePrice() in sale.js — never trusts a client-sent amount)
+// and the client import this one list, and every purchase snapshots its
+// own price/credits into partner_credit_transactions at the time it's
+// made, so changing a tier here never rewrites past purchases' history.
 export const PARTNER_PACKAGES = [
-  { id: 'starter-10', label: 'Starter', credits: 10, pricePaise: 900000 }, // ₹9,000 — placeholder
-  { id: 'growth-50', label: 'Growth', credits: 50, pricePaise: 4000000 }, // ₹40,000 — placeholder
-  { id: 'scale-100', label: 'Scale', credits: 100, pricePaise: 7500000 }, // ₹75,000 — placeholder
+  { id: 'starter-5', label: 'Starter', credits: 5, pricePaise: 700000 }, // ₹7,000
+  { id: 'growth-15', label: 'Growth', credits: 15, pricePaise: 1800000 }, // ₹18,000
+  { id: 'scale-30', label: 'Scale', credits: 30, pricePaise: 3000000 }, // ₹30,000
 ]
 
 export function getPartnerPackageById(id) {

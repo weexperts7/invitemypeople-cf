@@ -43,6 +43,11 @@ const EMPTY_FORM = {
   venue: '',
   locationUrl: '',
   message: '',
+  // The short invocation above the couple's names (see WelcomeSplash.jsx's
+  // greeting.line — "Shubh Vivah", "Radhe Radhe", "Rab Rakha", ...). Falls
+  // back to the selected template's own stock line when left blank (see
+  // buildWeddingExperienceTemplate.js).
+  greetingLine: '',
   // "Family Details" — rendered as two cards under the couple's names on
   // the live invitation (see WelcomeSplash.jsx's couple.people).
   groomName: '',
@@ -184,6 +189,7 @@ export default function PartnerCreateInvitePage() {
         venue: form.venue.trim(),
         locationUrl: form.locationUrl.trim(),
         message: form.message.trim(),
+        greetingLine: form.greetingLine.trim(),
         groomName: form.groomName.trim(),
         groomParents: form.groomParents.trim(),
         brideName: form.brideName.trim(),
@@ -484,6 +490,26 @@ export default function PartnerCreateInvitePage() {
                           placeholder="Paste your Google Maps link"
                           className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                         />
+                      </div>
+
+                      <div>
+                        <label htmlFor="greetingLine" className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Sparkles className="h-3.5 w-3.5 text-rose" />
+                          Opening Greeting <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <input
+                          id="greetingLine"
+                          type="text"
+                          maxLength={80}
+                          value={form.greetingLine}
+                          onChange={handleField('greetingLine')}
+                          placeholder='e.g. "Shubh Vivah" or "Together With Love"'
+                          className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                        />
+                        <p className="mt-1.5 text-xs text-ink-soft">
+                          Shown just above the couple&rsquo;s names. Leave blank
+                          to use this template&rsquo;s own line.
+                        </p>
                       </div>
 
                       <div>

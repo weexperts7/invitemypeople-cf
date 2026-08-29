@@ -225,6 +225,10 @@ export default function LiveInvitePreview({
         venue: values.venue.trim() || template.example.venue,
         locationUrl: values.locationUrl,
         message: values.message,
+        // Opening greeting line — wedding-only (see CreateInvitePage.jsx);
+        // undefined for Ganesh Chaturthi's `values`, harmless since
+        // buildGaneshExperienceTemplate.js never reads it.
+        greetingLine: values.greetingLine,
         // "Family Details" — wedding-only in both CreateInvitePage.jsx and
         // PartnerCreateInvitePage.jsx; undefined for Ganesh Chaturthi's
         // `values`, which is harmless since buildGaneshExperienceTemplate.js

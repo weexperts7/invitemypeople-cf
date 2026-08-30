@@ -90,6 +90,7 @@ export function rowToPartnerInvite(row) {
     venue: row.venue,
     locationUrl: row.location_url,
     message: row.message,
+    greetingLine: row.greeting_line,
     photos: row.photos ?? [],
     events: row.events ?? [],
     bgSongTitle: row.bg_song_title,
@@ -186,6 +187,7 @@ export async function spendCreditForInvite(partnerId, {
   brideName,
   brideParents,
   hostToken,
+  greetingLine,
 }) {
   const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
     p_partner_id: partnerId,
@@ -211,6 +213,7 @@ export async function spendCreditForInvite(partnerId, {
     p_bride_name: brideName || null,
     p_bride_parents: brideParents || null,
     p_host_token: hostToken,
+    p_greeting_line: greetingLine || null,
   })
   if (error) throw error
   const row = Array.isArray(data) ? data[0] : data

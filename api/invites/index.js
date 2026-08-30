@@ -46,6 +46,7 @@ export default async function handler(req, res) {
       venue,
       location_url: clean(body.locationUrl, 500),
       message: clean(body.message, 2000),
+      greeting_line: clean(body.greetingLine, 80),
       amount: Number(body.amount) || 0,
       payment_id: clean(body.paymentId, 80),
       payment_status: body.paymentId ? 'paid' : 'pending',

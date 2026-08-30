@@ -79,6 +79,7 @@ export function rowToInvite(row) {
     venue: row.venue,
     locationUrl: row.location_url,
     message: row.message,
+    greetingLine: row.greeting_line,
     amount: row.amount,
     paymentId: row.payment_id,
     paymentStatus: row.payment_status,

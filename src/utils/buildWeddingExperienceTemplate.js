@@ -67,6 +67,19 @@ export function buildWeddingExperienceTemplate(invite, template) {
       invitationLine: invite.message?.trim() || template.connective,
       people,
     },
+    // The short invocation at the top of the hero (WelcomeSplash.jsx's
+    // greeting.line — "Shubh Vivah", "Radhe Radhe", "Rab Rakha", "Together
+    // With Love", ...). Same override shape as couple.invitationLine above:
+    // the buyer's own text wins when they typed one (see CreateInvitePage.jsx's
+    // "Opening Greeting" field), the template's own stock line otherwise.
+    // `symbol` (the Om/Ik Onkar/etc. glyph, when the template has one)
+    // deliberately never comes from the buyer — it's tied to that
+    // template's own tradition, and a free-text line paired with a
+    // mismatched glyph would read as a mistake, not personalization.
+    greeting: {
+      symbol: template.greeting?.symbol,
+      line: invite.greetingLine?.trim() || template.greeting?.line,
+    },
     ceremoniesHeading: 'Event Details',
     ceremonies: [mainEvent, ...additionalEvents],
     weddingDate: invite.time ? `${invite.date}T${invite.time}:00` : `${invite.date}T00:00:00`,

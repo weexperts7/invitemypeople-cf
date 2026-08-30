@@ -86,6 +86,7 @@ export default function PartnerInviteViewerPage() {
       venue: invite.venue,
       locationUrl: invite.locationUrl,
       message: invite.message,
+      greetingLine: invite.greetingLine,
       groomName: invite.groomName,
       groomParents: invite.groomParents,
       brideName: invite.brideName,

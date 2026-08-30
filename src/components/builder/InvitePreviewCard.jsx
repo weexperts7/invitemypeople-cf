@@ -17,6 +17,10 @@ export default function InvitePreviewCard({ template, values, bare = false }) {
   const time24 = values.time || example.time
   const venue = values.venue.trim() || example.venue
   const message = values.message.trim() || example.message
+  // `values.greetingLine` is undefined for non-wedding occasions (see
+  // CreateInvitePage.jsx) — `?.trim()` keeps that a no-op, same as every
+  // other wedding-only field this card reads from `values`.
+  const greetingLine = values.greetingLine?.trim() || greeting?.line
   const mapHref = values.locationUrl.trim() || mapsSearchUrl(venue)
 
   const dateLabel = formatInviteDate(isoDate)
@@ -61,7 +65,7 @@ export default function InvitePreviewCard({ template, values, bare = false }) {
           className="text-[11px] font-medium uppercase tracking-[0.3em]"
           style={{ color: palette.inkSoft }}
         >
-          {greeting?.line ?? name}
+          {greetingLine ?? name}
         </p>
 
         <span className="block h-px w-12" style={{ background: palette.goldSoft }} />

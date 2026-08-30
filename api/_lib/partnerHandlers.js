@@ -614,6 +614,7 @@ export async function createClientInvite(req, res) {
     const venue = clean(body.venue, 200)
     const locationUrl = clean(body.locationUrl, 500)
     const message = clean(body.message, 2000)
+    const greetingLine = clean(body.greetingLine, 80)
     const templateId = clean(body.templateId, 80)
     const photos = Array.isArray(body.photos)
       ? body.photos.filter((p) => typeof p === 'string').slice(0, MAX_PHOTOS).map((p) => clean(p, 500))
@@ -670,6 +671,7 @@ export async function createClientInvite(req, res) {
           brideName: brideName || null,
           brideParents: brideParents || null,
           hostToken: generateHostToken(),
+          greetingLine: greetingLine || null,
         })
         console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
 

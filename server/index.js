@@ -394,6 +394,7 @@ app.post('/api/invites', async (req, res) => {
         venue,
         locationUrl: clean(body.locationUrl, 500),
         message: clean(body.message, 2000),
+        greetingLine: clean(body.greetingLine, 80),
         amount: Number(body.amount) || 0,
         paymentId: clean(body.paymentId, 80),
         paymentStatus: body.paymentId ? 'paid' : 'pending',

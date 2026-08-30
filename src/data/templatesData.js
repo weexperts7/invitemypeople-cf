@@ -458,6 +458,69 @@ export const TEMPLATES = [
       inkSoft: '#c2b696',
     },
   },
+  {
+    id: 'royal-plum-curtain',
+    name: 'Royal Plum Curtain',
+    category: 'Royal',
+    weddingType: 'Hindu',
+    tags: ['Royal', 'Curtain Reveal', 'Interactive', 'Scratch Card'],
+    description:
+      'A royal plum-and-gold curtain parts on tap to reveal a couple lit by drifting gold particles, scratch-to-reveal venue cards, and a live countdown to the big day — a fully animated, GSAP-driven take on the traditional invite.',
+    isFlagship: true,
+    // Bespoke experience component, not the shared InvitationExperience
+    // body — see components/wedding/layoutRegistry.js and
+    // components/templates/RoyalPlumCurtainTemplate/. Mirrors the `layout`
+    // field GANESH_TEMPLATES/SATSANG_TEMPLATES already use for their own
+    // one-off designs (see ganeshTemplatesData.js's comment block).
+    // `motif`/`motifAccent` are deliberately omitted: the bespoke layout
+    // owns its entire visual language and never reads them, and
+    // CulturalMotif/FrameCorners/MotifBadge all no-op safely on an unset
+    // motif (used only by TemplateShowcase's catalog thumbnail below).
+    layout: 'royal-plum-curtain',
+    fonts: { serif: '"Cinzel", "Playfair Display", serif', script: '"Great Vibes", cursive' },
+    greeting: { symbol: 'ॐ', line: 'A Special Day Awaits' },
+    // The hero caricature RoyalPlumCurtainAdapter passes through as
+    // couple.caricatureUrl (see components/wedding/royal-plum-curtain/
+    // RoyalPlumCurtainAdapter.jsx) — a couple in royal purple-and-gold
+    // sherwani/lehenga, cropped tight and re-encoded to WebP (230KB,
+    // down from a 3.5MB source PNG) since this loads on every guest's
+    // phone, often over mobile data.
+    heroPhoto: { src: '/images/couples/royal-plum-caricature.webp', alt: 'Illustrated couple in royal purple and gold wedding attire' },
+    couple: {
+      names: 'Ananya & Vivaan',
+      invitationLine:
+        'Thank you for being a part of our special journey. Your love, blessings, and presence mean the world to us as we begin this new chapter together.',
+      people: [
+        { name: 'Ananya Malhotra', parents: 'Daughter of Mr. Rajesh & Mrs. Sunita Malhotra' },
+        { name: 'Vivaan Rathore', parents: 'Son of Mr. Arvind & Mrs. Kavita Rathore' },
+      ],
+    },
+    ceremoniesHeading: 'Wedding Events',
+    weddingDate: '2026-12-12T18:30:00',
+    ceremonies: [
+      { icon: Flower, title: 'Haldi Ceremony', date: 'December 10, 2026', time: '9:00 AM', venue: 'Rathore Family Residence, Jodhpur' },
+      { icon: Music, title: 'Sangeet Night', date: 'December 11, 2026', time: '7:00 PM', venue: 'Umaid Bhawan Lawns, Jodhpur' },
+      { icon: Heart, title: 'Wedding Pheras', date: 'December 12, 2026', time: '6:30 PM', venue: 'The Leela Palace, Jodhpur' },
+    ],
+    // A deliberately dark palette (unlike every other template's light
+    // ivory/linen/champagne progression) — TemplateShowcase.jsx's catalog
+    // thumbnail builds its gradient straight from these three, so the card
+    // itself previews the template's real royal-plum-and-gold look instead
+    // of a mismatched light background.
+    palette: {
+      ivory: '#2f0440',
+      linen: '#260433',
+      champagne: '#3d0855',
+      champagneDeep: '#c79526',
+      blush: '#3d0855',
+      blushDeep: '#e6ba47',
+      rose: '#f5d061',
+      gold: '#e6ba47',
+      goldSoft: '#f5d061',
+      ink: '#fff4d2',
+      inkSoft: '#e8c574',
+    },
+  },
 ]
 
 export const CATEGORIES = ['All', ...new Set(TEMPLATES.map((t) => t.category))]

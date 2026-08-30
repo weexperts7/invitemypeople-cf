@@ -1,0 +1,491 @@
+/*
+ * RoyalPlumCurtainTemplate — fully self-contained stylesheet.
+ *
+ * Everything here is scoped under `.rpc-root` so it cannot leak into, or be
+ * overridden by, the app's global CSS / Tailwind theme. This file also owns
+ * its own font-face imports (Playfair Display, Cinzel, Great Vibes, Inter,
+ * Montserrat) rather than relying on the app shell's <head> fonts, so the
+ * template renders correctly even if it's ever previewed in total isolation.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Inter:wght@400;500;600&family=Montserrat:wght@400;500;600;700&display=swap');
+
+.rpc-root {
+  --rpc-bg-deep: #100018;
+  --rpc-bg-mid: #2f0440;
+  --rpc-bg-top: #180224;
+  --rpc-curtain: #260433;
+  --rpc-gold-1: #f5d061;
+  --rpc-gold-2: #e6ba47;
+  --rpc-gold-3: #c79526;
+  --rpc-champagne: #fff4d2;
+  --rpc-champagne-soft: #e8c574;
+  --rpc-rose-gold: #e3b8a8;
+
+  --rpc-font-display: 'Playfair Display', 'Cinzel', Georgia, serif;
+  --rpc-font-royal: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --rpc-font-script: 'Great Vibes', cursive;
+  --rpc-font-sans: 'Montserrat', 'Inter', system-ui, sans-serif;
+  --rpc-font-ui: 'Inter', system-ui, sans-serif;
+
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100svh;
+  background: linear-gradient(180deg, var(--rpc-bg-top) 0%, var(--rpc-bg-mid) 50%, var(--rpc-bg-deep) 100%);
+  color: var(--rpc-champagne);
+  font-family: var(--rpc-font-ui);
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.rpc-root *,
+.rpc-root *::before,
+.rpc-root *::after {
+  box-sizing: inherit;
+}
+
+.rpc-root ::selection {
+  background: var(--rpc-gold-2);
+  color: var(--rpc-bg-deep);
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared decorative primitives                                        */
+/* ------------------------------------------------------------------ */
+
+.rpc-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(230, 186, 71, 0.25) 0%, transparent 70%);
+}
+
+.rpc-gold-text {
+  background: linear-gradient(180deg, var(--rpc-gold-1) 0%, var(--rpc-gold-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rpc-tracking {
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.rpc-corner {
+  position: absolute;
+  width: clamp(28px, 8vw, 48px);
+  height: clamp(28px, 8vw, 48px);
+  border: 2px solid var(--rpc-gold-2);
+  opacity: 0.85;
+}
+.rpc-corner--tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+.rpc-corner--tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+.rpc-corner--bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+.rpc-corner--br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+
+/* ------------------------------------------------------------------ */
+/* Envelope cover                                                      */
+/* ------------------------------------------------------------------ */
+
+.rpc-envelope {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpc-envelope-frame {
+  position: relative;
+  z-index: 2;
+  width: min(90vw, 380px);
+  padding: 48px 28px;
+  text-align: center;
+  border: 1.5px solid rgba(230, 186, 71, 0.55);
+  background: rgba(38, 4, 51, 0.55);
+  backdrop-filter: blur(2px);
+  box-shadow: 0 0 60px rgba(230, 186, 71, 0.12), inset 0 0 40px rgba(230, 186, 71, 0.05);
+}
+
+.rpc-seal-btn {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  border: 2px solid var(--rpc-gold-1);
+  background: radial-gradient(circle at 50% 40%, #4a0a63 0%, #260433 70%);
+  color: var(--rpc-gold-1);
+  font-family: var(--rpc-font-royal);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px rgba(230, 186, 71, 0.12), 0 0 30px rgba(230, 186, 71, 0.35);
+  transition: box-shadow 0.3s ease;
+}
+.rpc-seal-btn:hover {
+  box-shadow: 0 0 0 6px rgba(230, 186, 71, 0.18), 0 0 44px rgba(230, 186, 71, 0.5);
+}
+.rpc-seal-btn:focus-visible {
+  outline: 2px solid var(--rpc-champagne);
+  outline-offset: 4px;
+}
+/* Toggled by the open timeline right before the scale/pop tweens — the
+   already-declared `transition: box-shadow 0.3s ease` above animates this
+   smoothly in parallel with GSAP's scale tween, without GSAP having to
+   interpolate the box-shadow value itself (multi-layer box-shadow strings
+   are the one CSS value GSAP's string interpolation handles unreliably). */
+.rpc-seal-btn--charging {
+  box-shadow: 0 0 0 10px rgba(230, 186, 71, 0.22), 0 0 70px rgba(230, 186, 71, 0.75);
+}
+
+.rpc-curtain-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 30;
+  width: 51%;
+  overflow: hidden;
+  /* Base velvet color/depth (a vertical gradient for volume) plus a
+     repeating pleat pattern layered on top — alternating soft
+     highlight/shadow stripes read as folded fabric instead of a flat
+     panel. The pleats are wide/soft rather than sharp so they still look
+     like heavy velvet, not corrugated cardboard. */
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 3px,
+      rgba(0, 0, 0, 0.05) 3px,
+      rgba(0, 0, 0, 0.05) 34px,
+      rgba(255, 255, 255, 0.02) 34px,
+      rgba(255, 255, 255, 0.02) 38px
+    ),
+    linear-gradient(180deg, var(--rpc-curtain) 0%, #1a0224 100%);
+}
+
+/* A soft inner shadow along the seam edge sells thickness — the fabric
+   recedes into shadow right where the two panels meet, like real drapery
+   catching less light near the fold. */
+.rpc-curtain-panel--left::after,
+.rpc-curtain-panel--right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  pointer-events: none;
+}
+.rpc-curtain-panel--left::after {
+  right: 0;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.35));
+}
+.rpc-curtain-panel--right::after {
+  left: 0;
+  background: linear-gradient(270deg, transparent, rgba(0, 0, 0, 0.35));
+}
+
+/* Diagonal light sweep — GSAP animates `.rpc-curtain-shimmer`'s
+   translateX across each panel during the open tween, like a stage light
+   catching the fabric as it moves. Off-panel by default (translateX set
+   inline by the timeline), so it's invisible until animated. */
+.rpc-curtain-shimmer {
+  position: absolute;
+  inset: -20% -40%;
+  pointer-events: none;
+  background: linear-gradient(
+    75deg,
+    transparent 40%,
+    rgba(255, 244, 210, 0.16) 48%,
+    rgba(255, 244, 210, 0.3) 50%,
+    rgba(255, 244, 210, 0.16) 52%,
+    transparent 60%
+  );
+}
+
+/*
+ * The base rule above uses `top`/`bottom` only (not `inset`) so each
+ * modifier can own its horizontal offset outright. `inset: 0` would set
+ * `left` AND `right` to 0 on both panels; a modifier that only overrides
+ * `right` would leave the inherited `left: 0` in place too, and with
+ * left + right + width all specified, CSS's over-constrained resolution
+ * drops `right` — collapsing the right panel onto the left panel's spot
+ * instead of anchoring it to the right edge.
+ */
+.rpc-curtain-panel--left { left: 0; right: auto; border-right: 2px solid var(--rpc-gold-3); }
+.rpc-curtain-panel--right { right: 0; left: auto; border-left: 2px solid var(--rpc-gold-3); }
+
+/* A bright vertical seam of light — hidden (scaleX 0) until the GSAP
+   timeline briefly flares it just as the curtains begin to part, like
+   light breaking through the gap before the fabric fully draws back. */
+.rpc-curtain-seam-glow {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  z-index: 31;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 244, 210, 0.9) 45%,
+    rgba(255, 244, 210, 0.9) 55%,
+    transparent
+  );
+  filter: blur(3px);
+  box-shadow: 0 0 60px 20px rgba(245, 208, 97, 0.5);
+}
+
+/* One-shot sparkle burst spawned at the seal's position once the curtains
+   fully clear — the "ta-da" moment. Each dot is placed/spun via inline
+   style from the timeline (angle + distance), this class only owns the
+   shared look + fade timing. */
+.rpc-sparkle {
+  position: fixed;
+  z-index: 41;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rpc-gold-1);
+  box-shadow: 0 0 8px 2px rgba(245, 208, 97, 0.8);
+  pointer-events: none;
+}
+
+.rpc-curtain-filigree {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 2px solid rgba(230, 186, 71, 0.4);
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero section                                                        */
+/* ------------------------------------------------------------------ */
+
+.rpc-hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px 40px;
+  overflow: hidden;
+}
+
+.rpc-hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/*
+ * No border/background/box-shadow here on purpose — the couple cutout
+ * (a transparent-background WebP) floats directly against the page's own
+ * plum gradient and particle glow instead of sitting inside a bordered
+ * card. `overflow: hidden`/fixed aspect-ratio are gone too, since those
+ * existed only to crop the image to an arch — the image now renders at
+ * its own natural aspect ratio.
+ */
+.rpc-caricature-frame {
+  position: relative;
+  z-index: 1;
+  width: min(78vw, 340px);
+}
+
+/*
+ * A warm spotlight glow behind and above the couple — brighter and more
+ * concentrated than the page-wide `.rpc-glow` wash, centered high (top
+ * -12%, so it reads as light falling from above rather than a halo
+ * centered behind them) and gently breathing so it feels like a living
+ * light source, not a flat sticker backdrop. z-index -1 keeps it behind
+ * the <img> (implicit stacking order within this box) while the frame's
+ * own z-index: 1 still keeps the whole thing above the particle canvas
+ * layer behind it.
+ */
+.rpc-caricature-frame::before {
+  content: '';
+  position: absolute;
+  top: -12%;
+  left: 50%;
+  translate: -50% 0;
+  width: 150%;
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(245, 208, 97, 0.55) 0%,
+    rgba(245, 208, 97, 0.24) 38%,
+    transparent 72%
+  );
+  animation: rpc-spotlight-breathe 4.5s ease-in-out infinite;
+}
+
+@keyframes rpc-spotlight-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    scale: 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.08;
+  }
+}
+
+.rpc-caricature-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* A soft ambient shadow stands in for the old hard-edged frame border —
+     just enough to ground the cutout against the background rather than
+     read as flat, without boxing it in. */
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 32px rgba(230, 186, 71, 0.2));
+}
+
+.rpc-scroll-cue {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--rpc-gold-2);
+}
+
+/* ------------------------------------------------------------------ */
+/* Event cards + scratch card                                          */
+/* ------------------------------------------------------------------ */
+
+.rpc-events {
+  position: relative;
+  padding: 72px 20px;
+}
+
+.rpc-event-card {
+  position: relative;
+  margin: 0 auto 28px;
+  max-width: 420px;
+  border: 1px solid rgba(230, 186, 71, 0.35);
+  background: linear-gradient(180deg, rgba(47, 4, 64, 0.6), rgba(16, 0, 24, 0.6));
+  padding: 24px;
+}
+
+.rpc-scratch-wrap {
+  position: relative;
+  margin-top: 16px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(230, 186, 71, 0.4);
+}
+
+.rpc-scratch-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  touch-action: none;
+  cursor: grab;
+}
+
+.rpc-scratch-content {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  min-height: 140px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Countdown                                                           */
+/* ------------------------------------------------------------------ */
+
+.rpc-countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.rpc-countdown-box {
+  border: 1.5px solid var(--rpc-gold-2);
+  background: rgba(47, 4, 64, 0.5);
+  padding: 14px 4px;
+  text-align: center;
+}
+
+.rpc-countdown-value {
+  font-family: var(--rpc-font-royal);
+  font-size: clamp(22px, 6vw, 32px);
+  color: var(--rpc-gold-1);
+  line-height: 1;
+}
+
+.rpc-countdown-label {
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rpc-rose-gold);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer / hearts                                                     */
+/* ------------------------------------------------------------------ */
+
+.rpc-footer {
+  position: relative;
+  padding: 60px 20px 80px;
+  text-align: center;
+}
+
+.rpc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: var(--rpc-font-ui);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 1.5px solid var(--rpc-gold-2);
+  background: transparent;
+  color: var(--rpc-champagne);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+.rpc-btn:hover { transform: translateY(-2px); background: rgba(230, 186, 71, 0.1); }
+.rpc-btn:active { transform: translateY(0); }
+
+.rpc-btn--solid {
+  background: linear-gradient(180deg, var(--rpc-gold-1), var(--rpc-gold-3));
+  color: #2a0736;
+  border-color: transparent;
+}
+
+.rpc-heart-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
+}
+
+.rpc-heart {
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rpc-root * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

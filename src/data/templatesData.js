@@ -465,7 +465,7 @@ export const TEMPLATES = [
     weddingType: 'Hindu',
     tags: ['Royal', 'Curtain Reveal', 'Interactive', 'Scratch Card'],
     description:
-      'A royal plum-and-gold curtain parts on tap to reveal a couple lit by drifting gold particles, scratch-to-reveal venue cards, and a live countdown to the big day — a fully animated, GSAP-driven take on the traditional invite.',
+      'A royal plum-and-gold curtain parts on tap to reveal a couple lit by drifting gold particles, a scratch-to-reveal save-the-date, event details, RSVP, and a live countdown to the big day — a fully animated, GSAP-driven take on the traditional invite.',
     isFlagship: true,
     // Bespoke experience component, not the shared InvitationExperience
     // body — see components/wedding/layoutRegistry.js and

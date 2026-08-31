@@ -23,6 +23,7 @@ export function withRoyalPlumDefaults(
     gratitudeMessage: input?.gratitudeMessage || fallback.gratitudeMessage,
     whatsapp: { ...fallback.whatsapp, ...input?.whatsapp },
     shareUrl: input?.shareUrl ?? fallback.shareUrl,
+    invitationSlug: input?.invitationSlug ?? fallback.invitationSlug,
   }
 }
 

@@ -153,6 +153,14 @@ export default function ParticleHero({
       <canvas ref={canvasRef} className="rpc-hero-canvas" aria-hidden="true" />
 
       <p
+        aria-hidden="true"
+        className="rpc-gold-text rpc-om-symbol"
+        style={{ position: 'relative', zIndex: 1, fontFamily: 'var(--rpc-font-royal)', fontSize: 26, marginBottom: 8, textAlign: 'center', ...(reduceMotion ? { animation: 'none' } : {}) }}
+      >
+        ॐ
+      </p>
+
+      <p
         className="rpc-tracking"
         style={{ position: 'relative', zIndex: 1, fontFamily: 'var(--rpc-font-ui)', fontSize: 11, color: 'var(--rpc-rose-gold)', marginBottom: 18, textAlign: 'center' }}
       >

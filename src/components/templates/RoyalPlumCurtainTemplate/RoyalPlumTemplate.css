@@ -352,6 +352,22 @@
   filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 32px rgba(230, 186, 71, 0.2));
 }
 
+.rpc-om-symbol {
+  display: block;
+  animation: rpc-om-glow 3.4s ease-in-out infinite;
+}
+
+@keyframes rpc-om-glow {
+  0%, 100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 0 rgba(245, 208, 97, 0));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(245, 208, 97, 0.65));
+  }
+}
+
 .rpc-scroll-cue {
   position: absolute;
   bottom: 22px;
@@ -361,12 +377,68 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Event cards + scratch card                                          */
+/* Save-the-date scratch reveal                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The one, single scratch-to-reveal moment on this page — every other
+ * template that has this feature (see ScratchCardSection.jsx) uses it to
+ * reveal the wedding date once, not on every event card. See the events
+ * section below, which shows venue details plainly instead.
+ */
+.rpc-date-reveal {
+  position: relative;
+  padding: 56px 20px 8px;
+  text-align: center;
+}
+
+.rpc-date-reveal-wrap {
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.rpc-date-reveal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 180px;
+}
+
+.rpc-date-reveal-month {
+  font-family: var(--rpc-font-royal);
+  letter-spacing: 0.3em;
+  font-size: 14px;
+  color: var(--rpc-champagne);
+}
+
+.rpc-date-reveal-day {
+  font-family: var(--rpc-font-royal);
+  font-size: 56px;
+  line-height: 1;
+}
+
+.rpc-date-reveal-year {
+  font-family: var(--rpc-font-ui);
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: var(--rpc-rose-gold);
+}
+
+/* ------------------------------------------------------------------ */
+/* Event cards                                                         */
 /* ------------------------------------------------------------------ */
 
 .rpc-events {
   position: relative;
   padding: 72px 20px;
+}
+
+/* Venue details render plainly now — no scratch layer per event, see
+   rpc-date-reveal above for where that interaction lives instead. */
+.rpc-event-venue {
+  margin-top: 16px;
 }
 
 .rpc-event-card {
@@ -433,6 +505,166 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--rpc-rose-gold);
+}
+
+/* ------------------------------------------------------------------ */
+/* RSVP                                                                 */
+/* ------------------------------------------------------------------ */
+
+.rpc-rsvp {
+  position: relative;
+  padding: 64px 20px 8px;
+}
+
+.rpc-rsvp-card {
+  max-width: 460px;
+  text-align: center;
+}
+
+.rpc-rsvp-success {
+  padding: 20px 0;
+}
+
+.rpc-field {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.rpc-field-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rpc-rose-gold);
+  margin-bottom: 8px;
+}
+
+.rpc-input,
+.rpc-textarea,
+.rpc-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(230, 186, 71, 0.35);
+  background: rgba(16, 0, 24, 0.5);
+  color: var(--rpc-champagne);
+  font-family: var(--rpc-font-ui);
+  font-size: 14px;
+}
+
+.rpc-input::placeholder,
+.rpc-textarea::placeholder {
+  color: rgba(227, 184, 168, 0.5);
+}
+
+.rpc-input:focus,
+.rpc-textarea:focus,
+.rpc-select:focus {
+  outline: none;
+  border-color: var(--rpc-gold-2);
+  box-shadow: 0 0 0 3px rgba(230, 186, 71, 0.15);
+}
+
+.rpc-textarea {
+  resize: none;
+  font-family: inherit;
+}
+
+.rpc-radio-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.rpc-radio-option {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid rgba(230, 186, 71, 0.3);
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--rpc-rose-gold);
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.rpc-radio-option--active {
+  border-color: var(--rpc-gold-2);
+  background: rgba(230, 186, 71, 0.12);
+  color: var(--rpc-champagne);
+}
+
+.rpc-radio-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rpc-divider-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+}
+.rpc-divider-label::before,
+.rpc-divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(230, 186, 71, 0.3);
+}
+
+.rpc-error-box {
+  border: 1px solid rgba(220, 90, 90, 0.4);
+  background: rgba(220, 90, 90, 0.08);
+  color: var(--rpc-champagne);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.rpc-btn--block {
+  width: 100%;
+  justify-content: center;
+}
+.rpc-btn--block:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Wishes Wall                                                         */
+/* ------------------------------------------------------------------ */
+
+.rpc-wishes {
+  position: relative;
+  padding: 56px 20px 8px;
+}
+
+.rpc-wish-card {
+  max-width: 420px;
+  margin: 0 auto 14px;
+  border: 1px solid rgba(230, 186, 71, 0.3);
+  background: linear-gradient(180deg, rgba(47, 4, 64, 0.5), rgba(16, 0, 24, 0.5));
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.rpc-wish-name {
+  font-family: var(--rpc-font-royal);
+  color: var(--rpc-champagne);
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.rpc-wish-message {
+  font-size: 13px;
+  color: var(--rpc-rose-gold);
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* ------------------------------------------------------------------ */

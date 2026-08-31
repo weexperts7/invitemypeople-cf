@@ -49,15 +49,6 @@ export default function RoyalPlumCurtainAdapter({ template, invitationSlug, onOp
   const [nameA, nameB] = splitCoupleNames(template?.couple?.names)
   const people = template?.couple?.people ?? []
 
-  // RSVP/Wishes Wall are not part of this bespoke layout yet — every other
-  // wedding template collects both (see InvitationExperience.jsx's
-  // RsvpForm/WishesWall), so this is a real, known gap for this template
-  // specifically until someone builds RoyalPlum-styled equivalents.
-  // `invitationSlug` is accepted here (same signature every other bespoke
-  // layout uses) so wiring that in later is a same-file change, not a new
-  // one threaded through the registry/adapter again.
-  void invitationSlug
-
   return (
     <RoyalPlumTemplate
       onOpen={onOpen}
@@ -79,6 +70,7 @@ export default function RoyalPlumCurtainAdapter({ template, invitationSlug, onOp
         events: toRoyalPlumEvents(template?.ceremonies),
         gratitudeMessage: template?.couple?.invitationLine,
         shareUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        invitationSlug,
         whatsapp: {
           message: `You're lovingly invited to the wedding of ${template?.couple?.names ?? 'our'}! 💛 Join us as we begin our forever. {link}`,
         },

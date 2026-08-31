@@ -12,6 +12,8 @@ import ParticleHero from './components/ParticleHero'
 import ScratchCard from './components/ScratchCard'
 import CountdownTimer from './components/CountdownTimer'
 import LoveHearts from './components/LoveHearts'
+import RoyalPlumRsvpForm from './components/RoyalPlumRsvpForm'
+import RoyalPlumWishesWall from './components/RoyalPlumWishesWall'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -53,6 +55,18 @@ function formatWeddingDateLabel(iso: string) {
   }
 }
 
+const MONTHS = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+]
+
+/** Month/day/year split for the scratch-to-reveal save-the-date card below. */
+function getDateParts(iso: string) {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return { month: '', day: '', year: '' }
+  return { month: MONTHS[d.getMonth()], day: String(d.getDate()).padStart(2, '0'), year: String(d.getFullYear()) }
+}
+
 /**
  * RoyalPlumCurtainTemplate — a standalone, plug-and-play luxury Indian
  * wedding invite. Renders the full user flow: curtain-opening envelope →
@@ -72,6 +86,7 @@ export default function RoyalPlumTemplate({ data, onOpen, reduceMotion }: RoyalP
   const [curtainsOpened, setCurtainsOpened] = useState(false)
 
   const dateLabel = formatWeddingDateLabel(resolved.weddingDateISO)
+  const dateParts = getDateParts(resolved.weddingDateISO)
   const whatsappHref = buildWhatsAppShareLink(resolved)
 
   // The hero is unconditionally mounted from the start — it sits in normal
@@ -166,6 +181,21 @@ export default function RoyalPlumTemplate({ data, onOpen, reduceMotion }: RoyalP
         reduceMotion={reduceMotion}
       />
 
+      <section className="rpc-date-reveal" data-rpc-reveal aria-label="Save the date">
+        <p className="rpc-tracking" style={{ textAlign: 'center', fontSize: 11, color: 'var(--rpc-rose-gold)', marginBottom: 16 }}>
+          Scratch to reveal our date
+        </p>
+        <div className="rpc-date-reveal-wrap">
+          <ScratchCard revealThreshold={0.5}>
+            <div className="rpc-date-reveal-content">
+              <span className="rpc-date-reveal-month">{dateParts.month}</span>
+              <span className="rpc-date-reveal-day rpc-gold-text">{dateParts.day}</span>
+              <span className="rpc-date-reveal-year">{dateParts.year}</span>
+            </div>
+          </ScratchCard>
+        </div>
+      </section>
+
       <section className="rpc-events" data-rpc-reveal aria-label="Event details">
         <h3
           className="rpc-gold-text"
@@ -188,7 +218,7 @@ export default function RoyalPlumTemplate({ data, onOpen, reduceMotion }: RoyalP
             <p style={{ fontSize: 12, color: 'var(--rpc-rose-gold)', margin: '0 0 2px' }}>{event.timing}</p>
             <p style={{ fontSize: 12, color: 'var(--rpc-rose-gold)', margin: 0 }}>{event.dateLabel}</p>
 
-            <ScratchCard revealThreshold={0.35}>
+            <div className="rpc-event-venue">
               <p style={{ fontFamily: 'var(--rpc-font-royal)', fontSize: 14, color: 'var(--rpc-champagne)', margin: '0 0 6px' }}>
                 {event.venue.name}
               </p>
@@ -213,7 +243,7 @@ export default function RoyalPlumTemplate({ data, onOpen, reduceMotion }: RoyalP
               >
                 Get Directions →
               </a>
-            </ScratchCard>
+            </div>
           </div>
         ))}
       </section>
@@ -224,6 +254,10 @@ export default function RoyalPlumTemplate({ data, onOpen, reduceMotion }: RoyalP
         </p>
         <CountdownTimer targetISO={resolved.weddingDateISO} />
       </section>
+
+      <RoyalPlumRsvpForm slug={resolved.invitationSlug} />
+
+      <RoyalPlumWishesWall slug={resolved.invitationSlug} />
 
       <footer className="rpc-footer" data-rpc-reveal>
         <p

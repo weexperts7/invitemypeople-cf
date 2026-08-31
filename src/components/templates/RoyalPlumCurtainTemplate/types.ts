@@ -66,6 +66,16 @@ export interface RoyalPlumTemplateData {
   whatsapp: RoyalPlumShareConfig
   /** URL of the page itself, used to build the share message and copy link. */
   shareUrl?: string
+  /**
+   * The real invite's slug, e.g. "ananya-vivaan" — required for the RSVP
+   * form and Wishes Wall to submit/load against `/api/rsvps` and
+   * `/api/wishes` (both key everything off this, same as every other
+   * template's RsvpForm/WishesWall). Left undefined, both sections still
+   * render but every submit/fetch will fail against an unknown slug — same
+   * "known gap until wired" behavior every bespoke layout has before its
+   * caller passes a real one.
+   */
+  invitationSlug?: string
 }
 
 export interface RoyalPlumShareConfig extends RoyalPlumWhatsAppShare {}
@@ -80,6 +90,7 @@ export type RoyalPlumTemplateDataInput = {
   gratitudeMessage?: string
   whatsapp?: Partial<RoyalPlumWhatsAppShare>
   shareUrl?: string
+  invitationSlug?: string
 }
 
 export interface RoyalPlumTemplateProps {

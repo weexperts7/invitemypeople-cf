@@ -62,6 +62,7 @@ export const royalPlumMockData: RoyalPlumTemplateData = {
       'You are lovingly invited to the wedding of Ananya & Vivaan! 💛 Join us as we begin our forever. {link}',
   },
   shareUrl: 'https://www.invitemypeople.com/i/ananya-vivaan',
+  invitationSlug: 'ananya-vivaan',
 }
 
 export default royalPlumMockData

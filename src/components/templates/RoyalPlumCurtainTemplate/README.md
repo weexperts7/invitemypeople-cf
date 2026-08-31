@@ -19,10 +19,14 @@ RoyalPlumCurtainTemplate/
 └── components/
     ├── CurtainEnvelope.tsx    # Step A — seal button + sliding curtain reveal
     ├── ParticleHero.tsx       # Step B — bobbing caricature + canvas light orbs
-    ├── ScratchCard.tsx        # Step C — scratch-to-reveal canvas
+    ├── ScratchCard.tsx        # Step C — scratch-to-reveal canvas, used once (see below)
     ├── CountdownTimer.tsx     # Step D — live Days/Hours/Min/Sec countdown
-    └── LoveHearts.tsx         # Step D — click-to-float heart particles
+    ├── LoveHearts.tsx         # Step D — click-to-float heart particles
+    ├── RoyalPlumRsvpForm.tsx  # Step E — RSVP form, posts to /api/rsvps
+    └── RoyalPlumWishesWall.tsx # Step F — reads back guest wishes from /api/wishes
 ```
+
+Event cards show venue details plainly — `ScratchCard` is used exactly once on the page, to reveal the wedding date, matching how the site's other (non-bespoke) wedding templates use their own `ScratchCardSection`: a single reveal moment, not one per event.
 
 ## Dependencies added
 

@@ -18,12 +18,19 @@ interface ScratchCardProps {
  * downsampled pixel scan, and once the threshold is crossed, GSAP takes over
  * to fade out whatever's left with a small celebratory sparkle burst.
  */
+const BRUSH_RADIUS = 26
+
 export default function ScratchCard({ children, revealThreshold = 0.35, onRevealed }: ScratchCardProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sparkleRef = useRef<HTMLDivElement>(null)
   const isDrawingRef = useRef(false)
   const revealedRef = useRef(false)
+  // The last point erased in the current stroke — `null` between strokes
+  // (pointer up, or the very start of a new one) so scratchAt knows to
+  // stamp a single dot rather than draw a line from a stale, unrelated
+  // point left over from wherever the previous stroke ended.
+  const lastPointRef = useRef<{ x: number; y: number } | null>(null)
   const [revealed, setRevealed] = useState(false)
 
   const { contextSafe } = useGSAP({ scope: wrapRef })
@@ -108,6 +115,14 @@ export default function ScratchCard({ children, revealThreshold = 0.35, onReveal
     return total ? transparent / total : 0
   }, [])
 
+  // Stamping an isolated circle at each pointermove sample (the old
+  // approach) leaves visible gaps whenever the pointer travels farther
+  // between two samples than the brush's own diameter — which, at normal
+  // scratch speed, is most of the time — so the erased trail reads as a
+  // dotted line instead of a continuous scratch. Stroking a round-capped
+  // line from the previous point to this one fills that gap solidly, same
+  // as every real scratch-card implementation (and how a brush tool works
+  // in any paint program).
   const scratchAt = useCallback(
     (clientX: number, clientY: number) => {
       const canvas = canvasRef.current
@@ -119,9 +134,24 @@ export default function ScratchCard({ children, revealThreshold = 0.35, onReveal
       if (!ctx) return
 
       ctx.globalCompositeOperation = 'destination-out'
-      ctx.beginPath()
-      ctx.arc(x, y, 26, 0, Math.PI * 2)
-      ctx.fill()
+      const last = lastPointRef.current
+      if (last) {
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.lineWidth = BRUSH_RADIUS * 2
+        ctx.beginPath()
+        ctx.moveTo(last.x, last.y)
+        ctx.lineTo(x, y)
+        ctx.stroke()
+      } else {
+        // First point of a stroke — nothing to draw a line from yet, so
+        // stamp a single dot (a zero-length stroke doesn't reliably paint
+        // in every browser even with round caps).
+        ctx.beginPath()
+        ctx.arc(x, y, BRUSH_RADIUS, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      lastPointRef.current = { x, y }
 
       const fraction = getScratchedFraction(canvas)
       if (fraction >= revealThreshold) {
@@ -134,15 +164,23 @@ export default function ScratchCard({ children, revealThreshold = 0.35, onReveal
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (revealedRef.current) return
     isDrawingRef.current = true
+    lastPointRef.current = null
     ;(e.target as HTMLCanvasElement).setPointerCapture(e.pointerId)
     scratchAt(e.clientX, e.clientY)
   }
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current) return
-    scratchAt(e.clientX, e.clientY)
+    // The browser batches several real hardware samples into one React
+    // pointermove event; replaying all of them (not just the latest) keeps
+    // fast scratches from skipping segments between samples.
+    const events = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent]
+    for (const ev of events) {
+      scratchAt(ev.clientX, ev.clientY)
+    }
   }
   const handlePointerUp = () => {
     isDrawingRef.current = false
+    lastPointRef.current = null
   }
 
   return (

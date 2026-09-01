@@ -26,10 +26,11 @@ export const SALE_PRICE = 2399
 // rescheduling the sale is a one-line change to SALE_START — nothing else
 // below needs updating.
 export const SALE_START = '2026-08-09T00:00:00+05:30'
-// Was 17 days; extended by 8 more (still counted from the same
-// SALE_START, so the original Aug 9 start date is untouched) — new
-// end-of-sale is Sep 3 instead of Aug 26.
-const SALE_DURATION_DAYS = 25
+// Was 17 days, then extended by 8 more to 25 (end-of-sale Sep 3), and now
+// by another 7 to 32 — still counted from the same SALE_START, so the
+// original Aug 9 start date is untouched — new end-of-sale is Sep 10
+// instead of Sep 3.
+const SALE_DURATION_DAYS = 32
 export const SALE_END = new Date(
   new Date(SALE_START).getTime() + SALE_DURATION_DAYS * 24 * 60 * 60 * 1000,
 ).toISOString()

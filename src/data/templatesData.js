@@ -23,6 +23,87 @@ export { PRICING } from './pricing.js'
 //   WelcomeSplash. symbol is optional (Western-style templates omit it).
 export const TEMPLATES = [
   {
+    id: 'mahogany-seal',
+    name: 'Mahogany Seal',
+    category: 'Luxury',
+    weddingType: 'Hindu',
+    tags: ['Luxury', 'Cinematic', 'Caricature Video', 'Wax Seal'],
+    description:
+      'A cinematic dark-mahogany intro — a rope-pull envelope video behind a 3D red wax seal — opens into a gold-on-cream dashboard with a couple hero, live countdown, itinerary, scratch-to-reveal date, gallery and RSVP, finished off with your own hand-animated caricature video.',
+    isFlagship: true,
+    // Bespoke experience component, same mechanism as royal-plum-curtain
+    // just above — see components/wedding/layoutRegistry.js and
+    // components/wedding/mahogany-seal/MahoganySealAdapter.jsx. `motif`/
+    // `motifAccent` deliberately omitted for the same reason royal-plum-curtain's
+    // own comment gives: the bespoke layout owns its entire visual
+    // language, and CulturalMotif/FrameCorners/MotifBadge all no-op safely
+    // on an unset motif (used only by TemplateShowcase's catalog thumbnail
+    // below).
+    layout: 'mahogany-seal',
+    // This template's caricature intro video is bespoke, hand-produced
+    // work, not something the self-service builder (`/create`) can
+    // generate, so there's no instant Razorpay checkout to send anyone to.
+    // `hasOwnCreateCta` tells InvitationExperience.jsx to skip its own
+    // generic "Create Your Own — ₹X" bar (which would otherwise send
+    // buyers to the wrong, incompatible checkout) since MahoganySealTemplate
+    // already renders its own — a WhatsApp chat, opened straight away for
+    // an instant lead, not a details form (see MahoganySealTemplate.tsx's
+    // own comment). `customizeWhatsAppMessage` is the matching override for
+    // TemplateCard.jsx's "Customize" button on the listing grid — same
+    // WhatsApp-first behavior there too, rather than the site-wide
+    // `buildCreateLink()` every other template's Customize button uses.
+    // The detailed form our team sends back after that first reply
+    // (MahoganySealCreatePage.tsx, at `/mahogany-seal/create`) is never
+    // linked from here automatically.
+    hasOwnCreateCta: true,
+    customizeWhatsAppMessage: "Hi! I'd love to create my own Mahogany Seal wedding invitation ✨",
+    // Its own fixed price, not the global launch-sale/PRICING.price every
+    // self-serve-checkout template shows (see TemplateCard.jsx's own
+    // comment on `originalPrice`/`salePrice`) — this template's bespoke
+    // caricature video costs more to produce, and its price isn't tied to
+    // the site-wide sale window since checkout never happens through
+    // Razorpay at all.
+    originalPrice: 9000,
+    salePrice: 3900,
+    fonts: { serif: '"Playfair Display", "Cormorant Garamond", serif', script: '"Great Vibes", cursive' },
+    greeting: { line: 'Together With Joy' },
+    couple: { names: 'Shaya & Rehaan' },
+    // With no `motif` to draw from, TemplateShowcase's usual palette-and-
+    // typography card would tell a browser nothing about the one thing
+    // that actually sets this template apart — a real, animated 3D
+    // caricature of the couple, not a flat illustration like every other
+    // template. `cardImage` opts the catalog thumbnail into showing that
+    // caricature photo directly instead (see TemplateShowcase.jsx's own
+    // comment) — the same still frame CoupleHero.tsx shows live, cropped
+    // from the intro video (see mockData.ts's own comment on it).
+    // `previewBadge` stamps an extra "3D Caricature Video" chip onto the
+    // card (see TemplateCard.jsx) so that's obvious even at a glance,
+    // before a browser has scrolled the card into clear view.
+    cardImage: {
+      src: '/images/mahogany-seal/couple-portrait.jpg',
+      alt: 'Illustrated 3D Pixar-style caricature of the couple, from the animated intro video',
+    },
+    previewBadge: '3D Caricature Video',
+    // Still used as this card's text colors (couple-name script, template
+    // name) over the photo above, and as the fallback for any other UI
+    // that reads a template's palette generically — kept in sync with
+    // MahoganySealTemplate.css's own --mst-* custom properties (dark
+    // mahogany through to warm gold).
+    palette: {
+      ivory: '#1a100d',
+      linen: '#150b09',
+      champagne: '#2c1d18',
+      champagneDeep: '#8a6a1f',
+      blush: '#3d2820',
+      blushDeep: '#d4af37',
+      rose: '#f2d675',
+      gold: '#d4af37',
+      goldSoft: '#f2d675',
+      ink: '#fbf3e3',
+      inkSoft: '#c9b38a',
+    },
+  },
+  {
     id: 'rajasthani-royal',
     name: 'Rajasthani Royal',
     category: 'Royal',
@@ -112,87 +193,6 @@ export const TEMPLATES = [
       goldSoft: '#ffcf3f',
       ink: '#4a0b18',
       inkSoft: '#8a3b4a',
-    },
-  },
-  {
-    id: 'mahogany-seal',
-    name: 'Mahogany Seal',
-    category: 'Luxury',
-    weddingType: 'Hindu',
-    tags: ['Luxury', 'Cinematic', 'Caricature Video', 'Wax Seal'],
-    description:
-      'A cinematic dark-mahogany intro — a rope-pull envelope video behind a 3D red wax seal — opens into a gold-on-cream dashboard with a couple hero, live countdown, itinerary, scratch-to-reveal date, gallery and RSVP, finished off with your own hand-animated caricature video.',
-    isFlagship: true,
-    // Bespoke experience component, same mechanism as royal-plum-curtain
-    // just above — see components/wedding/layoutRegistry.js and
-    // components/wedding/mahogany-seal/MahoganySealAdapter.jsx. `motif`/
-    // `motifAccent` deliberately omitted for the same reason royal-plum-curtain's
-    // own comment gives: the bespoke layout owns its entire visual
-    // language, and CulturalMotif/FrameCorners/MotifBadge all no-op safely
-    // on an unset motif (used only by TemplateShowcase's catalog thumbnail
-    // below).
-    layout: 'mahogany-seal',
-    // This template's caricature intro video is bespoke, hand-produced
-    // work, not something the self-service builder (`/create`) can
-    // generate, so there's no instant Razorpay checkout to send anyone to.
-    // `hasOwnCreateCta` tells InvitationExperience.jsx to skip its own
-    // generic "Create Your Own — ₹X" bar (which would otherwise send
-    // buyers to the wrong, incompatible checkout) since MahoganySealTemplate
-    // already renders its own — a WhatsApp chat, opened straight away for
-    // an instant lead, not a details form (see MahoganySealTemplate.tsx's
-    // own comment). `customizeWhatsAppMessage` is the matching override for
-    // TemplateCard.jsx's "Customize" button on the listing grid — same
-    // WhatsApp-first behavior there too, rather than the site-wide
-    // `buildCreateLink()` every other template's Customize button uses.
-    // The detailed form our team sends back after that first reply
-    // (MahoganySealCreatePage.tsx, at `/mahogany-seal/create`) is never
-    // linked from here automatically.
-    hasOwnCreateCta: true,
-    customizeWhatsAppMessage: "Hi! I'd love to create my own Mahogany Seal wedding invitation ✨",
-    // Its own fixed price, not the global launch-sale/PRICING.price every
-    // self-serve-checkout template shows (see TemplateCard.jsx's own
-    // comment on `originalPrice`/`salePrice`) — this template's bespoke
-    // caricature video costs more to produce, and its price isn't tied to
-    // the site-wide sale window since checkout never happens through
-    // Razorpay at all.
-    originalPrice: 9000,
-    salePrice: 3900,
-    fonts: { serif: '"Playfair Display", "Cormorant Garamond", serif', script: '"Great Vibes", cursive' },
-    greeting: { line: 'Together With Joy' },
-    couple: { names: 'Shaya & Rehaan' },
-    // With no `motif` to draw from, TemplateShowcase's usual palette-and-
-    // typography card would tell a browser nothing about the one thing
-    // that actually sets this template apart — a real, animated 3D
-    // caricature of the couple, not a flat illustration like every other
-    // template. `cardImage` opts the catalog thumbnail into showing that
-    // caricature photo directly instead (see TemplateShowcase.jsx's own
-    // comment) — the same still frame CoupleHero.tsx shows live, cropped
-    // from the intro video (see mockData.ts's own comment on it).
-    // `previewBadge` stamps an extra "3D Caricature Video" chip onto the
-    // card (see TemplateCard.jsx) so that's obvious even at a glance,
-    // before a browser has scrolled the card into clear view.
-    cardImage: {
-      src: '/images/mahogany-seal/couple-portrait.jpg',
-      alt: 'Illustrated 3D Pixar-style caricature of the couple, from the animated intro video',
-    },
-    previewBadge: '3D Caricature Video',
-    // Still used as this card's text colors (couple-name script, template
-    // name) over the photo above, and as the fallback for any other UI
-    // that reads a template's palette generically — kept in sync with
-    // MahoganySealTemplate.css's own --mst-* custom properties (dark
-    // mahogany through to warm gold).
-    palette: {
-      ivory: '#1a100d',
-      linen: '#150b09',
-      champagne: '#2c1d18',
-      champagneDeep: '#8a6a1f',
-      blush: '#3d2820',
-      blushDeep: '#d4af37',
-      rose: '#f2d675',
-      gold: '#d4af37',
-      goldSoft: '#f2d675',
-      ink: '#fbf3e3',
-      inkSoft: '#c9b38a',
     },
   },
   {

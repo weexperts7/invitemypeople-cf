@@ -1,0 +1,309 @@
+/*
+ * MahoganySealTemplate — scoped styles. Everything layout/spacing/color
+ * related lives as Tailwind utility classes directly in the .tsx files, per
+ * the brief ("Tailwind CSS utility classes exclusively"). This file only
+ * holds what Tailwind utility classes genuinely can't express:
+ *   1. The Google Fonts @import (no Tailwind equivalent).
+ *   2. @keyframes definitions (Tailwind's `animate-[name_1s_...]` arbitrary
+ *      syntax can *reference* a keyframe, but something still has to
+ *      *define* it).
+ *   3. The wax seal's layered radial-gradient + multi-shadow texture and
+ *      the film-grain overlay — technically expressible as one giant
+ *      Tailwind arbitrary-value string, but unreadable at that size; a
+ *      named class is the more honest tradeoff.
+ *
+ * Everything is namespaced under `.mst-` so it can never collide with the
+ * host app's own classes or with RoyalPlumCurtainTemplate's `.rpc-`
+ * classes sitting right next to this one.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Cinzel:wght@500;600&family=Great+Vibes&display=swap');
+
+.mst-root {
+  --mst-mahogany-950: #1a100d;
+  --mst-mahogany-900: #2c1d18;
+  --mst-mahogany-800: #3d2820;
+  --mst-mahogany-700: #4f3229;
+  --mst-gold: #d4af37;
+  --mst-gold-soft: #f2d675;
+  --mst-gold-deep: #8a6a1f;
+  --mst-cream: #fbf3e3;
+  --mst-wax-light: #b23b3b;
+  --mst-wax: #8b1e1e;
+  --mst-wax-dark: #4a1010;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+}
+
+.mst-font-display {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+}
+.mst-font-script {
+  font-family: 'Great Vibes', cursive;
+}
+.mst-font-seal {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Wax seal button                                                        */
+/* ---------------------------------------------------------------------- */
+
+.mst-seal {
+  background:
+    radial-gradient(circle at 32% 28%, var(--mst-wax-light) 0%, var(--mst-wax) 55%, var(--mst-wax-dark) 100%);
+  box-shadow:
+    inset 0 -6px 10px rgba(0, 0, 0, 0.45),
+    inset 0 5px 8px rgba(255, 255, 255, 0.18),
+    0 10px 24px rgba(0, 0, 0, 0.55),
+    0 0 0 3px var(--mst-gold-deep),
+    0 0 0 5px rgba(212, 175, 55, 0.35);
+}
+
+.mst-seal::before,
+.mst-seal::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  width: 14px;
+  height: 18px;
+  border-radius: 0 0 50% 50%;
+  background: radial-gradient(circle at 35% 20%, var(--mst-wax-light), var(--mst-wax-dark));
+  box-shadow: inset 0 -3px 4px rgba(0, 0, 0, 0.5);
+}
+.mst-seal::before {
+  left: 14%;
+  transform: rotate(-8deg);
+}
+.mst-seal::after {
+  right: 16%;
+  transform: rotate(10deg);
+  height: 14px;
+}
+
+.mst-seal:active {
+  transform: scale(0.94);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Texture overlays                                                       */
+/* ---------------------------------------------------------------------- */
+
+.mst-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.mst-vignette {
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Ambient lighting (AmbientLights.tsx)                                   */
+/*                                                                         */
+/* The intro video is warmly, brightly lit — lamp-light amber falling on  */
+/* the envelope, out-of-focus fairy-light bokeh glowing at the edges of   */
+/* frame. The dashboard that follows it used to just be flat dark-mahogany*/
+/* gradients with a grain texture: correct in color, but visibly less LIT */
+/* than what the guest just watched, so the hand-off read as a dip in     */
+/* production value rather than a continuation of the same room. These   */
+/* three pieces (a soft warm wash, small out-of-focus light dots, and a   */
+/* couple of slowly rising embers) are that same lamp-light carried       */
+/* forward into every section.                                            */
+/* ---------------------------------------------------------------------- */
+
+.mst-glow-wash {
+  background: radial-gradient(60% 55% at 50% 0%, rgba(242, 214, 117, 0.16) 0%, rgba(212, 175, 55, 0.07) 45%, transparent 75%);
+}
+
+.mst-bokeh {
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(242, 214, 117, 0.95) 0%, rgba(212, 175, 55, 0.4) 55%, transparent 75%);
+  filter: blur(1.5px);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Motion                                                                  */
+/* ---------------------------------------------------------------------- */
+
+@keyframes mst-shimmer {
+  0%,
+  100% {
+    opacity: 0.75;
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+  }
+}
+
+/* The "Tap to Open Invite" prompt that appears once the intro video ends —
+   a literal on/off blink (not the softer glow-only `mst-shimmer`), so it
+   reads unmistakably as "press me" against the frozen video frame behind
+   it. */
+@keyframes mst-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes mst-glow-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(212, 175, 55, 0);
+  }
+}
+
+@keyframes mst-ember-drift {
+  from {
+    transform: translate3d(0, 10vh, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  to {
+    transform: translate3d(var(--mst-drift, 12px), -110vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes mst-rope-sway {
+  from {
+    transform: rotate(-1.5deg);
+  }
+  to {
+    transform: rotate(1.5deg);
+  }
+}
+
+/* The intro→dashboard handoff (SealBurst.tsx): a quick blossom of warm
+   wax-seal light — the seal "breaking open" — that bridges the crossfade
+   instead of the dashboard's dark root color showing through a plain gap.
+   Punches in fast (the 35% mark), lingers barely, then blooms outward as
+   it fades so it reads as light spilling past the edges of frame rather
+   than a flat flash cutting off. */
+@keyframes mst-burst-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+/* HeartBurst.tsx: each heart pops outward fast with a scale overshoot
+   (0→22%), then keeps drifting further out while rising and fading
+   (22%→100%) — a "burst, then float away" shape rather than a flat
+   outward-and-fall, which is what actually reads as hearts rather than
+   generic confetti. `--mst-heart-x`/`--mst-heart-y` are each piece's full
+   burst offset; the 60%/100% steps push past that by scaling the same
+   vector up and layering on extra upward drift. */
+@keyframes mst-heart-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.15);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--mst-heart-x), var(--mst-heart-y)) rotate(var(--mst-heart-rotate)) scale(1.35);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(calc(var(--mst-heart-x) * 1.12), calc(var(--mst-heart-y) * 1.12 - 26px))
+      rotate(calc(var(--mst-heart-rotate) * 1.15)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(calc(var(--mst-heart-x) * 1.25), calc(var(--mst-heart-y) * 1.25 - 70px))
+      rotate(calc(var(--mst-heart-rotate) * 1.35)) scale(0.75);
+  }
+}
+
+/* The bright flash behind HeartBurst's hearts — same idea as
+   mst-burst-flash above (a bloom instead of a flat crossfade), punched up
+   brighter/bigger than a first pass so the very first frame of the reveal
+   reads unmistakably as "something just happened" even before the hearts
+   or ring have gone anywhere. */
+@keyframes mst-heart-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+/* A gold ring expanding outward from the reveal point right behind the
+   flash — a literal shockwave. Of the four HeartBurst layers this is the
+   single clearest "something happened here" cue, since a ring visibly
+   growing reads instantly even to someone glancing at the page mid-scroll,
+   before they've had time to register individual hearts. */
+@keyframes mst-shock-ring {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(5.5);
+  }
+}
+
+/* HeartBurst.tsx's dense ring of tiny, fast sparks — shoot straight out
+   from center and vanish well before the hearts arrive, selling the
+   instant of impact the way a firework's core flash reads before its
+   trails do. */
+@keyframes mst-spark-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--mst-spark-x), var(--mst-spark-y)) scale(0.2);
+  }
+}
+
+@keyframes mst-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mst-root *,
+  .mst-root *::before,
+  .mst-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

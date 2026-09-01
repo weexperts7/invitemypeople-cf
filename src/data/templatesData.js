@@ -115,6 +115,87 @@ export const TEMPLATES = [
     },
   },
   {
+    id: 'mahogany-seal',
+    name: 'Mahogany Seal',
+    category: 'Luxury',
+    weddingType: 'Hindu',
+    tags: ['Luxury', 'Cinematic', 'Caricature Video', 'Wax Seal'],
+    description:
+      'A cinematic dark-mahogany intro — a rope-pull envelope video behind a 3D red wax seal — opens into a gold-on-cream dashboard with a couple hero, live countdown, itinerary, scratch-to-reveal date, gallery and RSVP, finished off with your own hand-animated caricature video.',
+    isFlagship: true,
+    // Bespoke experience component, same mechanism as royal-plum-curtain
+    // just above — see components/wedding/layoutRegistry.js and
+    // components/wedding/mahogany-seal/MahoganySealAdapter.jsx. `motif`/
+    // `motifAccent` deliberately omitted for the same reason royal-plum-curtain's
+    // own comment gives: the bespoke layout owns its entire visual
+    // language, and CulturalMotif/FrameCorners/MotifBadge all no-op safely
+    // on an unset motif (used only by TemplateShowcase's catalog thumbnail
+    // below).
+    layout: 'mahogany-seal',
+    // This template's caricature intro video is bespoke, hand-produced
+    // work, not something the self-service builder (`/create`) can
+    // generate, so there's no instant Razorpay checkout to send anyone to.
+    // `hasOwnCreateCta` tells InvitationExperience.jsx to skip its own
+    // generic "Create Your Own — ₹X" bar (which would otherwise send
+    // buyers to the wrong, incompatible checkout) since MahoganySealTemplate
+    // already renders its own — a WhatsApp chat, opened straight away for
+    // an instant lead, not a details form (see MahoganySealTemplate.tsx's
+    // own comment). `customizeWhatsAppMessage` is the matching override for
+    // TemplateCard.jsx's "Customize" button on the listing grid — same
+    // WhatsApp-first behavior there too, rather than the site-wide
+    // `buildCreateLink()` every other template's Customize button uses.
+    // The detailed form our team sends back after that first reply
+    // (MahoganySealCreatePage.tsx, at `/mahogany-seal/create`) is never
+    // linked from here automatically.
+    hasOwnCreateCta: true,
+    customizeWhatsAppMessage: "Hi! I'd love to create my own Mahogany Seal wedding invitation ✨",
+    // Its own fixed price, not the global launch-sale/PRICING.price every
+    // self-serve-checkout template shows (see TemplateCard.jsx's own
+    // comment on `originalPrice`/`salePrice`) — this template's bespoke
+    // caricature video costs more to produce, and its price isn't tied to
+    // the site-wide sale window since checkout never happens through
+    // Razorpay at all.
+    originalPrice: 9000,
+    salePrice: 3900,
+    fonts: { serif: '"Playfair Display", "Cormorant Garamond", serif', script: '"Great Vibes", cursive' },
+    greeting: { line: 'Together With Joy' },
+    couple: { names: 'Shaya & Rehaan' },
+    // With no `motif` to draw from, TemplateShowcase's usual palette-and-
+    // typography card would tell a browser nothing about the one thing
+    // that actually sets this template apart — a real, animated 3D
+    // caricature of the couple, not a flat illustration like every other
+    // template. `cardImage` opts the catalog thumbnail into showing that
+    // caricature photo directly instead (see TemplateShowcase.jsx's own
+    // comment) — the same still frame CoupleHero.tsx shows live, cropped
+    // from the intro video (see mockData.ts's own comment on it).
+    // `previewBadge` stamps an extra "3D Caricature Video" chip onto the
+    // card (see TemplateCard.jsx) so that's obvious even at a glance,
+    // before a browser has scrolled the card into clear view.
+    cardImage: {
+      src: '/images/mahogany-seal/couple-portrait.jpg',
+      alt: 'Illustrated 3D Pixar-style caricature of the couple, from the animated intro video',
+    },
+    previewBadge: '3D Caricature Video',
+    // Still used as this card's text colors (couple-name script, template
+    // name) over the photo above, and as the fallback for any other UI
+    // that reads a template's palette generically — kept in sync with
+    // MahoganySealTemplate.css's own --mst-* custom properties (dark
+    // mahogany through to warm gold).
+    palette: {
+      ivory: '#1a100d',
+      linen: '#150b09',
+      champagne: '#2c1d18',
+      champagneDeep: '#8a6a1f',
+      blush: '#3d2820',
+      blushDeep: '#d4af37',
+      rose: '#f2d675',
+      gold: '#d4af37',
+      goldSoft: '#f2d675',
+      ink: '#fbf3e3',
+      inkSoft: '#c9b38a',
+    },
+  },
+  {
     id: 'gujarati-traditional',
     name: 'Gujarati Traditional',
     category: 'Traditional',
@@ -456,6 +537,75 @@ export const TEMPLATES = [
       goldSoft: '#9c7f3f',
       ink: '#f0e6cf',
       inkSoft: '#c2b696',
+    },
+  },
+  {
+    id: 'royal-plum-curtain',
+    name: 'Royal Plum Curtain',
+    category: 'Royal',
+    weddingType: 'Hindu',
+    tags: ['Royal', 'Curtain Reveal', 'Interactive', 'Scratch Card'],
+    description:
+      'A royal plum-and-gold curtain parts on tap to reveal a couple lit by drifting gold particles, a scratch-to-reveal save-the-date, event details, RSVP, and a live countdown to the big day — a fully animated, GSAP-driven take on the traditional invite.',
+    isFlagship: true,
+    // Pulled from the public catalog for now (LandingPage.jsx/WeddingsPage.jsx
+    // filter it out of their listings and counts) while we hold it back —
+    // left fully intact here, not deleted, so it's a one-line revert to
+    // bring it back. Direct/shared links still resolve via getTemplateById,
+    // which doesn't consult this flag.
+    hidden: true,
+    // Bespoke experience component, not the shared InvitationExperience
+    // body — see components/wedding/layoutRegistry.js and
+    // components/templates/RoyalPlumCurtainTemplate/. Mirrors the `layout`
+    // field GANESH_TEMPLATES/SATSANG_TEMPLATES already use for their own
+    // one-off designs (see ganeshTemplatesData.js's comment block).
+    // `motif`/`motifAccent` are deliberately omitted: the bespoke layout
+    // owns its entire visual language and never reads them, and
+    // CulturalMotif/FrameCorners/MotifBadge all no-op safely on an unset
+    // motif (used only by TemplateShowcase's catalog thumbnail below).
+    layout: 'royal-plum-curtain',
+    fonts: { serif: '"Cinzel", "Playfair Display", serif', script: '"Great Vibes", cursive' },
+    greeting: { symbol: 'ॐ', line: 'A Special Day Awaits' },
+    // The hero caricature RoyalPlumCurtainAdapter passes through as
+    // couple.caricatureUrl (see components/wedding/royal-plum-curtain/
+    // RoyalPlumCurtainAdapter.jsx) — a couple in royal purple-and-gold
+    // sherwani/lehenga, cropped tight and re-encoded to WebP (230KB,
+    // down from a 3.5MB source PNG) since this loads on every guest's
+    // phone, often over mobile data.
+    heroPhoto: { src: '/images/couples/royal-plum-caricature.webp', alt: 'Illustrated couple in royal purple and gold wedding attire' },
+    couple: {
+      names: 'Ananya & Vivaan',
+      invitationLine:
+        'Thank you for being a part of our special journey. Your love, blessings, and presence mean the world to us as we begin this new chapter together.',
+      people: [
+        { name: 'Ananya Malhotra', parents: 'Daughter of Mr. Rajesh & Mrs. Sunita Malhotra' },
+        { name: 'Vivaan Rathore', parents: 'Son of Mr. Arvind & Mrs. Kavita Rathore' },
+      ],
+    },
+    ceremoniesHeading: 'Wedding Events',
+    weddingDate: '2026-12-12T18:30:00',
+    ceremonies: [
+      { icon: Flower, title: 'Haldi Ceremony', date: 'December 10, 2026', time: '9:00 AM', venue: 'Rathore Family Residence, Jodhpur' },
+      { icon: Music, title: 'Sangeet Night', date: 'December 11, 2026', time: '7:00 PM', venue: 'Umaid Bhawan Lawns, Jodhpur' },
+      { icon: Heart, title: 'Wedding Pheras', date: 'December 12, 2026', time: '6:30 PM', venue: 'The Leela Palace, Jodhpur' },
+    ],
+    // A deliberately dark palette (unlike every other template's light
+    // ivory/linen/champagne progression) — TemplateShowcase.jsx's catalog
+    // thumbnail builds its gradient straight from these three, so the card
+    // itself previews the template's real royal-plum-and-gold look instead
+    // of a mismatched light background.
+    palette: {
+      ivory: '#2f0440',
+      linen: '#260433',
+      champagne: '#3d0855',
+      champagneDeep: '#c79526',
+      blush: '#3d0855',
+      blushDeep: '#e6ba47',
+      rose: '#f5d061',
+      gold: '#e6ba47',
+      goldSoft: '#f5d061',
+      ink: '#fff4d2',
+      inkSoft: '#e8c574',
     },
   },
 ]

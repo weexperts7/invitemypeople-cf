@@ -124,7 +124,7 @@ const COMPARISON_ROWS = [
     feature: 'Custom design',
     ours: {
       state: 'yes',
-      text: `${TEMPLATES.length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion`,
+      text: `${TEMPLATES.filter((t) => !t.hidden).length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion`,
     },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
@@ -298,6 +298,7 @@ export default function LandingPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return TEMPLATES.filter((t) => {
+      if (t.hidden) return false
       const matchesWeddingType =
         activeWeddingType === 'All' || t.weddingType === activeWeddingType
       const matchesSearch =

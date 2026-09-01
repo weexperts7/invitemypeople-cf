@@ -363,6 +363,36 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromWedding('royal-plum-curtain')
+    return {
+      id: 'wedding-royal-plum-curtain',
+      sourceId: 'royal-plum-curtain',
+      occasion: 'wedding',
+      name: src.name,
+      tagline: 'Curtain reveal, gold particles & scratch-to-reveal cards',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      // Propagated through so buildWeddingExperienceTemplate.js's
+      // `{ ...template, ... }` spread carries it onto the real generated
+      // invite too — see InvitationExperience.jsx's dispatch, which reads
+      // this same field name off whatever `template` it's given.
+      layout: src.layout,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-12-12',
+        time: '18:30',
+        venue: 'The Leela Palace, Jodhpur',
+        message: "Your presence is our greatest blessing — we can't wait to celebrate with you.",
+      },
+    }
+  })(),
 
   // ---- Ganesh Chaturthi ----------------------------------------------
   (() => {

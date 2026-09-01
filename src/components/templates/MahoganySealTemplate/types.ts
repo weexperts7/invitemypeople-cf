@@ -104,4 +104,17 @@ export interface MahoganySealTemplateProps {
   onOpen?: () => void
   /** Disables non-essential ambient motion (shimmer, floating embers) for reduced-motion users. */
   reduceMotion?: boolean
+  /**
+   * Shows the fixed "Create Your Own Invitation" bar (opens a pre-filled
+   * WhatsApp chat straight away — see `MahoganySealTemplate.tsx`'s own
+   * comment on why) once the dashboard's revealed. Defaults to `true` —
+   * every current caller renders this template as its own sales showcase
+   * (the dormant `/_preview/mahogany-seal` route and the real catalog at
+   * `/templates/wedding/mahogany-seal`). Pass `false` once this template
+   * is wired in as a real, already-purchased guest-facing invite, where a
+   * "buy this" CTA no longer makes sense — the same `isPreview`-gated
+   * pattern InvitationExperience.jsx already uses for every other
+   * template's own conversion bar.
+   */
+  showCreateCta?: boolean
 }

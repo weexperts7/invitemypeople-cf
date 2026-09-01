@@ -202,27 +202,43 @@ export default function InvitationExperience({
             bespoke layout stretching edge-to-edge across a wide browser
             window like every other template doesn't.
 
-            Two things here are load-bearing, not decorative, both existing
-            only to correctly contain RoyalPlumTemplate's `position:fixed`
-            curtain panels/seal cover:
+            Three things here are load-bearing, not decorative, mostly
+            existing only to correctly contain RoyalPlumTemplate's
+            `position:fixed` curtain panels/seal cover:
             - `sm:[transform:translateZ(0)]` gives this card a CSS
               "containing block" for `position:fixed` descendants, so they
               clip to the rounded card instead of covering the full
               browser viewport the way `position:fixed` normally does.
-            - `sm:h-svh sm:overflow-y-auto` (replacing `min-h-svh` +
-              page-level scroll at that breakpoint) caps the card at
-              exactly one screen tall with its OWN internal scrollbar. This
-              is what actually makes a real phone's fixed-height screen —
-              without it, the card's height would equal its full,
-              much-taller-than-one-screen scrollable content, and the
-              `position:fixed; inset:0` cover's flex-centered content
-              would center itself against *that* full height, landing
-              scrolled hundreds of pixels below the visible fold instead
-              of centered on screen.
-            Below `sm:`, neither applies — mobile keeps true viewport-fixed
-            curtains and page-level scroll, unchanged from before this
-            wrapper existed. */}
-        <div className="relative w-full max-w-md min-h-svh overflow-hidden sm:h-svh sm:overflow-y-auto sm:rounded-[2.5rem] sm:shadow-soft sm:border sm:border-champagne-deep/40 sm:[transform:translateZ(0)]">
+            - `sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto` (replacing
+              `min-h-svh` + page-level scroll at that breakpoint) caps the
+              card at exactly one screen tall (minus the parent's own
+              `sm:py-8` — 2rem top + 2rem bottom = 4rem — so the two
+              together fill exactly one viewport, not one-viewport-plus-padding)
+              with its OWN internal scrollbar. This is what actually makes
+              a real phone's fixed-height screen — without it, the card's
+              height would equal its full, much-taller-than-one-screen
+              scrollable content, and the `position:fixed; inset:0` cover's
+              flex-centered content would center itself against *that*
+              full height, landing scrolled hundreds of pixels below the
+              visible fold instead of centered on screen. Using plain
+              `100svh` here (not accounting for the parent's padding) was
+              the bug behind a second, page-level scrollbar with nothing
+              of substance to scroll to — the parent's total content height
+              came out 4rem taller than the viewport. `sm:min-h-0`
+              alongside it resets this card's own unprefixed `min-h-svh`
+              (its mobile-only fallback, below `sm:`) — left unset at
+              `sm:` and up, that `min-height: 100svh` would otherwise win
+              over the smaller explicit `height` and silently cancel the
+              subtraction out.
+            - `no-scrollbar` (index.css's existing utility) hides the
+              browser's own scrollbar chrome on the card's internal scroll
+              without disabling scrolling itself — a real phone shows a
+              thin, auto-hiding indicator while actively scrolling, not
+              Windows/Chrome's permanent track+thumb.
+            Below `sm:`, none of these apply — mobile keeps true
+            viewport-fixed curtains and page-level scroll, unchanged from
+            before this wrapper existed. */}
+        <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:min-h-0 sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto sm:rounded-[2.5rem] sm:shadow-soft sm:border sm:border-champagne-deep/40 sm:[transform:translateZ(0)]">
           <Layout template={template} invitationSlug={invitationSlug} onOpen={openEnvelope} />
         </div>
 
@@ -240,26 +256,36 @@ export default function InvitationExperience({
               <ArrowLeft className="w-4 h-4" />
               Back to Templates
             </motion.button>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="fixed inset-x-0 bottom-0 z-[70] flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 bg-gradient-to-t from-ink/20 via-ink/5 to-transparent"
-            >
+            {/* Templates whose own bespoke layout already renders its own,
+                correctly-routed "Create Your Own" bar (see
+                templatesData.js's own comment on `hasOwnCreateCta` —
+                Mahogany Seal's caricature video is bespoke, hand-produced
+                work, so its CTA hands off to WhatsApp instead of this
+                generic self-service builder link) skip this one entirely
+                rather than stacking two bottom bars, one of which would
+                send buyers to the wrong checkout. */}
+            {!template?.hasOwnCreateCta && (
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex w-full max-w-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="fixed inset-x-0 bottom-0 z-[70] flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 bg-gradient-to-t from-ink/20 via-ink/5 to-transparent"
               >
-                <Link
-                  to={buildCreateLink({ occasion: 'wedding', sourceId: template?.id })}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex w-full max-w-md"
                 >
-                  <Heart className="w-4 h-4" />
-                  Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
-                </Link>
+                  <Link
+                    to={buildCreateLink({ occasion: 'wedding', sourceId: template?.id })}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/30 bg-rose px-6 py-3.5 text-sm font-semibold text-ivory shadow-soft backdrop-blur-xl"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
+                  </Link>
+                </motion.div>
               </motion.div>
-            </motion.div>
+            )}
           </>
         )}
       </div>

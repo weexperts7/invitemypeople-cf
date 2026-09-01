@@ -31,8 +31,16 @@ MahoganySealTemplate/
     ├── GalleryPreview.tsx       # photo grid + lightweight lightbox
     ├── RsvpForm.tsx             # RSVP form, posts to /api/rsvps
     ├── AmbientLights.tsx        # warm glow/bokeh/ember decoration, see below
-    └── SealBurst.tsx            # gold-light burst bridging intro → dashboard, see below
+    ├── SealBurst.tsx            # gold-light burst bridging intro → dashboard, see below
+    ├── EventDetailsEditor.tsx   # dynamic events list, used by ../../../pages/MahoganySealCreatePage.tsx
+    ├── MstPhotoUploader.tsx     # gold-on-mahogany photo uploader, same page
+    └── leadFormTypes.ts         # shared LeadEvent type/constant for the two above
 ```
+
+The "Create Your Own" lead-capture form itself (see below) lives outside
+this directory, at `src/pages/MahoganySealCreatePage.tsx` — it's a full
+page (`SiteHeader`/`SiteFooter`, real route), not something scoped inside
+this otherwise self-contained template.
 
 ## The intro video
 
@@ -175,13 +183,71 @@ The backend's `rsvps` table has no dedicated meal-preference column (see
 `message` field before submit rather than silently dropped — a real column
 is a one-line migration away whenever this is wired in for production.
 
-### Wiring into the existing template catalog (when you're ready)
+## "Create Your Own" — an instant WhatsApp lead, then a details page
 
-This template does **not** register itself anywhere — it's dormant until
-imported. To offer it as a choice alongside the existing templates, add one
-entry to the wedding catalog (`src/data/templatesData.js` or wherever it
-lives) pointing at this component. Deliberately left undone here, same as
-`RoyalPlumCurtainTemplate`'s own README explains.
+Every other template's sales showcase hands off to the site-wide
+self-service Invitation Builder (`/create`, see `CreateInvitePage.jsx`) —
+pick a style, fill in details, pay via Razorpay, get a live invite
+instantly, all on one dedicated page. This template's caricature intro
+video is bespoke, hand-produced work, so there's no instant checkout to
+send anyone to — and rather than fronting a details form before the buyer
+has even said hello, the fixed "Create Your Own Invitation" bar (shown
+once the dashboard's revealed, see `showCreateCta` on
+`MahoganySealTemplateProps`) opens a pre-filled WhatsApp chat straight
+away (`wa.me`, same business number every WhatsApp CTA site-wide uses).
+The instant someone taps it, we have a real lead — their WhatsApp contact
+— before they've filled in a single field.
+
+`MahoganySealCreatePage.tsx`, the actual "tell us everything" form (couple
+names, wedding date, an events list, hashtag, gallery photos, each
+partner's individual photo for the caricature, a footer message, contact
+details), still exists at its own permanent URL —
+`/mahogany-seal/create` — but nothing links there automatically anymore.
+It's what our team sends the lead *after* that first WhatsApp reply, so
+they can fill in the rest on their own time. Submitting it still composes
+a formatted WhatsApp message from everything filled in and opens `wa.me`
+with it pre-filled, same as before; our team follows up with the buyer's
+own live template link, and payment happens there once they're happy with
+it.
+
+Nothing here writes to any database table — every photo (`galleryPhotos`,
+each partner's portrait) uploads immediately to the same `POST /api/photos`
+endpoint the real Invitation Builder uses (so the WhatsApp message carries
+real, clickable Supabase Storage URLs, not files WhatsApp's own share
+sheet has no way to attach for us), but the WhatsApp message itself *is*
+the submission. This can't affect the self-service builder's own DB-backed
+flow (`invites` table, Razorpay, `/api/invites`) at all.
+
+The "Create Your Own" bar itself is a plain `<a href="https://wa.me/...">`
+— no shared-app import needed for that anymore (an earlier version linked
+to the details page directly via react-router's `Link`; this template is
+back to depending on nothing outside its own directory). `MahoganySealCreatePage.tsx`,
+reached separately once a lead's already in a WhatsApp conversation, is
+the one place that still uses the shared `SiteHeader`/`SiteFooter`/`SEO`
+components — it's a real page, not part of this self-contained tree.
+
+### Wiring into the existing template catalog
+
+Now registered in the real wedding catalog (`TEMPLATES` in
+`src/data/templatesData.js`, `id: 'mahogany-seal'`), same mechanism
+`royal-plum-curtain` uses: `layout: 'mahogany-seal'` dispatches through
+`src/components/wedding/layoutRegistry.js` to
+`src/components/wedding/mahogany-seal/MahoganySealAdapter.jsx`, which
+renders this component with no `data` prop at all — every visitor lands on
+the same curated showcase dataset (`mockData.ts`) to preview the design;
+personalizing happens over WhatsApp instead (see "Create Your Own" above).
+This makes the template show up in `WeddingsPage`'s grid and reachable at
+`/templates/wedding/mahogany-seal`, same as every other template's
+"Preview" button.
+
+Two catalog fields specific to this template keep the generic self-service
+builder out of its way: `hasOwnCreateCta: true` tells
+`InvitationExperience.jsx` to skip its own generic "Create Your Own — ₹X"
+bar (this template already renders its own WhatsApp one — see above), and
+`customizeWhatsAppMessage` overrides `TemplateCard.jsx`'s "Customize"
+button on the listing grid to open the same pre-filled WhatsApp chat
+instead of the site-wide `/create` builder link every other template's
+Customize button uses.
 
 ## Reduced motion
 

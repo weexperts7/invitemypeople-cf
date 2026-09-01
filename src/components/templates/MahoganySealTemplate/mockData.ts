@@ -5,15 +5,20 @@ import type { MahoganySealTemplateData } from './types'
  * production build path — safe to delete without affecting
  * `MahoganySealTemplate`, which has its own internal fallback defaults.
  *
- * `couple.caricatureUrl` and every `galleryPhotos` entry are stills pulled
- * straight from `videoSrc` below (`public/images/mahogany-seal/*.jpg`) —
- * not generic stock. Borrowing another template's caricature image here
- * (an earlier version of this file used RoyalPlumCurtainTemplate's,
- * purple lehenga and all) put a color palette on screen the intro video
- * never actually shows; the dashboard is meant to feel like a continuation
- * of the video, not a hand-off to an unrelated one. If you swap in a real
- * couple's own video later, re-crop this dataset's images from *that*
- * video the same way (see the frame-extraction note on `videoSrc`).
+ * `couple.caricatureUrl` is a still pulled straight from `videoSrc` below.
+ * `galleryPhotos` are a matching set in the same Pixar-caricature art
+ * style — Haldi, the ring exchange, a formal portrait, the wedding
+ * walk — rather than more stills of that one swing scene, so the gallery
+ * reads as the couple's wider story instead of six crops of a single
+ * moment. Borrowing another template's caricature image here (an earlier
+ * version of this file used RoyalPlumCurtainTemplate's, purple lehenga and
+ * all) put a color palette on screen the intro video never actually shows;
+ * the dashboard is meant to feel like a continuation of the video, not a
+ * hand-off to an unrelated one — same reasoning `caricatureUrl` follows,
+ * just not literal frame-for-frame stills for the gallery. If you swap in
+ * a real couple's own video later, re-crop `caricatureUrl` from *that*
+ * video the same way (see the frame-extraction note on `videoSrc`), and
+ * swap `galleryPhotos` for their own real photos.
  */
 export const mahoganySealMockData: MahoganySealTemplateData = {
   couple: {
@@ -60,13 +65,13 @@ export const mahoganySealMockData: MahoganySealTemplateData = {
     eyebrow: 'A little secret',
     message: 'We fell in love over chai and bad puns. Come dance at the wedding of the century — ours.',
   },
+  // Haldi, the ring exchange, a formal portrait, then the wedding walk —
+  // see this file's own top comment for why these aren't more video stills.
   galleryPhotos: [
     '/images/mahogany-seal/gallery-1.jpg',
     '/images/mahogany-seal/gallery-2.jpg',
     '/images/mahogany-seal/gallery-3.jpg',
     '/images/mahogany-seal/gallery-4.jpg',
-    '/images/mahogany-seal/gallery-5.jpg',
-    '/images/mahogany-seal/gallery-6.jpg',
   ],
   gratitudeMessage:
     'Your presence is the best gift we could ask for. Thank you for being part of our story, from the very first chapter to this one.',

@@ -39,6 +39,7 @@ import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
 import PartnerHostDashboardPage from './pages/partners/PartnerHostDashboardPage'
 import InvitationExperience from './components/InvitationExperience'
 import MahoganySealTemplate from './components/templates/MahoganySealTemplate'
+import MahoganySealCreatePage from './pages/MahoganySealCreatePage'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
@@ -83,10 +84,21 @@ function WeddingRoute() {
 // permanent track+thumb, which read as visibly "wrong" for a page meant
 // to look like a phone screen — most noticeably while the intro video is
 // still up, since nothing about the video itself is scrollable at all.
+//
+// `sm:h-[calc(100svh_-_4rem)]` (not plain `100svh`) accounts for this
+// wrapper's own `sm:py-8` (2rem top + 2rem bottom = 4rem) — with plain
+// `100svh` the card plus that padding came out 4rem taller than the
+// actual viewport, so the whole *page* picked up a second scrollbar with
+// nothing of substance to scroll to, on top of the card's own internal
+// one. Together the two now fill exactly one viewport. `sm:min-h-0`
+// alongside it resets the plain `min-h-svh` this card also carries (its
+// own mobile-only fallback, below `sm:`) — left unset at `sm:` and up,
+// that `min-height: 100svh` would otherwise win over the smaller explicit
+// `height` here and silently cancel the subtraction out.
 function MahoganySealPreviewRoute() {
   return (
     <div className="flex min-h-svh w-full justify-center bg-[#0c0705] sm:py-8">
-      <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:h-svh sm:overflow-y-auto sm:rounded-[2.5rem] sm:border sm:border-[#d4af37]/30 sm:shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:[transform:translateZ(0)]">
+      <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:min-h-0 sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto sm:rounded-[2.5rem] sm:border sm:border-[#d4af37]/30 sm:shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:[transform:translateZ(0)]">
         <MahoganySealTemplate />
       </div>
     </div>
@@ -175,6 +187,13 @@ function App() {
         <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
         <Route path="/create" element={<CreateInvitePage />} />
         <Route path="/_preview/mahogany-seal" element={<MahoganySealPreviewRoute />} />
+        {/* A real, permanent page — NOT nested under /_preview like the
+            bare dev-preview route above. This one is manually pasted into
+            real WhatsApp conversations with leads (see
+            MahoganySealTemplate.tsx's own comment on the "Create Your Own"
+            CTA), so it needs a clean, public URL rather than reading as an
+            internal/temporary one. */}
+        <Route path="/mahogany-seal/create" element={<MahoganySealCreatePage />} />
         <Route path="/blog" element={<BlogListPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         {/* Not a real destination — only ever loaded in the same-origin

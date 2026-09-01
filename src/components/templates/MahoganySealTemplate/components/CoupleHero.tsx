@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatDateLabel } from '../defaults'
 import AmbientLights from './AmbientLights'
+import ScratchCanvas from './ScratchCanvas'
 
 interface CoupleHeroProps {
   name1: string
@@ -69,6 +70,27 @@ export default function CoupleHero({
   weddingDateISO,
   reduceMotion = false,
 }: CoupleHeroProps) {
+  // The date stays hidden behind the scratch card until the guest scratches
+  // it off; the countdown only exists to reveal once that's happened —
+  // showing live ticking numbers for a date the guest can't even see yet
+  // would be a spoiler in the wrong order.
+  const [dateRevealed, setDateRevealed] = useState(false)
+  // Same double-rAF "settle" idiom the root component uses for its own
+  // dashboard reveal (see MahoganySealTemplate.tsx): `dateRevealed` mounts
+  // the countdown at its pre-transition state in one render, and only a
+  // frame later flips to its settled state, so the fade-in has an actual
+  // painted starting point instead of popping in silently.
+  const [countdownSettled, setCountdownSettled] = useState(false)
+  const rafRef = useRef(0)
+
+  useEffect(() => {
+    if (!dateRevealed) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => setCountdownSettled(true))
+    })
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [dateRevealed])
+
   return (
     <header className="relative flex flex-col items-center gap-6 overflow-hidden bg-gradient-to-b from-[#2c1d18] to-[#3d2820] px-6 pb-14 pt-16 text-center">
       {/* Full-density lamplight/bokeh/embers — the first section the guest
@@ -98,17 +120,42 @@ export default function CoupleHero({
         {name1} <span className="mst-font-script text-[#d4af37]">&amp;</span> {name2}
       </h2>
 
+      {/* The date scratch card sits right below the couple's name — the
+          guest scratches away the gold seal to reveal the wedding date
+          underneath, with a confetti burst as the payoff. Wider/taller than
+          before (was a single cramped line) so "Save the Date" and the
+          date itself both get room to breathe at a size that actually
+          reads as the headline reveal it's meant to be. */}
+      <div className="relative z-10 w-full max-w-sm">
+        <ScratchCanvas
+          onRevealed={() => setDateRevealed(true)}
+          scratchLabel="SCRATCH FOR THE DATE"
+          ariaLabel="Scratch to reveal the wedding date"
+          celebrateOnReveal
+          reduceMotion={reduceMotion}
+          className="aspect-[2/1] w-full"
+        >
+          <p className="mst-font-seal text-[11px] tracking-[0.35em] text-[#d4af37] uppercase">Save the Date</p>
+          <p className="mst-font-display text-2xl font-semibold text-[#fbf3e3] sm:text-3xl">{formatDateLabel(weddingDateISO)}</p>
+        </ScratchCanvas>
+      </div>
+
       <p className="relative z-10 rounded-full border border-[#d4af37]/40 bg-[#1a100d]/50 px-4 py-1 text-sm tracking-[0.08em] text-[#f2d675]">
         {hashtag}
       </p>
 
-      <p className="mst-font-seal relative z-10 text-xs tracking-[0.15em] text-[#fbf3e3]/70 uppercase">
-        {formatDateLabel(weddingDateISO)}
-      </p>
-
-      <div className="relative z-10 mt-2 w-full">
-        <Countdown targetISO={weddingDateISO} />
-      </div>
+      {/* Only mounted once the scratch card's been revealed — see the
+          `dateRevealed`/`countdownSettled` state above for why this is a
+          two-step mount-then-settle instead of a plain conditional render. */}
+      {dateRevealed && (
+        <div
+          className={`relative z-10 mt-2 w-full transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] ${
+            countdownSettled ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+          }`}
+        >
+          <Countdown targetISO={weddingDateISO} />
+        </div>
+      )}
     </header>
   )
 }

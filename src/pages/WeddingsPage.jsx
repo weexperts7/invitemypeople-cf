@@ -26,6 +26,7 @@ export default function WeddingsPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return TEMPLATES.filter((t) => {
+      if (t.hidden) return false
       const matchesWeddingType =
         activeWeddingType === 'All' || t.weddingType === activeWeddingType
       const matchesSearch =
@@ -60,7 +61,7 @@ export default function WeddingsPage() {
               Digital Wedding Invitations for Every Tradition
             </h1>
             <p className="mx-auto max-w-xl text-ink-soft mb-8">
-              {TEMPLATES.length} interactive templates spanning Hindu, Muslim,
+              {TEMPLATES.filter((t) => !t.hidden).length} interactive templates spanning Hindu, Muslim,
               Sikh and more — envelope reveal, scratch-to-reveal cards, and
               built-in RSVP tracking on every single one.
             </p>

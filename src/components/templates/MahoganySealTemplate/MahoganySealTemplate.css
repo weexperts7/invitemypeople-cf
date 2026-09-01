@@ -208,6 +208,85 @@
   }
 }
 
+/* HeartBurst.tsx: each heart pops outward fast with a scale overshoot
+   (0→22%), then keeps drifting further out while rising and fading
+   (22%→100%) — a "burst, then float away" shape rather than a flat
+   outward-and-fall, which is what actually reads as hearts rather than
+   generic confetti. `--mst-heart-x`/`--mst-heart-y` are each piece's full
+   burst offset; the 60%/100% steps push past that by scaling the same
+   vector up and layering on extra upward drift. */
+@keyframes mst-heart-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.15);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--mst-heart-x), var(--mst-heart-y)) rotate(var(--mst-heart-rotate)) scale(1.35);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(calc(var(--mst-heart-x) * 1.12), calc(var(--mst-heart-y) * 1.12 - 26px))
+      rotate(calc(var(--mst-heart-rotate) * 1.15)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(calc(var(--mst-heart-x) * 1.25), calc(var(--mst-heart-y) * 1.25 - 70px))
+      rotate(calc(var(--mst-heart-rotate) * 1.35)) scale(0.75);
+  }
+}
+
+/* The bright flash behind HeartBurst's hearts — same idea as
+   mst-burst-flash above (a bloom instead of a flat crossfade), punched up
+   brighter/bigger than a first pass so the very first frame of the reveal
+   reads unmistakably as "something just happened" even before the hearts
+   or ring have gone anywhere. */
+@keyframes mst-heart-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+/* A gold ring expanding outward from the reveal point right behind the
+   flash — a literal shockwave. Of the four HeartBurst layers this is the
+   single clearest "something happened here" cue, since a ring visibly
+   growing reads instantly even to someone glancing at the page mid-scroll,
+   before they've had time to register individual hearts. */
+@keyframes mst-shock-ring {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(5.5);
+  }
+}
+
+/* HeartBurst.tsx's dense ring of tiny, fast sparks — shoot straight out
+   from center and vanish well before the hearts arrive, selling the
+   instant of impact the way a firework's core flash reads before its
+   trails do. */
+@keyframes mst-spark-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--mst-spark-x), var(--mst-spark-y)) scale(0.2);
+  }
+}
+
 @keyframes mst-fade-in-up {
   from {
     opacity: 0;

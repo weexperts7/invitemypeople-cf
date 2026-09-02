@@ -239,7 +239,12 @@ export default function InvitationExperience({
             viewport-fixed curtains and page-level scroll, unchanged from
             before this wrapper existed. */}
         <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:min-h-0 sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto sm:rounded-[2.5rem] sm:shadow-soft sm:border sm:border-champagne-deep/40 sm:[transform:translateZ(0)]">
-          <Layout template={template} invitationSlug={invitationSlug} onOpen={openEnvelope} />
+          <Layout
+            template={template}
+            invitationSlug={invitationSlug}
+            onOpen={openEnvelope}
+            rsvpEndpoint={rsvpEndpoint}
+          />
         </div>
 
         {isPreview && (

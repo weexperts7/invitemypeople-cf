@@ -59,6 +59,18 @@ import {
 import { requireAdmin } from '../api/_lib/auth.js'
 import { getSupabase } from '../api/_lib/supabase.js'
 import { formatDirectInvite, formatPartnerInvite, sortInvitesByCreatedAtDesc } from '../api/_lib/adminInvites.js'
+// Admin Direct Invite/Template Creation — see api/_lib/adminCreateInvite.js's
+// header for why only its validation + the partner branch are imported here:
+// the 'direct' branch below writes to INVITES_FILE instead, exactly like
+// every other consumer-invite route's dev/prod split in this file.
+import {
+  cleanCreateInvitePayload,
+  buildDirectInviteRow,
+  insertPartnerInviteSupabase,
+  sendPartnerInviteReadyEmail,
+  sendDirectInviteReadyEmail,
+} from '../api/_lib/adminCreateInvite.js'
+import { adminUploadMahoganyVideo } from '../api/_lib/adminMahoganyVideo.js'
 // Cloudflare Turnstile — same shared helper the Vercel Serverless Functions
 // use (api/rsvps/index.js, api/create-order.js), so dev and prod enforce
 // the exact same verification instead of drifting apart like the flat-file
@@ -672,6 +684,7 @@ app.post('/api/partners/rsvps', submitPartnerRsvp)
 app.get('/api/partners/wishes', getPartnerWishes)
 app.get('/api/partners/invites/:slug/host', getPartnerInviteHostDashboard)
 app.get('/api/admin/me', adminGetMe)
+app.post('/api/admin/mahogany-video', adminUploadMahoganyVideo)
 app.get('/api/admin/partners', adminListPartners)
 app.post('/api/admin/partners/approve', adminApprovePartner)
 app.post('/api/admin/partners/reject', adminRejectPartner)
@@ -716,6 +729,110 @@ app.get('/api/admin/invites', async (req, res) => {
   } catch (err) {
     console.error('[admin] failed to list invites:', err)
     res.status(500).json({ ok: false, error: 'could not load invites' })
+  }
+})
+
+// Dev mirror of api/_lib/adminCreateInvite.js's adminCreateInvite() — same
+// admin-override invite minting, no Razorpay and no partner-credit spend
+// either way. The 'direct' branch here writes to INVITES_FILE (like POST
+// /api/invites above) instead of Supabase; the 'partner' branch reuses the
+// exact same insertPartnerInviteSupabase() the Vercel handler calls, since
+// partner_invites is real Supabase in dev too — see this file's own header
+// and the imports above.
+app.post('/api/admin/create-invite', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  const fields = cleanCreateInvitePayload(req.body || {})
+  if (!fields.ok) return res.status(400).json({ ok: false, error: fields.error })
+
+  try {
+    if (fields.destination === 'partner') {
+      const supabase = getSupabase()
+      const { data: partnerRow, error: partnerError } = await supabase
+        .from('partners')
+        .select('id, business_name')
+        .eq('id', fields.partnerId)
+        .maybeSingle()
+      if (partnerError) throw partnerError
+      if (!partnerRow) return res.status(400).json({ ok: false, error: 'partner not found' })
+
+      const result = await insertPartnerInviteSupabase(supabase, fields.partnerId, fields)
+      await sendPartnerInviteReadyEmail(result.invite, partnerRow.business_name)
+      console.log(`[admin] ${admin.email} minted partner invite "${result.slug}" for partner ${fields.partnerId} (no credit spent, client emailed)`)
+      return res.json({ ok: true, destination: 'partner', slug: result.slug, url: result.url })
+    }
+
+    const row = buildDirectInviteRow(fields, admin)
+    const result = await enqueueInvites(async () => {
+      const entries = await readAllInvites()
+      const existingSlugs = new Set(entries.map((e) => e.slug))
+      const base = slugify(fields.names) || 'invite'
+
+      let slug = fields.customSlug || `${base}-${randomSlugSuffix()}`
+      if (fields.customSlug) {
+        if (existingSlugs.has(slug)) {
+          const err = new Error('that slug is already taken')
+          err.statusCode = 409
+          throw err
+        }
+      } else {
+        while (existingSlugs.has(slug)) slug = `${base}-${randomSlugSuffix()}`
+      }
+
+      // row is already snake_case-free (buildDirectInviteRow() returns the
+      // same camelCase-ish keys the flat-file store uses elsewhere in this
+      // file — event_date/template_id/etc. below map it onto the exact
+      // entry shape POST /api/invites writes).
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        slug,
+        occasion: row.occasion,
+        templateId: row.template_id,
+        templateName: null,
+        names: row.names,
+        date: row.date,
+        eventDate: row.event_date,
+        time: row.time,
+        venue: row.venue,
+        locationUrl: row.location_url,
+        message: row.message,
+        greetingLine: row.greeting_line,
+        amount: row.amount,
+        paymentId: row.payment_id,
+        paymentStatus: row.payment_status,
+        photos: row.photos,
+        eventTitle: row.event_title,
+        events: row.events,
+        bgSongTitle: row.bg_song_title,
+        bgSongArtist: row.bg_song_artist,
+        bgSongAlbumArt: row.bg_song_album_art,
+        bgSongPreviewUrl: row.bg_song_preview_url,
+        groomName: row.groom_name,
+        groomParents: row.groom_parents,
+        brideName: row.bride_name,
+        brideParents: row.bride_parents,
+        hostName: row.host_name,
+        hostEmail: row.host_email,
+        hostPhone: row.host_phone,
+        hostToken: row.host_token,
+        caricatureVideoUrl: row.caricature_video_url,
+        hashtag: row.hashtag,
+        reminderSentAt: null,
+        createdAt: new Date().toISOString(),
+      }
+      entries.push(entry)
+      await persistInvites(entries)
+      return entry
+    })
+
+    await sendDirectInviteReadyEmail(result)
+    console.log(`[admin] ${admin.email} minted direct invite "${result.slug}" (no payment collected, host emailed)`)
+    res.json({ ok: true, destination: 'direct', slug: result.slug, url: `${SITE_URL}/i/${result.slug}` })
+  } catch (err) {
+    console.error('[admin] failed to create invite:', err)
+    if (err.statusCode === 409) return res.status(409).json({ ok: false, error: err.message })
+    res.status(500).json({ ok: false, error: 'could not create invite' })
   }
 })
 

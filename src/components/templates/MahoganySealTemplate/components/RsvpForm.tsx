@@ -9,6 +9,8 @@ interface RsvpFormProps {
   /** The real invite's slug — see `MahoganySealTemplateData.invitationSlug`'s own doc comment. */
   slug?: string
   reduceMotion?: boolean
+  /** Optional override — '/api/partners/rsvps' for a partner-created invite. See useRsvpSubmit's own comment. */
+  endpoint?: string
 }
 
 const GUEST_COUNTS = ['1', '2', '3', '4', '5']
@@ -35,7 +37,7 @@ const labelClasses = 'mst-font-seal mb-1.5 block text-[11px] tracking-[0.12em] t
  * submit, so it still reaches the host's dashboard. A dedicated column is
  * a one-line migration away whenever this template is wired in for real.
  */
-export default function RsvpForm({ slug, reduceMotion = false }: RsvpFormProps) {
+export default function RsvpForm({ slug, reduceMotion = false, endpoint }: RsvpFormProps) {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -45,7 +47,7 @@ export default function RsvpForm({ slug, reduceMotion = false }: RsvpFormProps) 
     message: '',
   })
   const [honeypot, setHoneypot] = useState('')
-  const { status, isSending, submit } = useRsvpSubmit(slug)
+  const { status, isSending, submit } = useRsvpSubmit(slug, endpoint)
 
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const turnstileRef = useRef<{ reset: () => void } | null>(null)

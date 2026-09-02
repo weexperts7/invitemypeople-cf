@@ -5,7 +5,7 @@ import SEO from '../../components/SEO'
 import PartnerBrandBadge from '../../components/partners/PartnerBrandBadge'
 import InvitationExperience from '../../components/InvitationExperience'
 import { getPartnerInviteBySlug } from '../../utils/partnerApi'
-import { getBuilderTemplateById } from '../../data/builderTemplates'
+import { resolveWeddingTemplateForInvite } from '../../data/builderTemplates'
 import { buildWeddingExperienceTemplate } from '../../utils/buildWeddingExperienceTemplate'
 
 // The shareable /p/:slug link a partner's client hands to their guests —
@@ -76,7 +76,7 @@ export default function PartnerInviteViewerPage() {
     )
   }
 
-  const template = getBuilderTemplateById(invite.templateId)
+  const template = resolveWeddingTemplateForInvite(invite.templateId)
   const experienceTemplate = buildWeddingExperienceTemplate(
     {
       names: invite.coupleNames,

@@ -111,3 +111,30 @@ export function adminGetStats(token) {
 export function adminListInvites(token) {
   return request('/api/admin/invites', { token })
 }
+
+// Admin Direct Invite/Template Creation — mints a live invite with no
+// Razorpay payment and no partner-credit spend. `payload.destination` is
+// 'direct' (-> /i/:slug) or 'partner' (-> /p/:slug, needs `partnerId`). See
+// api/_lib/adminCreateInvite.js.
+export function adminCreateInvite(token, payload) {
+  return request('/api/admin/create-invite', { method: 'POST', token, body: payload })
+}
+
+// Admin-only, Mahogany Seal template only — uploads a real caricature intro
+// video for AdminCreateInvitePage.jsx's "Caricature Video" field. Not JSON,
+// so this bypasses request()'s helper, same as uploadPartnerLogo() above.
+// See api/_lib/adminMahoganyVideo.js.
+export async function adminUploadMahoganyVideo(token, file) {
+  const formData = new FormData()
+  formData.append('video', file)
+  const response = await fetch('/api/admin/mahogany-video', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  })
+  const result = await response.json().catch(() => null)
+  if (!response.ok || !result?.ok) {
+    throw new Error(result?.error || `HTTP ${response.status}`)
+  }
+  return result.url
+}

@@ -13,7 +13,7 @@
 // the consumer one) instead of the default public /api/photos.
 import { useRef, useState } from 'react'
 import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react'
-import { ALLOWED_MIME_TYPES, MAX_PHOTOS } from '../../utils/photoUpload'
+import { ALLOWED_MIME_TYPES, MAX_PHOTOS, MAX_PHOTO_BYTES } from '../../utils/photoUpload'
 
 let nextItemId = 0
 
@@ -37,6 +37,23 @@ export default function PhotoUploader({ photos, onChange, endpoint = '/api/photo
         setItems((prev) => [
           ...prev,
           { id, previewUrl, uploading: false, error: 'Unsupported file type', url: null },
+        ])
+        continue
+      }
+
+      // Server-side (formidable, both api/photos.js and its local-dev
+      // counterpart in server/index.js) enforces this same MAX_PHOTO_BYTES
+      // limit, but aborts the connection mid-upload rather than finishing
+      // the request when it's exceeded — the browser then sees that as a
+      // bare "Failed to fetch" network error, not the friendly "file is
+      // too large" message the server actually intends. Checking here,
+      // before a single byte is ever sent, is what avoids that entirely —
+      // exactly what this constant's own doc comment (photoUpload.js) says
+      // this component already does.
+      if (file.size > MAX_PHOTO_BYTES) {
+        setItems((prev) => [
+          ...prev,
+          { id, previewUrl, uploading: false, error: 'File is too large (max 4MB)', url: null },
         ])
         continue
       }

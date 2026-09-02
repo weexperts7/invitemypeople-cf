@@ -21,6 +21,7 @@ interface LeadForm {
   weddingDate: string
   weddingTime: string
   hashtag: string
+  song: string
   footerMessage: string
   hostName: string
   hostPhone: string
@@ -34,6 +35,7 @@ const EMPTY_FORM: LeadForm = {
   weddingDate: '',
   weddingTime: '',
   hashtag: '',
+  song: '',
   footerMessage: '',
   hostName: '',
   hostPhone: '',
@@ -94,6 +96,11 @@ function composeWhatsAppMessage(form: LeadForm, events: LeadEvent[], gallery: st
     if (p2Photo[0]) lines.push(`${form.partner2Name || 'Partner 2'}: ${p2Photo[0]}`)
   }
 
+  if (form.song) {
+    lines.push('')
+    lines.push(`Background Song: ${form.song}`)
+  }
+
   if (form.footerMessage) {
     lines.push('')
     lines.push(`Footer Message: ${form.footerMessage}`)
@@ -115,9 +122,9 @@ function composeWhatsAppMessage(form: LeadForm, events: LeadEvent[], gallery: st
 /**
  * The Mahogany Seal template's detailed "tell us everything" form — couple
  * names, wedding date, an events list, hashtag, gallery photos, each
- * partner's individual photo for the caricature, a footer message, contact
- * details. Nothing on the site links here automatically anymore: the
- * template's own "Create Your Own Invitation" CTA (see
+ * partner's individual photo for the caricature, a background song, a
+ * footer message, contact details. Nothing on the site links here
+ * automatically anymore: the template's own "Create Your Own Invitation" CTA (see
  * `MahoganySealTemplate.tsx`) and the listing card's "Customize" button
  * (see `TemplateCard.jsx`) both open a plain WhatsApp chat straight away
  * instead — an instant, near-zero-friction lead the moment someone taps
@@ -391,6 +398,29 @@ export default function MahoganySealCreatePage() {
                 <div className={sectionCardClasses}>
                   <div className="mb-5 flex items-center gap-2">
                     <StepBadge n={4} />
+                    <h2 className="mst-font-display text-xl text-[#fbf3e3]">Your Song</h2>
+                  </div>
+                  <label htmlFor="cyo-song" className={labelClasses}>
+                    Background music for your invitation{' '}
+                    <span className="normal-case tracking-normal text-[#8a6a1f]/70">(optional)</span>
+                  </label>
+                  <p className="mb-3 font-sans text-xs text-[#fbf3e3]/60">
+                    This plays the moment a guest opens your invite, right alongside the intro video — a song name
+                    and artist is enough, or paste a YouTube/Spotify link if you already have one in mind.
+                  </p>
+                  <input
+                    id="cyo-song"
+                    type="text"
+                    value={form.song}
+                    onChange={handleField('song')}
+                    placeholder="e.g. Perfect – Ed Sheeran, or a YouTube/Spotify link"
+                    className={inputClasses}
+                  />
+                </div>
+
+                <div className={sectionCardClasses}>
+                  <div className="mb-5 flex items-center gap-2">
+                    <StepBadge n={5} />
                     <h2 className="mst-font-display text-xl text-[#fbf3e3]">Footer Message</h2>
                   </div>
                   <label htmlFor="cyo-footer" className={labelClasses}>
@@ -409,7 +439,7 @@ export default function MahoganySealCreatePage() {
 
                 <div className={sectionCardClasses}>
                   <div className="mb-5 flex items-center gap-2">
-                    <StepBadge n={5} />
+                    <StepBadge n={6} />
                     <h2 className="mst-font-display text-xl text-[#fbf3e3]">Your Contact Details</h2>
                   </div>
                   <div className="space-y-4">

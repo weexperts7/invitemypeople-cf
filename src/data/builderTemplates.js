@@ -20,7 +20,7 @@
 import { Heart } from 'lucide-react'
 import { GaneshIcon } from '../components/icons/GaneshIcon'
 import { FoldedHandsIcon } from '../components/icons/FoldedHandsIcon'
-import { TEMPLATES } from './templatesData'
+import { TEMPLATES, getTemplateById } from './templatesData'
 import { GANESH_TEMPLATES } from './ganeshTemplatesData'
 import { SATSANG_TEMPLATES } from './satsangTemplatesData'
 
@@ -708,6 +708,36 @@ export function getBuilderTemplatesForOccasion(occasionId) {
 
 export function getBuilderTemplateById(id) {
   return BUILDER_TEMPLATES.find((t) => t.id === id) ?? BUILDER_TEMPLATES[0]
+}
+
+// Resolves a REAL saved invite's `templateId` back to its rendering data —
+// used by GeneratedInvitePage.jsx (/i/:slug) and PartnerInviteViewerPage.jsx
+// (/p/:slug), never by the builder pages themselves (which keep calling
+// getBuilderTemplateById() above, unchanged).
+//
+// Why this needs to exist separately: the self-service Invitation Builder
+// and Partner Portal builder both save `template.id` from
+// getBuilderTemplateById() — one of THIS file's own `wedding-<slug>` ids
+// (see BUILDER_TEMPLATES above) — so looking it back up here always hits
+// first. But AdminCreateInvitePage.jsx's Template picker (api/_lib/
+// adminCreateInvite.js) deliberately offers the FULL wedding catalog
+// (templatesData.js's TEMPLATES), not just this file's self-service subset
+// — that's the whole point of Mahogany Seal being selectable there despite
+// having no BUILDER_TEMPLATES entry at all (it's excluded from the
+// self-service builder on purpose — see templatesData.js's own comment).
+// A raw catalog id like "mahogany-seal" doesn't match any `wedding-*` id
+// here, so getBuilderTemplateById() alone would silently return
+// BUILDER_TEMPLATES[0] — a DIFFERENT template's palette/fonts/layout
+// entirely — instead of erroring, which is exactly the bug an admin-minted
+// Mahogany Seal invite hit: it rendered in a different, wrong template
+// instead of failing loudly.
+//
+// Falls through: this file's own builder id -> the full catalog's own id
+// -> the same BUILDER_TEMPLATES[0] safety net getBuilderTemplateById() has
+// always had, in that order — so every existing self-service/partner
+// invite (which only ever have a builder id) resolves exactly as before.
+export function resolveWeddingTemplateForInvite(templateId) {
+  return BUILDER_TEMPLATES.find((t) => t.id === templateId) ?? getTemplateById(templateId) ?? BUILDER_TEMPLATES[0]
 }
 
 // Reverse lookup used when a "Customize"/"Buy Now" CTA elsewhere on the site

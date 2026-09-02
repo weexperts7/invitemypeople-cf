@@ -12,6 +12,7 @@ import GalleryPreview from './components/GalleryPreview'
 import RsvpForm from './components/RsvpForm'
 import AmbientLights from './components/AmbientLights'
 import SealBurst from './components/SealBurst'
+import AudioToggle from '../../AudioToggle'
 
 // How long the intro overlay's own CSS transition takes to finish (see the
 // `duration-700` class on IntroOverlay's root) — kept in one place so the
@@ -33,6 +34,11 @@ const BURST_MS = 950
 // this opens a chat directly rather than linking to a details page.
 const WHATSAPP_NUMBER = '918847044554'
 const WHATSAPP_MESSAGE = "Hi! I'd love to create my own Mahogany Seal wedding invitation ✨"
+
+// Target background-music volume once faded in — same value and same
+// "fade up from 0, don't just snap to it" reasoning as
+// InvitationExperience.jsx's own `MUSIC_VOLUME` for every other template.
+const MUSIC_VOLUME = 0.7
 
 /**
  * MahoganySealTemplate — a standalone, plug-and-play luxury wedding invite.
@@ -81,12 +87,29 @@ export default function MahoganySealTemplate({
   const [revealed, setRevealed] = useState(false)
   const [dismissing, setDismissing] = useState(false)
   const [bursting, setBursting] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
   const rafRef = useRef(0)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   const handleOpen = () => {
     if (dismissing || opened) return
     setDismissing(true)
     setBursting(true)
+    // Fired from the same click/tap/Enter-key handler that dismisses the
+    // intro (see IntroOverlay's onClick/onKeyDown/WaxSeal, all of which
+    // route here) — a *real* user gesture, unlike the mount-time attempt
+    // below. This is the fallback that actually gets sound playing on the
+    // (common) first-ever-visit case where that mount attempt got silently
+    // blocked: browsers only allow autoplay *with sound* once the guest
+    // has interacted with the page, so this is the earliest point audio
+    // is guaranteed able to start. No volume reset here — if the mount
+    // attempt already got it going, this is just a harmless no-op
+    // `play()` on an already-playing track, not a restart; the rAF loop
+    // below owns fading it up exactly once, however it started.
+    audioRef.current?.play().catch(() => {
+      /* Blocked despite the gesture (rare) — the corner AudioToggle below
+         still lets a guest start it manually once open. */
+    })
     window.setTimeout(() => {
       setOpened(true)
       onOpen?.()
@@ -106,6 +129,82 @@ export default function MahoganySealTemplate({
     return () => cancelAnimationFrame(rafRef.current)
   }, [opened])
 
+  // Attempts to start the track the instant this mounts — i.e. alongside
+  // the intro video's own autoplay attempt (see IntroOverlay's identical
+  // `videoRef.current?.play().catch()` on mount) — rather than waiting for
+  // the guest to open the invite. This is genuinely the earliest a browser
+  // will ever allow it: unlike the video (which autoplays muted, always
+  // allowed), this is a real, audible `play()` with no user gesture behind
+  // it yet, so most browsers on a first-ever visit *will* silently block
+  // it here — that's a platform policy, not a bug, and there's no way
+  // around it without a prior interaction. It succeeds instead whenever
+  // the browser already trusts this page with sound (a returning guest,
+  // desktop Chrome once its Media Engagement Index is crossed, etc.), in
+  // which case the music is genuinely already playing before the guest
+  // does anything. Either way, `handleOpen`'s own `play()` call is the
+  // guaranteed fallback the moment they actually tap to open — see its
+  // own comment.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    // Starts silent regardless of which attempt (this one or handleOpen's)
+    // actually succeeds first — the rAF fade-in loop below is what brings
+    // it up to `MUSIC_VOLUME`, so whichever `play()` call wins the race
+    // still eases in rather than starting at the `<audio>` element's
+    // default volume of 1.0.
+    audio.volume = 0
+    audio.play().catch(() => {})
+  }, [])
+
+  // Keeps nudging the track's volume up toward `MUSIC_VOLUME` for as long
+  // as it's actually playing and not muted — runs continuously for this
+  // component's whole lifetime (not re-triggered by `opened`/`isMuted`
+  // flipping) so however/whenever playback actually started (the mount
+  // attempt above, or `handleOpen`'s gesture-backed fallback), it fades up
+  // exactly once from wherever it started, then holds — no re-fade or dip
+  // when `opened` flips true, since this same effect has been running
+  // since before that. Reads `isMuted` through a ref rather than as a
+  // dependency for the same reason: restarting this effect on every mute
+  // toggle would restart the rAF loop, which is harmless here (it already
+  // no-ops once volume reaches target) but the ref keeps the intent
+  // explicit — this loop's job is fading in, not reacting to mute.
+  const isMutedRef = useRef(isMuted)
+  useEffect(() => {
+    isMutedRef.current = isMuted
+  }, [isMuted])
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    let raf = 0
+    const step = () => {
+      // Terminal state once reached — stops polling instead of running an
+      // rAF loop for the rest of the component's lifetime. Safe to treat
+      // as permanent: nothing else in this file ever lowers `audio.volume`
+      // once set, including mute (which pauses instead of zeroing it).
+      if (audio.volume >= MUSIC_VOLUME) return
+      if (!isMutedRef.current && !audio.paused) {
+        audio.volume = Math.min(MUSIC_VOLUME, audio.volume + 0.02)
+      }
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  // Pause/resume whenever the corner AudioToggle is used. Unmuting is
+  // itself a fresh user gesture (the click on AudioToggle), so this
+  // `play()` is safe even on a guest whose earlier autoplay attempts were
+  // both blocked — same reasoning as `handleOpen`'s own fallback.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (isMuted) {
+      audio.pause()
+    } else {
+      audio.play().catch(() => {})
+    }
+  }, [isMuted])
+
   return (
     // Dark mahogany, not the bright cream this was originally — every
     // section now backs itself with its own dark tone (see
@@ -119,6 +218,25 @@ export default function MahoganySealTemplate({
     // bright cream this was originally — that combination read as a flash
     // of plain white cutting through an otherwise all-dark reveal.
     <div className="mst-root relative min-h-svh bg-[#1a100d]">
+      {/* Rendered unconditionally here (not inside `!opened && <IntroOverlay>`
+          or `main`) so it's the same element from mount straight through
+          to the dashboard — never unmounted/recreated across the intro →
+          reveal transition, so playback that starts during the intro
+          carries on into the dashboard rather than restarting. Attempts to
+          start playing the instant this mounts, alongside the intro
+          video's own autoplay (see the mount effect above); `handleOpen`'s
+          own `play()` call is the guaranteed fallback for whichever
+          browser blocked that first attempt for lacking a user gesture.
+          `loop` so it keeps playing for as long as the guest stays on the
+          dashboard rather than cutting out mid-visit; omitted entirely
+          when there's no track to play, same as `videoSrc` falling back to
+          the illustrated envelope. */}
+      {resolved.musicUrl && (
+        <audio ref={audioRef} loop preload="auto">
+          <source src={resolved.musicUrl} />
+        </audio>
+      )}
+
       {!opened && (
         <IntroOverlay
           hashtag={couple.hashtag}
@@ -233,21 +351,38 @@ export default function MahoganySealTemplate({
           GalleryPreview.tsx's own lightbox uses. Gated on `opened` here
           (not the `hidden` class `main` uses) since a portal renders
           outside `main`'s own DOM subtree, so its parent's `display:none`
-          can no longer hide it for free. */}
+          can no longer hide it for free.
+
+          The corner AudioToggle rides along in this same portal for the
+          same reason — it's `position:fixed` too, so it needs the same
+          escape from the transformed/scrolling phone-frame card. Top-right
+          rather than bottom-right (where InvitationExperience.jsx's own
+          floating widget sits) since bottom-right here would collide with
+          the WhatsApp CTA bar below. Gated on `resolved.musicUrl`, not on
+          `showCreateCta` — a guest-facing invite with no CTA bar can still
+          have a track playing and needs the control regardless. */}
       {opened &&
-        showCreateCta &&
         createPortal(
-          <div className="mst-root fixed inset-x-0 bottom-0 z-30 flex justify-center bg-gradient-to-t from-[#1a100d] via-[#1a100d]/85 to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-8">
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mst-font-seal flex w-full max-w-md items-center justify-center gap-2 rounded-full border border-[#d4af37]/40 bg-[#8b1e1e] px-6 py-3.5 text-xs tracking-[0.15em] text-[#fbf3e3] uppercase shadow-[0_10px_28px_-8px_rgba(139,30,30,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <span aria-hidden="true" className="text-sm">♥</span>
-              Create Your Own Invitation
-            </a>
-          </div>,
+          <>
+            {resolved.musicUrl && (
+              <div className="mst-root fixed top-4 right-4 z-40">
+                <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
+              </div>
+            )}
+            {showCreateCta && (
+              <div className="mst-root fixed inset-x-0 bottom-0 z-30 flex justify-center bg-gradient-to-t from-[#1a100d] via-[#1a100d]/85 to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-8">
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mst-font-seal flex w-full max-w-md items-center justify-center gap-2 rounded-full border border-[#d4af37]/40 bg-[#8b1e1e] px-6 py-3.5 text-xs tracking-[0.15em] text-[#fbf3e3] uppercase shadow-[0_10px_28px_-8px_rgba(139,30,30,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <span aria-hidden="true" className="text-sm">♥</span>
+                  Create Your Own Invitation
+                </a>
+              </div>
+            )}
+          </>,
           document.body,
         )}
     </div>

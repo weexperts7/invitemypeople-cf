@@ -75,6 +75,17 @@ export interface MahoganySealTemplateData {
   videoSrc?: string
   posterSrc?: string
   /**
+   * Background track that starts the instant the guest opens the invite
+   * (the same tap/click that dismisses the intro overlay) and loops from
+   * there, with a corner mute toggle once the dashboard's up — mirrors
+   * InvitationExperience.jsx's own background-music system, which this
+   * bespoke layout otherwise opts out of entirely (see that file's
+   * "Bespoke per-template layouts" comment). Left unset is a supported
+   * state — the template still renders, just silently, same as a missing
+   * `videoSrc` falling back to the illustrated envelope.
+   */
+  musicUrl?: string
+  /**
    * The real invite's slug — required for the RSVP form to submit against
    * `/api/rsvps` (same contract every other template's RSVP form uses).
    * Left undefined, the form still renders but every submit will fail
@@ -95,6 +106,7 @@ export type MahoganySealTemplateDataInput = {
   gratitudeMessage?: string
   videoSrc?: string
   posterSrc?: string
+  musicUrl?: string
   invitationSlug?: string
 }
 

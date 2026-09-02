@@ -23,6 +23,7 @@ export function withMahoganySealDefaults(
     gratitudeMessage: input?.gratitudeMessage || fallback.gratitudeMessage,
     videoSrc: input?.videoSrc ?? fallback.videoSrc,
     posterSrc: input?.posterSrc ?? fallback.posterSrc,
+    musicUrl: input?.musicUrl ?? fallback.musicUrl,
     invitationSlug: input?.invitationSlug ?? fallback.invitationSlug,
   }
 }

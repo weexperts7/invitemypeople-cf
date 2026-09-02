@@ -89,6 +89,11 @@ export const mahoganySealMockData: MahoganySealTemplateData = {
   // — always matches whatever's actually on screen a moment earlier.
   videoSrc: '/videos/mahogany-seal-envelope-intro.mp4',
   posterSrc: '/videos/mahogany-seal-envelope-poster.jpg',
+  // The same site-wide default track InvitationExperience.jsx falls back
+  // to for every other template (`DEFAULT_BG_MUSIC_URL`) — a guest should
+  // always hear something once they open the invite, a host's own pick
+  // eventually overriding this the same way it would there.
+  musicUrl: '/audio/default-background-music.mp3',
   invitationSlug: 'shaya-rehaan',
 }
 

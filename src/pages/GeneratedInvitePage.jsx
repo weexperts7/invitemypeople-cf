@@ -19,7 +19,7 @@ import InvitePreviewCard from '../components/builder/InvitePreviewCard'
 import InvitationExperience from '../components/InvitationExperience'
 import GaneshExperience from '../components/GaneshExperience'
 import EventConcludedView from '../components/EventConcludedView'
-import { getBuilderTemplateById } from '../data/builderTemplates'
+import { resolveWeddingTemplateForInvite } from '../data/builderTemplates'
 import { getInviteBySlug } from '../utils/inviteApi'
 import { formatInviteDate } from '../utils/formatInviteDateTime'
 import { getEventStatus } from '../utils/eventStatus'
@@ -114,7 +114,7 @@ export default function GeneratedInvitePage() {
     )
   }
 
-  const template = getBuilderTemplateById(invite.templateId)
+  const template = resolveWeddingTemplateForInvite(invite.templateId)
   const shareUrl = `${SITE_URL}/i/${invite.slug}`
   const shareText = `You're invited! ${invite.names} — ${formatInviteDate(invite.date)}. View & RSVP here: ${shareUrl}`
 

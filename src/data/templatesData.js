@@ -21,6 +21,13 @@ export { PRICING } from './pricing.js'
 //   banana-leaf green, etc.) used sparingly inside that motif's linework.
 // - greeting: { symbol, line } — the invocation shown at the top of
 //   WelcomeSplash. symbol is optional (Western-style templates omit it).
+// - simplifiedInviteFields: true — this template's live viewer doesn't
+//   consume the full generic field set every other template does (see
+//   mahogany-seal below for why). AdminCreateInvitePage.jsx reads this to
+//   hide the fields that template has no use for once it's picked in
+//   either of that form's two destinations ("Consumer Invite" or "Partner
+//   Co-Branded Invite") — every other template keeps the full form.
+//   Omitted (falsy) everywhere else.
 export const TEMPLATES = [
   {
     id: 'mahogany-seal',
@@ -57,6 +64,16 @@ export const TEMPLATES = [
     // linked from here automatically.
     hasOwnCreateCta: true,
     customizeWhatsAppMessage: "Hi! I'd love to create my own Mahogany Seal wedding invitation ✨",
+    // This template's own lead-capture form (MahoganySealCreatePage.jsx,
+    // /mahogany-seal/create) collects a deliberately different, shorter
+    // field set than the generic wedding builder — no Family Details,
+    // Function Name, Google Maps URL, Opening Greeting, or Spotify-backed
+    // Background Music (it takes a plain free-text song name/link instead,
+    // which isn't a field either DB-backed invite table has). When a
+    // super admin picks this template on either AdminCreateInvitePage.jsx
+    // destination, that page hides those same fields rather than showing
+    // ones this template's viewer has no use for.
+    simplifiedInviteFields: true,
     // Its own fixed price, not the global launch-sale/PRICING.price every
     // self-serve-checkout template shows (see TemplateCard.jsx's own
     // comment on `originalPrice`/`salePrice`) — this template's bespoke

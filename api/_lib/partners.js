@@ -106,6 +106,12 @@ export function rowToPartnerInvite(row) {
     groomParents: row.groom_parents,
     brideName: row.bride_name,
     brideParents: row.bride_parents,
+    // Admin-only, Mahogany Seal template only — see
+    // 0014_admin_mahogany_caricature_video.sql /
+    // 0015_admin_mahogany_hashtag.sql / api/_lib/adminCreateInvite.js.
+    // Null for every invite created any other way.
+    caricatureVideoUrl: row.caricature_video_url,
+    hashtag: row.hashtag,
     createdAt: row.created_at,
   }
 }

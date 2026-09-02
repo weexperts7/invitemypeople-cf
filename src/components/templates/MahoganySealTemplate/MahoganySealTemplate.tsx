@@ -72,6 +72,7 @@ export default function MahoganySealTemplate({
   onOpen,
   reduceMotion = false,
   showCreateCta = true,
+  rsvpEndpoint,
 }: MahoganySealTemplateProps) {
   const resolved = withMahoganySealDefaults(data)
   const { couple } = resolved
@@ -154,6 +155,28 @@ export default function MahoganySealTemplate({
     // default volume of 1.0.
     audio.volume = 0
     audio.play().catch(() => {})
+  }, [])
+
+  // Backstop for the one case neither the mount attempt above nor
+  // `handleOpen`'s own play() call covers: a guest who lets the intro
+  // video play through to its natural end (IntroOverlay's `onEnded` ->
+  // `onOpen`) without ever tapping. That's not a real user gesture, so
+  // browsers block audible playback there too — sound would otherwise
+  // stay silent until the guest happens to find the corner AudioToggle.
+  // This listens once for the guest's actual FIRST interaction anywhere
+  // on the page (a scroll-then-tap on the itinerary, the RSVP form,
+  // anything) and uses that as the unlocking gesture instead — a harmless
+  // no-op `play()` if audio is already going. Fires at most once per
+  // mount; nothing to clean up beyond removing the listeners themselves.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const tryPlay = () => audio.play().catch(() => {})
+    const events: (keyof DocumentEventMap)[] = ['pointerdown', 'keydown']
+    events.forEach((event) => document.addEventListener(event, tryPlay, { once: true, passive: true }))
+    return () => {
+      events.forEach((event) => document.removeEventListener(event, tryPlay))
+    }
   }, [])
 
   // Keeps nudging the track's volume up toward `MUSIC_VOLUME` for as long
@@ -302,7 +325,7 @@ export default function MahoganySealTemplate({
 
         <GalleryPreview photos={resolved.galleryPhotos} reduceMotion={reduceMotion} />
 
-        <RsvpForm slug={resolved.invitationSlug} reduceMotion={reduceMotion} />
+        <RsvpForm slug={resolved.invitationSlug} reduceMotion={reduceMotion} endpoint={rsvpEndpoint} />
 
         {/* Extra bottom padding (pb-32, was pb-12) so the fixed "Create
             Your Own" bar below never sits on top of the footer's own text

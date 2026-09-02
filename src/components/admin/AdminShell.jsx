@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ArrowLeft, IndianRupee, LayoutDashboard, Link2, LogOut, Menu, ShieldCheck, Users, X } from 'lucide-react'
+import { ArrowLeft, IndianRupee, LayoutDashboard, Link2, LogOut, Menu, Sparkles, ShieldCheck, Users, X } from 'lucide-react'
 import Logo from '../Logo'
 import RequirePartnerAuth from '../partners/RequirePartnerAuth'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/partners', label: 'Partner Applications', icon: Users },
   { to: '/admin/invites', label: 'Member Links', icon: Link2 },
+  { to: '/admin/create-invite', label: 'Create Invite', icon: Sparkles },
   { to: '/admin/pricing', label: 'Template Pricing', icon: IndianRupee },
 ]
 

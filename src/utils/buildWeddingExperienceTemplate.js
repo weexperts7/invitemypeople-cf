@@ -97,5 +97,11 @@ export function buildWeddingExperienceTemplate(invite, template) {
           previewUrl: invite.bgSongPreviewUrl,
         }
       : null,
+    // Admin-only, Mahogany Seal template only (see
+    // MahoganySealAdapter.jsx) — null for every other invite. Carried
+    // through here so that adapter, which only ever sees this merged
+    // `template` object (never the raw `invite`), can read it.
+    caricatureVideoUrl: invite.caricatureVideoUrl || null,
+    hashtag: invite.hashtag || null,
   }
 }

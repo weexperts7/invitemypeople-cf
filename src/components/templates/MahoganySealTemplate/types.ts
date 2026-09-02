@@ -129,4 +129,12 @@ export interface MahoganySealTemplateProps {
    * template's own conversion bar.
    */
   showCreateCta?: boolean
+  /**
+   * Overrides the RSVP form's submit target — '/api/partners/rsvps' for a
+   * partner-created invite (see PartnerInviteViewerPage.jsx), so guest
+   * RSVPs land in `partner_rsvps`, not the consumer `rsvps` table. Left
+   * unset, RsvpForm falls back to the site-wide '/api/rsvps' default (see
+   * useRsvpSubmit.js).
+   */
+  rsvpEndpoint?: string
 }

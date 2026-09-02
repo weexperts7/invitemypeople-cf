@@ -5,14 +5,22 @@ import { useCallback, useState } from 'react'
 // RSVPS-AND-REMINDERS-SETUP.md. Same-origin JSON POST, no CORS setup needed
 // (the old external Google Apps Script endpoint this replaced required the
 // text/plain trick this hook used to use).
-const ENDPOINT = '/api/rsvps'
+const DEFAULT_ENDPOINT = '/api/rsvps'
 
 // The fetch/status-machine core shared by every RSVP form in the app,
 // regardless of how differently each one is styled. `fields` is whatever
 // the calling form collects beyond the shared invitationSlug/website
 // envelope (e.g. { guestName, attendanceStatus, guests, message } for
 // Satsang forms, plus { song, advice } for wedding forms).
-export function useRsvpSubmit(slug) {
+//
+// `endpoint` is an optional override — same pattern the shared RsvpForm.jsx/
+// WishesWall.jsx/PhotoUploader.jsx already use, so a bespoke layout's own
+// RSVP form (e.g. MahoganySealTemplate's) can point this at
+// '/api/partners/rsvps' when it's rendering a partner-created invite
+// instead of always posting into the consumer `rsvps` table. Every
+// existing caller that doesn't pass one keeps hitting '/api/rsvps' exactly
+// as before.
+export function useRsvpSubmit(slug, endpoint = DEFAULT_ENDPOINT) {
   const [status, setStatus] = useState('idle') // idle | sending | success | error
 
   // `captchaToken` comes from each calling form's own <TurnstileWidget> (see
@@ -25,7 +33,7 @@ export function useRsvpSubmit(slug) {
       setStatus('sending')
 
       try {
-        const response = await fetch(ENDPOINT, {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ invitationSlug: slug, website: honeypot, captchaToken, ...fields }),
@@ -40,14 +48,14 @@ export function useRsvpSubmit(slug) {
         return true
       } catch (err) {
         console.error(
-          `[RSVP] submission to ${ENDPOINT} failed — is the RSVP API running? (npm run dev starts it)`,
+          `[RSVP] submission to ${endpoint} failed — is the RSVP API running? (npm run dev starts it)`,
           err,
         )
         setStatus('error')
         return false
       }
     },
-    [slug, status],
+    [slug, endpoint, status],
   )
 
   return { status, isSending: status === 'sending', submit }

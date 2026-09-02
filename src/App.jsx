@@ -34,6 +34,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminPartnersPage from './pages/admin/AdminPartnersPage'
 import AdminInvitesPage from './pages/admin/AdminInvitesPage'
 import AdminPricingPage from './pages/admin/AdminPricingPage'
+import AdminCreateInvitePage from './pages/admin/AdminCreateInvitePage'
 import { RequireAdminPortal } from './components/admin/AdminShell'
 import PartnerInviteViewerPage from './pages/partners/PartnerInviteViewerPage'
 import PartnerHostDashboardPage from './pages/partners/PartnerHostDashboardPage'
@@ -249,6 +250,7 @@ function App() {
             <Route path="/admin/partners" element={<AdminPartnersPage />} />
             <Route path="/admin/invites" element={<AdminInvitesPage />} />
             <Route path="/admin/pricing" element={<AdminPricingPage />} />
+            <Route path="/admin/create-invite" element={<AdminCreateInvitePage />} />
           </Route>
         </Route>
         {COMING_SOON_OCCASIONS.map((occasion) => (

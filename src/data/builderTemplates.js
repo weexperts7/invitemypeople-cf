@@ -369,6 +369,10 @@ export const BUILDER_TEMPLATES = [
       id: 'wedding-royal-plum-curtain',
       sourceId: 'royal-plum-curtain',
       occasion: 'wedding',
+      // Propagated so getBuilderTemplatesForOccasion() can keep this style
+      // out of the builder's picker while it's hidden from the browsing
+      // catalog too (see templatesData.js's royal-plum-curtain entry).
+      hidden: src.hidden,
       name: src.name,
       tagline: 'Curtain reveal, gold particles & scratch-to-reveal cards',
       palette: src.palette,
@@ -703,7 +707,11 @@ export function getOccasion(id) {
 }
 
 export function getBuilderTemplatesForOccasion(occasionId) {
-  return BUILDER_TEMPLATES.filter((t) => t.occasion === occasionId)
+  // Respect the source template's `hidden` flag (see templatesData.js's
+  // royal-plum-curtain entry) so a style pulled from the public catalog
+  // ahead of launch stays out of the builder's "choose your style" grid
+  // too, not just the browsing gallery.
+  return BUILDER_TEMPLATES.filter((t) => t.occasion === occasionId && !t.hidden)
 }
 
 export function getBuilderTemplateById(id) {

@@ -41,6 +41,7 @@ import PartnerHostDashboardPage from './pages/partners/PartnerHostDashboardPage'
 import InvitationExperience from './components/InvitationExperience'
 import MahoganySealTemplate from './components/templates/MahoganySealTemplate'
 import MahoganySealCreatePage from './pages/MahoganySealCreatePage'
+import PinkGoldFloralTemplate from './components/templates/PinkGoldFloralTemplate/PinkGoldFloralTemplate'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
@@ -101,6 +102,22 @@ function MahoganySealPreviewRoute() {
     <div className="flex min-h-svh w-full justify-center bg-[#0c0705] sm:py-8">
       <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:min-h-0 sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto sm:rounded-[2.5rem] sm:border sm:border-[#d4af37]/30 sm:shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:[transform:translateZ(0)]">
         <MahoganySealTemplate />
+      </div>
+    </div>
+  )
+}
+
+// Same "dormant preview while unregistered in the real catalog" pattern as
+// MahoganySealPreviewRoute above — lets PinkGoldFloralTemplate be viewed at
+// its own URL without adding it to templatesData.js/layoutRegistry.js yet.
+// Cream/blush shell (not Mahogany's dark one) to match this template's own
+// light background instead of letting its edges show through a mismatched
+// frame color.
+function PinkGoldFloralPreviewRoute() {
+  return (
+    <div className="flex min-h-svh w-full justify-center bg-[#fbe6c4] sm:py-8">
+      <div className="no-scrollbar relative w-full max-w-md min-h-svh overflow-hidden sm:min-h-0 sm:h-[calc(100svh_-_4rem)] sm:overflow-y-auto sm:rounded-[2.5rem] sm:border sm:border-[#c9932f]/30 sm:shadow-[0_30px_80px_rgba(169,114,15,0.35)] sm:[transform:translateZ(0)]">
+        <PinkGoldFloralTemplate />
       </div>
     </div>
   )
@@ -188,6 +205,7 @@ function App() {
         <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />
         <Route path="/create" element={<CreateInvitePage />} />
         <Route path="/_preview/mahogany-seal" element={<MahoganySealPreviewRoute />} />
+        <Route path="/_preview/pink-gold-floral" element={<PinkGoldFloralPreviewRoute />} />
         {/* A real, permanent page — NOT nested under /_preview like the
             bare dev-preview route above. This one is manually pasted into
             real WhatsApp conversations with leads (see

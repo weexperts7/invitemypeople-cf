@@ -168,11 +168,16 @@ export default function MahoganySealTemplate({
   // anything) and uses that as the unlocking gesture instead — a harmless
   // no-op `play()` if audio is already going. Fires at most once per
   // mount; nothing to clean up beyond removing the listeners themselves.
+  // Deliberately 'click'/'touchend', not 'pointerdown'/'touchstart':
+  // mobile Safari only counts a gesture toward its autoplay allowance once
+  // the tap actually completes, so a play() attempt fired on the leading
+  // edge (pointerdown/touchstart) is silently blocked there too — same
+  // failure this backstop exists to route around.
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
     const tryPlay = () => audio.play().catch(() => {})
-    const events: (keyof DocumentEventMap)[] = ['pointerdown', 'keydown']
+    const events: (keyof DocumentEventMap)[] = ['click', 'touchend', 'keydown']
     events.forEach((event) => document.addEventListener(event, tryPlay, { once: true, passive: true }))
     return () => {
       events.forEach((event) => document.removeEventListener(event, tryPlay))
@@ -214,19 +219,43 @@ export default function MahoganySealTemplate({
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  // Pause/resume whenever the corner AudioToggle is used. Unmuting is
-  // itself a fresh user gesture (the click on AudioToggle), so this
-  // `play()` is safe even on a guest whose earlier autoplay attempts were
-  // both blocked — same reasoning as `handleOpen`'s own fallback.
-  useEffect(() => {
+  // Handles the AudioToggle tap. Calls play()/pause() directly rather than
+  // just flipping `isMuted` and letting an effect react to it, for two
+  // reasons:
+  //
+  // 1. Deliberately doesn't trust `isMuted` to reflect reality. On a guest
+  //    who let the intro video autoplay through to its natural end (see
+  //    `handleOpen`'s comment), every `play()` attempt so far ran without a
+  //    real user gesture behind it and was very likely blocked — so
+  //    `isMuted` is still sitting at its initial `false` ("sound on") even
+  //    though the track never actually started. Toggling straight off that
+  //    stale value would flip it to `true` (mute an already-silent track)
+  //    on this first, genuinely-gesture-backed tap, forcing the guest to
+  //    tap *again* to actually hear anything. Reading the element's real
+  //    `.paused` state instead means the very first tap always does the
+  //    right thing regardless of what `isMuted` claims: silent → this tap
+  //    starts it, playing → this tap mutes it.
+  // 2. Calling play()/pause() here, synchronously inside the click handler,
+  //    rather than from a `useEffect` keyed on `isMuted`: the case above
+  //    computes the *same* `isMuted` value the state already held (`false`
+  //    staying `false`), which React bails out of re-rendering for — an
+  //    effect watching `[isMuted]` would then never re-run, and playback
+  //    would never actually start despite this being the exact tap meant
+  //    to unlock it.
+  const handleToggleAudio = () => {
     const audio = audioRef.current
-    if (!audio) return
-    if (isMuted) {
-      audio.pause()
-    } else {
-      audio.play().catch(() => {})
+    if (!audio) {
+      setIsMuted((m) => !m)
+      return
     }
-  }, [isMuted])
+    if (audio.paused) {
+      audio.play().catch(() => {})
+      setIsMuted(false)
+    } else {
+      audio.pause()
+      setIsMuted(true)
+    }
+  }
 
   return (
     // Dark mahogany, not the bright cream this was originally — every
@@ -389,7 +418,7 @@ export default function MahoganySealTemplate({
           <>
             {resolved.musicUrl && (
               <div className="mst-root fixed top-4 right-4 z-40">
-                <AudioToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
+                <AudioToggle isMuted={isMuted} onToggle={handleToggleAudio} />
               </div>
             )}
             {showCreateCta && (

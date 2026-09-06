@@ -397,6 +397,40 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromWedding('pink-gold-floral')
+    return {
+      id: 'wedding-pink-gold-floral',
+      sourceId: 'pink-gold-floral',
+      occasion: 'wedding',
+      // Propagated so getBuilderTemplatesForOccasion() can keep this style
+      // out of the builder's picker while it's hidden from the browsing
+      // catalog too (see templatesData.js's pink-gold-floral entry).
+      hidden: src.hidden,
+      name: src.name,
+      tagline: 'Watercolor roses, gold vines & a live blush-and-gold scroll',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      // Propagated through so buildWeddingExperienceTemplate.js's
+      // `{ ...template, ... }` spread carries it onto the real generated
+      // invite too — see InvitationExperience.jsx's dispatch, which reads
+      // this same field name off whatever `template` it's given.
+      layout: src.layout,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2026-12-13',
+        time: '08:00',
+        venue: 'ITC Grand Bharat, Gurugram',
+        message: 'cordially invite you to join in the celebration of their wedding',
+      },
+    }
+  })(),
 
   // ---- Ganesh Chaturthi ----------------------------------------------
   (() => {

@@ -625,6 +625,70 @@ export const TEMPLATES = [
       inkSoft: '#e8c574',
     },
   },
+  {
+    id: 'pink-gold-floral',
+    name: 'Pink Gold Floral',
+    category: 'Floral',
+    weddingType: 'Hindu',
+    tags: ['Floral', 'Blush & Gold', 'Watercolor'],
+    description:
+      'Real watercolor rose and gold-vine artwork bookends a soft blush-and-cream scroll — blessing, couple names, core date/time/venue, a multi-day ceremony timeline and a live RSVP, framed throughout with hand-painted florals instead of flat CSS borders.',
+    // Pulled from the public catalog for now (LandingPage.jsx/WeddingsPage.jsx
+    // filter it out of their listings and counts) while it's held back —
+    // left fully intact here, not deleted, so it's a one-line revert to
+    // bring it back. Direct/shared links still resolve via getTemplateById,
+    // which doesn't consult this flag.
+    hidden: true,
+    // Bespoke experience component, same mechanism as mahogany-seal/
+    // royal-plum-curtain just above — see components/wedding/
+    // layoutRegistry.js and components/wedding/pink-gold-floral/
+    // PinkGoldFloralAdapter.jsx. `motif`/`motifAccent` deliberately omitted
+    // for the same reason those two templates' own comments give: the
+    // bespoke layout owns its entire visual language, and
+    // CulturalMotif/FrameCorners/MotifBadge all no-op safely on an unset
+    // motif (used only by TemplateShowcase's catalog thumbnail below).
+    layout: 'pink-gold-floral',
+    fonts: { serif: '"Playfair Display", "Cormorant Garamond", serif', script: '"Dancing Script", cursive' },
+    greeting: { symbol: 'ॐ', line: 'Om Shree Ganeshay Namah' },
+    couple: {
+      names: 'Prerna & Sumit',
+      // Doesn't repeat "Together with their families" — the bespoke
+      // layout's own header already renders that line first (its
+      // `familyIntro`, hard-coded in PinkGoldFloralTemplate.tsx's default
+      // data since nothing in this shared shape maps to it), immediately
+      // above the couple's names, then this line right after — see
+      // PinkGoldFloralAdapter.jsx's `invitationMessage`.
+      invitationLine: 'cordially invite you to join in the celebration of their wedding',
+    },
+    ceremoniesHeading: 'Functions & Ceremonies',
+    weddingDate: '2026-12-13T08:00:00',
+    ceremonies: [
+      { icon: Music, title: 'Sangeet Night', date: 'December 11, 2026', time: '7:00 PM', venue: 'The Leela Ambience, Gurugram' },
+      { icon: Flower, title: 'Haldi Ceremony', date: 'December 12, 2026', time: '10:00 AM', venue: 'Gupta Residence, Gurugram' },
+      { icon: Sparkle, title: 'Mehndi Ceremony', date: 'December 12, 2026', time: '4:00 PM', venue: 'Gupta Residence, Gurugram' },
+      { icon: Heart, title: 'Wedding Ceremony', date: 'December 13, 2026', time: '8:00 AM', venue: 'ITC Grand Bharat, Gurugram' },
+    ],
+    // A deliberately light, cream-and-gold palette (matching
+    // PinkGoldFloralTemplate.tsx's own hard-coded hex colors — #fff9f2
+    // root, #fdf1de/#fbe6c4 arch-card gradient, #a9720f/#c9932f gold text
+    // — even though the bespoke layout never actually reads these CSS
+    // variables itself) so TemplateShowcase.jsx's catalog card, which
+    // builds straight from this palette, previews the template's real
+    // blush-and-gold look instead of a mismatched default.
+    palette: {
+      ivory: '#fff9f2',
+      linen: '#fdf1de',
+      champagne: '#fbe6c4',
+      champagneDeep: '#e8c98a',
+      blush: '#fbe6c4',
+      blushDeep: '#e9a3b6',
+      rose: '#a9720f',
+      gold: '#c9932f',
+      goldSoft: '#e8c98a',
+      ink: '#5c431f',
+      inkSoft: '#7a5c33',
+    },
+  },
 ]
 
 export const CATEGORIES = ['All', ...new Set(TEMPLATES.map((t) => t.category))]

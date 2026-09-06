@@ -107,12 +107,15 @@ function MahoganySealPreviewRoute() {
   )
 }
 
-// Same "dormant preview while unregistered in the real catalog" pattern as
-// MahoganySealPreviewRoute above — lets PinkGoldFloralTemplate be viewed at
-// its own URL without adding it to templatesData.js/layoutRegistry.js yet.
-// Cream/blush shell (not Mahogany's dark one) to match this template's own
-// light background instead of letting its edges show through a mismatched
-// frame color.
+// Now registered in the real catalog too (templatesData.js/
+// layoutRegistry.js — see PinkGoldFloralAdapter.jsx), reachable the normal
+// way at /templates/wedding/pink-gold-floral. This route stays as a
+// lightweight, adapter-free smoke test of the raw component itself (bare
+// props, curated mock data, no InvitationExperience/adapter in the way) —
+// same reason MahoganySealPreviewRoute above still exists even though
+// mahogany-seal is registered too. Cream/blush shell (not Mahogany's dark
+// one) to match this template's own light background instead of letting
+// its edges show through a mismatched frame color.
 function PinkGoldFloralPreviewRoute() {
   return (
     <div className="flex min-h-svh w-full justify-center bg-[#fbe6c4] sm:py-8">

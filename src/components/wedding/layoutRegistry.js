@@ -1,5 +1,6 @@
 import RoyalPlumCurtainAdapter from './royal-plum-curtain/RoyalPlumCurtainAdapter'
 import MahoganySealAdapter from './mahogany-seal/MahoganySealAdapter'
+import PinkGoldFloralAdapter from './pink-gold-floral/PinkGoldFloralAdapter'
 
 // Maps a wedding template's optional `layout` field (see
 // src/data/templatesData.js) to its bespoke experience component.
@@ -11,6 +12,7 @@ import MahoganySealAdapter from './mahogany-seal/MahoganySealAdapter'
 export const WEDDING_LAYOUTS = {
   'royal-plum-curtain': RoyalPlumCurtainAdapter,
   'mahogany-seal': MahoganySealAdapter,
+  'pink-gold-floral': PinkGoldFloralAdapter,
 }
 
 export function getWeddingLayoutComponent(layout) {

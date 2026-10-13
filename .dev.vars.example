@@ -1,0 +1,36 @@
+# Local-dev env vars for `npm run pages:dev` (wrangler pages dev). Copy this
+# file to `.dev.vars` (gitignored, same as `.env`) and fill in real values —
+# wrangler reads `.dev.vars` automatically and exposes everything in it as
+# `context.env.*` to every function in functions/, which
+# functions/_lib/adapt.js's bridgeEnv() then also copies onto `process.env`
+# per-request so the existing api/_lib/*.js / src/utils/*.js helpers (which
+# read `process.env.VARIABLE_NAME`) work unchanged — see that file's header.
+#
+# This is a SEPARATE file from `.env` (read by `npm run dev`'s Node/Express
+# server and by Vite for VITE_-prefixed client vars) — wrangler doesn't read
+# `.env` at all. Same variable names, same values; just two files because
+# the two dev runtimes (Node vs. the Workers runtime `wrangler pages dev`
+# emulates) read env differently. See .env.example for what each variable
+# is for and where to get it — every comment there applies here too.
+
+SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+BREVO_API_KEY=xkeysib-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+EMAIL_FROM=InviteMyPeople <hello@invitemypeople.com>
+
+RAZORPAY_KEY_ID=rzp_test_XXXXXXXXXXXXXX
+RAZORPAY_KEY_SECRET=XXXXXXXXXXXXXXXXXXXXXXXX
+
+SPOTIFY_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SPOTIFY_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+TURNSTILE_SECRET_KEY=0x4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+ADMIN_EMAILS=founder@invitemypeople.com, ops@invitemypeople.com
+
+# In production, set all of the above as Cloudflare Pages environment
+# variables/secrets instead (Pages project → Settings → Environment
+# variables, scoped separately to Production and Preview) — or via
+# `wrangler pages secret put VARIABLE_NAME`. Never commit real values here
+# or in `.dev.vars`.

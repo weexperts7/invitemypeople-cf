@@ -1,0 +1,20 @@
+# Cloudflare Pages config — see functions/ for the Pages Functions this
+# project deploys alongside the static Vite build (dist/, via
+# pages_build_output_dir below). Rename `name` to match the Pages project
+# you create in the Cloudflare dashboard (or `wrangler pages project create`)
+# if it isn't literally "invitemypeople".
+name = "invitemypeople"
+pages_build_output_dir = "dist"
+
+# 2024-09-23 is the date Cloudflare Workers started auto-populating
+# `process.env` from a Worker's bound environment variables/secrets when
+# `nodejs_compat` is enabled — every functions/**/*.js file that reuses an
+# existing api/_lib/*.js or src/utils/*.js helper (getSupabase, Turnstile,
+# Razorpay, Brevo, Spotify) relies on this, since those still read
+# `process.env.VARIABLE_NAME` directly rather than `context.env.*` (see
+# functions/_lib/adapt.js's header for why). `nodejs_compat` also covers the
+# node:crypto APIs (randomBytes/timingSafeEqual/createHmac) those same
+# modules use. Safe to bump forward to a more recent date later; don't move
+# it earlier than this.
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]

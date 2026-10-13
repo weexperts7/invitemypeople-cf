@@ -1,26 +1,21 @@
 // Shared Razorpay Standard Checkout helpers — mirrors the split in
 // api/_lib/supabase.js and src/utils/slugify.js: one framework-agnostic
-// module imported by both the local-dev Express routes (server/index.js)
-// and their Vercel Serverless counterparts (api/create-order.js,
-// api/verify-payment.js). Server-side only — RAZORPAY_KEY_SECRET must never
-// be reachable from anything the client bundle imports.
+// module imported by every runtime this app deploys to (local-dev Express
+// in server/index.js, Vercel Serverless Functions, and Cloudflare Pages
+// Functions — see functions/api/create-order.js). Server-side only —
+// RAZORPAY_KEY_SECRET must never be reachable from anything the client
+// bundle imports.
+//
+// Calls Razorpay's REST API directly via `fetch` rather than the `razorpay`
+// npm SDK (which this module used until the Cloudflare migration): that SDK
+// depends on axios, which picks a Node http/https adapter outside the
+// browser — unavailable on Cloudflare Workers, which have no Node socket
+// layer underneath a Pages Function even with the `nodejs_compat`
+// compatibility flag (that flag covers built-in modules like node:crypto,
+// not a working node:http client). `fetch` and node:crypto both work
+// identically in Node 18+ and Workers, so this one implementation now
+// covers every runtime instead of needing a Cloudflare-specific fork.
 import crypto from 'node:crypto'
-import Razorpay from 'razorpay'
-
-let client = null
-
-function getClient() {
-  if (client) return client
-
-  const key_id = process.env.RAZORPAY_KEY_ID
-  const key_secret = process.env.RAZORPAY_KEY_SECRET
-  if (!key_id || !key_secret) {
-    throw new Error('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set for this deployment.')
-  }
-
-  client = new Razorpay({ key_id, key_secret })
-  return client
-}
 
 // Razorpay's own floor for an Order's amount — ₹1.
 export const MIN_AMOUNT_PAISE = 100
@@ -33,7 +28,29 @@ export const MIN_AMOUNT_PAISE = 100
  * re-trusts a client-supplied amount.
  */
 export async function createOrder({ amount, currency = 'INR', receipt }) {
-  const order = await getClient().orders.create({ amount, currency, receipt })
+  const key_id = process.env.RAZORPAY_KEY_ID
+  const key_secret = process.env.RAZORPAY_KEY_SECRET
+  if (!key_id || !key_secret) {
+    throw new Error('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set for this deployment.')
+  }
+
+  const response = await fetch('https://api.razorpay.com/v1/orders', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${key_id}:${key_secret}`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ amount, currency, receipt }),
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    const err = new Error(body?.error?.description || `Razorpay order creation failed (HTTP ${response.status})`)
+    if (response.status === 401) err.statusCode = 401
+    throw err
+  }
+
+  const order = await response.json()
   return { order_id: order.id, amount: order.amount, currency: order.currency }
 }
 

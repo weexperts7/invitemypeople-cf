@@ -1,24 +1,25 @@
 // Catch-all Cloudflare Pages Function. Production counterpart to
-// server/index.js's renderSeoHtml/getIndexHtmlTemplate (local-dev-only) and
-// direct port of api/render.js (the Vercel Serverless Function that same
-// logic used to run as) — see that file's header comment for the full
-// "why this exists" (per-route SEO meta injection for crawlers that don't
-// execute JS) and why it reads dist/app-shell.html specifically, never
-// dist/index.html (scripts/postbuild.js renames it — see that script's own
-// comment for why a literal index.html file would silently bypass this
-// function for "/").
+// server/index.js's renderSeoHtml/getIndexHtmlTemplate (local-dev-only) —
+// see "why this exists" below: per-route SEO meta injection for crawlers
+// that don't execute JS, and why it reads dist/app-shell.html specifically,
+// never dist/index.html (scripts/postbuild.js renames it — see that
+// script's own comment for why a literal index.html file would silently
+// bypass this function for "/"). Originally ported from this project's
+// Vercel Serverless Function equivalent (api/render.js, since removed once
+// the Cloudflare migration was cut over) — logic is otherwise unchanged.
 //
 // Cloudflare Pages Functions route this file for any request path that
-// doesn't match a static asset in the build output (same ordering
-// vercel.json's rewrite relies on — a real dist/assets/app.js, favicon.ico,
-// robots.txt, etc. is still served directly, never reaching this
-// function), which is exactly why renaming index.html to app-shell.html
-// still matters here too: without it, "/" would resolve straight to that
-// static file and skip this function's <h1>/meta injection entirely.
+// doesn't match a static asset in the build output (a real
+// dist/assets/app.js, favicon.ico, robots.txt, etc. is still served
+// directly, never reaching this function), which is exactly why renaming
+// index.html to app-shell.html still matters here too: without it, "/"
+// would resolve straight to that static file and skip this function's
+// <h1>/meta injection entirely.
 //
-// Only real change from api/render.js: there's no filesystem on Workers, so
-// the HTML template is read via Cloudflare Pages' ASSETS binding (a
-// Fetcher over this same build output) instead of `fs.readFileSync`.
+// Only real difference from a Node renderer: there's no filesystem on
+// Workers, so the HTML template is read via Cloudflare Pages' ASSETS
+// binding (a Fetcher over this same build output) instead of
+// `fs.readFileSync`.
 import {
   ROUTES_SEO,
   SITE_URL,

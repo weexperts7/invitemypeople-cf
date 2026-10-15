@@ -1,10 +1,10 @@
 // Vite's build always emits dist/index.html — and that literal filename is
-// exactly what both Vercel's static-file layer and Express's
+// exactly what both Cloudflare Pages' static-asset layer and Express's
 // `express.static` (server/index.js) treat as the implicit document for a
-// request to "/". That static match wins over vercel.json's catch-all
-// rewrite to api/render.js (rewrites only apply when no matching static
-// file already exists) and, locally, over express.static's own
-// serve-index-for-directory default — so a request for "/" bypassed the
+// request to "/". That static match wins over Cloudflare's catch-all
+// routing to functions/[[path]].js (Pages Functions only run when no
+// matching static file already exists) and, locally, over express.static's
+// own serve-index-for-directory default — so a request for "/" bypassed the
 // per-route <h1>/meta injection entirely and served the raw, route-agnostic
 // shell. Every OTHER route (/weddings, /about, ...) has no corresponding
 // static file in dist/, so those already fell through to the render
@@ -13,7 +13,7 @@
 //
 // Renaming the built file removes that literal "index.html" match: dist/
 // then has nothing that can satisfy "/" (or "/index.html") on its own, so
-// every request — including "/" — falls through to api/render.js
+// every request — including "/" — falls through to functions/[[path]].js
 // (production) or server/index.js's renderSeoHtml catch-all (local
 // `npm start`), both of which already read this same renamed file as their
 // shared HTML template (see getIndexHtmlTemplate() in each).

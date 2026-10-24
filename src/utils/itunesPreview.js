@@ -69,10 +69,23 @@ function delay(ms) {
 // latency for the common (already-succeeding) case.
 const RETRY_BACKOFF_MS = 400
 
+// Spotify's `artist` field is every credited artist joined with ", " —
+// Bollywood/Punjabi tracks especially often carry 4-6 names (singers,
+// composers, featured artists). Confirmed directly against iTunes: the full
+// joined string returns zero results ("Prem & Hardeep, Amar Arshi, Badshah,
+// Neha Kakkar, Indeep Bakshi, Amrik Singh Kala Chashma" → resultCount: 0),
+// while just the primary artist finds the track instantly ("Badshah Kala
+// Chashma" → matches, in a collection literally titled "Desi Wedding
+// Hits"). iTunes' search just can't handle that many names in one query —
+// using only the first credited artist is what actually matches.
+function primaryArtist(artist) {
+  return artist.split(',')[0].trim()
+}
+
 async function findItunesPreviewUrl(kv, title, artist, attempt = 0) {
   try {
     const params = new URLSearchParams({
-      term: `${artist} ${title}`,
+      term: `${primaryArtist(artist)} ${title}`,
       media: 'music',
       entity: 'song',
       limit: '1',

@@ -18,3 +18,10 @@ pages_build_output_dir = "dist"
 # it earlier than this.
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+
+
+[vars]
+VITE_RAZORPAY_KEY_ID = "rzp_live_TriWOP4WJgqN9e"
+VITE_SUPABASE_URL = "https://hrwvmxzysndlztykvfci.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhyd3ZteHp5c25kbHp0eWt2ZmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjI4OTIsImV4cCI6MjEwMTQzODg5Mn0.ATNRde1ojIL9lnG3WEkNyqjAU5fyeeip_xD4pdP7n6E"
+VITE_TURNSTILE_SITE_KEY = "0x4AAAAAAEW4t3n1cH8ETIBq"

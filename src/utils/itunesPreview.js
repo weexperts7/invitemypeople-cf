@@ -44,17 +44,36 @@ async function findItunesPreviewUrl(title, artist) {
   }
 }
 
+// Firing one lookup per track in parallel (the old Promise.all approach)
+// reliably tripped iTunes' per-IP rate limit (HTTP 429, confirmed via
+// Cloudflare's live Function logs) — Cloudflare Workers share egress IPs
+// across a huge number of unrelated customers, so even one search's worth
+// of simultaneous requests was enough to get throttled. Sequential with a
+// small stagger keeps each search under that burst threshold; it costs a
+// bit of latency (worst case tracks.length * STAGGER_MS, since every miss
+// still waits its full fetch timeout too) but that's the trade for
+// previews actually coming back instead of 429ing every time.
+const STAGGER_MS = 150
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 // Fills in `previewUrl` on every track that came back from Spotify without
-// one, by looking each up on iTunes in parallel. Tracks that already have a
-// Spotify preview (Extended Quota Mode apps, or the rare track Spotify does
-// still serve one for) are left untouched — iTunes is only asked to cover
-// the gap.
+// one, by looking each up on iTunes one at a time. Tracks that already have
+// a Spotify preview (Extended Quota Mode apps, or the rare track Spotify
+// does still serve one for) are left untouched — iTunes is only asked to
+// cover the gap.
 export async function backfillPreviewUrls(tracks) {
-  return Promise.all(
-    tracks.map(async (track) => {
-      if (track.previewUrl) return track
-      const previewUrl = await findItunesPreviewUrl(track.title, track.artist)
-      return previewUrl ? { ...track, previewUrl } : track
-    }),
-  )
+  const results = []
+  for (const track of tracks) {
+    if (track.previewUrl) {
+      results.push(track)
+      continue
+    }
+    const previewUrl = await findItunesPreviewUrl(track.title, track.artist)
+    results.push(previewUrl ? { ...track, previewUrl } : track)
+    await delay(STAGGER_MS)
+  }
+  return results
 }

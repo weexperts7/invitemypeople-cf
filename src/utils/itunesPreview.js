@@ -75,18 +75,33 @@ async function findItunesPreviewUrl(title, artist, attempt = 0) {
 // previews actually coming back instead of 429ing every time.
 const STAGGER_MS = 150
 
-// Fills in `previewUrl` on every track that came back from Spotify without
-// one, by looking each up on iTunes one at a time. Tracks that already have
-// a Spotify preview (Extended Quota Mode apps, or the rare track Spotify
-// does still serve one for) are left untouched — iTunes is only asked to
-// cover the gap.
+// Even staggered+retried, two searches landing close together (debounced
+// typing firing more than once) independently queue their own sequences
+// against the same shared, already-saturated Cloudflare egress IP — a
+// single search's own pacing can't control that. Capping how many of a
+// search's results ever attempt an iTunes lookup at all is the one lever
+// left that directly shrinks total request volume rather than just
+// reordering it: the UI only shows a handful of results without
+// scrolling anyway, so the long tail past MAX_LOOKUPS was mostly spending
+// rate-limit budget on tracks nobody was about to click regardless.
+const MAX_LOOKUPS = 4
+
+// Fills in `previewUrl` on the first MAX_LOOKUPS tracks that came back from
+// Spotify without one, by looking each up on iTunes one at a time. Tracks
+// that already have a Spotify preview (Extended Quota Mode apps, or the
+// rare track Spotify does still serve one for) are left untouched — iTunes
+// is only asked to cover the gap. Anything past the cap is returned as-is
+// (still shown in results, just not selectable) rather than spending more
+// of the shared rate-limit budget on tracks unlikely to be reached.
 export async function backfillPreviewUrls(tracks) {
   const results = []
+  let lookups = 0
   for (const track of tracks) {
-    if (track.previewUrl) {
+    if (track.previewUrl || lookups >= MAX_LOOKUPS) {
       results.push(track)
       continue
     }
+    lookups += 1
     const previewUrl = await findItunesPreviewUrl(track.title, track.artist)
     results.push(previewUrl ? { ...track, previewUrl } : track)
     await delay(STAGGER_MS)

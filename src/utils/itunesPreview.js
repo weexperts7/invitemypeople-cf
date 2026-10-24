@@ -12,7 +12,23 @@ const ITUNES_SEARCH_URL = 'https://itunes.apple.com/search'
 // overall Spotify search, it should just leave that track's preview null
 // (same as if Spotify itself had no preview), so SongSearchPicker.jsx keeps
 // treating it as "no preview available".
-async function findItunesPreviewUrl(title, artist) {
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// One retry on 429 specifically — confirmed via Cloudflare's live Function
+// logs that iTunes' per-IP rate limit is what's actually blocking these
+// (not a bot-detection block: the exact same query resolves instantly when
+// run outside Cloudflare's network). The 150ms stagger in backfillPreviewUrls
+// cut most 429s but not all — Cloudflare Workers share egress IPs across
+// unrelated customers, so this app's own request pacing can't fully control
+// how saturated that shared IP's rate-limit bucket already is. A short
+// backoff plus one retry recovers the transient case without piling on more
+// latency for the common (already-succeeding) case.
+const RETRY_BACKOFF_MS = 400
+
+async function findItunesPreviewUrl(title, artist, attempt = 0) {
   try {
     const params = new URLSearchParams({
       term: `${artist} ${title}`,
@@ -33,6 +49,10 @@ async function findItunesPreviewUrl(title, artist) {
       },
     })
     if (!response.ok) {
+      if (response.status === 429 && attempt === 0) {
+        await delay(RETRY_BACKOFF_MS)
+        return findItunesPreviewUrl(title, artist, attempt + 1)
+      }
       console.error(`[itunesPreview] lookup for "${artist} ${title}" failed: HTTP ${response.status}`)
       return null
     }
@@ -54,10 +74,6 @@ async function findItunesPreviewUrl(title, artist) {
 // still waits its full fetch timeout too) but that's the trade for
 // previews actually coming back instead of 429ing every time.
 const STAGGER_MS = 150
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 // Fills in `previewUrl` on every track that came back from Spotify without
 // one, by looking each up on iTunes one at a time. Tracks that already have

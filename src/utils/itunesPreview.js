@@ -21,10 +21,14 @@ async function findItunesPreviewUrl(title, artist) {
       limit: '1',
     })
     const response = await fetch(`${ITUNES_SEARCH_URL}?${params}`)
-    if (!response.ok) return null
+    if (!response.ok) {
+      console.error(`[itunesPreview] lookup for "${artist} ${title}" failed: HTTP ${response.status}`)
+      return null
+    }
     const data = await response.json()
     return data?.results?.[0]?.previewUrl ?? null
-  } catch {
+  } catch (err) {
+    console.error(`[itunesPreview] lookup for "${artist} ${title}" threw:`, err)
     return null
   }
 }

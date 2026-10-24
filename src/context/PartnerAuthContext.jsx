@@ -43,16 +43,19 @@ export function PartnerAuthProvider({ children }) {
 
     let cancelled = false
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (cancelled) return
-      setSession(data.session)
-      await loadProfile(data.session?.access_token)
-      if (!cancelled) setLoading(false)
-    })
-
+    // onAuthStateChange alone covers both the initial session (it fires
+    // once immediately on subscribe with whatever session already exists —
+    // Supabase's INITIAL_SESSION event) and every later change (sign-in,
+    // sign-out, token refresh). A separate getSession() call here used to
+    // race this same listener's initial fire, so both resolved around the
+    // same time and each called loadProfile() with the same token — every
+    // login (and every page load with an existing session) hit
+    // /api/partners/me twice. One listener, one load per actual change.
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
-      loadProfile(nextSession?.access_token)
+      loadProfile(nextSession?.access_token).finally(() => {
+        if (!cancelled) setLoading(false)
+      })
     })
 
     return () => {
@@ -61,17 +64,16 @@ export function PartnerAuthProvider({ children }) {
     }
   }, [loadProfile])
 
-  const signIn = useCallback(
-    async (email, password) => {
-      if (!supabase) throw new Error('This deployment is not configured for partner login.')
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-      setSession(data.session)
-      await loadProfile(data.session?.access_token)
-      return data.session
-    },
-    [loadProfile],
-  )
+  const signIn = useCallback(async (email, password) => {
+    if (!supabase) throw new Error('This deployment is not configured for partner login.')
+    // Doesn't set session/profile state itself — supabase.auth.signInWithPassword
+    // firing a SIGNED_IN event through the onAuthStateChange listener above
+    // already does both; calling loadProfile() again here was the other
+    // half of the duplicate-request pair described above.
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
+    return data.session
+  }, [])
 
   const signOut = useCallback(async () => {
     if (!supabase) return

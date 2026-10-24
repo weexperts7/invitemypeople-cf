@@ -14,19 +14,30 @@ import { getTemplatePrices } from '../utils/templatePriceApi'
 // TemplateCard.jsx (template galleries — WeddingsPage.jsx, LandingPage.jsx)
 // and the "Create Your Own" CTA in InvitationExperience.jsx/
 // SatsangExperience.jsx/GaneshExperience.jsx. A page rendering many cards
-// (WeddingsPage.jsx's whole grid, say) ends up with one of these calls per
-// card — deliberately not deduped behind a module-level cache, so a price
-// an admin just changed always shows up on the very next mount instead of
-// serving a stale value from earlier in the same browser session; the
-// endpoint itself is a single small Supabase select, cheap enough that a
-// handful of parallel calls on one page load is not worth the staleness
-// tradeoff a shared cache would introduce.
+// (WeddingsPage.jsx's whole grid, say) used to end up with one HTTP call per
+// card, all for the exact same payload — inFlight below dedupes concurrent
+// mounts onto a single request. It's cleared the moment that request
+// settles (not kept as a resolved-value cache), so this only collapses
+// calls that genuinely overlap in time; a later, separate page visit still
+// fetches fresh, preserving the original "a price an admin just changed
+// shows up on the very next mount" guarantee.
+let inFlight = null
+
+function fetchTemplatePricesOnce() {
+  if (!inFlight) {
+    inFlight = getTemplatePrices().finally(() => {
+      inFlight = null
+    })
+  }
+  return inFlight
+}
+
 export function useTemplatePriceOverrides() {
   const [overrides, setOverrides] = useState({})
 
   useEffect(() => {
     let cancelled = false
-    getTemplatePrices()
+    fetchTemplatePricesOnce()
       .then((rows) => {
         if (cancelled) return
         setOverrides(Object.fromEntries(rows.map((row) => [row.templateKey, row.price])))

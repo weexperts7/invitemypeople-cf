@@ -20,7 +20,18 @@ async function findItunesPreviewUrl(title, artist) {
       entity: 'song',
       limit: '1',
     })
-    const response = await fetch(`${ITUNES_SEARCH_URL}?${params}`)
+    // Cloudflare Workers' default fetch() sends no User-Agent at all, which
+    // reads as bot/datacenter traffic to some public APIs — iTunes' search
+    // endpoint appears to be one of them: this request works fine from a
+    // browser or a local dev machine, but every lookup silently fails when
+    // it originates from Cloudflare's network. A plain desktop-browser UA
+    // is enough to look like an ordinary web request.
+    const response = await fetch(`${ITUNES_SEARCH_URL}?${params}`, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    })
     if (!response.ok) {
       console.error(`[itunesPreview] lookup for "${artist} ${title}" failed: HTTP ${response.status}`)
       return null

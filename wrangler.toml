@@ -25,3 +25,14 @@ VITE_RAZORPAY_KEY_ID = "rzp_live_TriWOP4WJgqN9e"
 VITE_SUPABASE_URL = "https://hrwvmxzysndlztykvfci.supabase.co"
 VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhyd3ZteHp5c25kbHp0eWt2ZmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjI4OTIsImV4cCI6MjEwMTQzODg5Mn0.ATNRde1ojIL9lnG3WEkNyqjAU5fyeeip_xD4pdP7n6E"
 VITE_TURNSTILE_SITE_KEY = "0x4AAAAAAEW4t3n1cH8ETIBq"
+
+# Caches iTunes preview-clip lookups (src/utils/itunesPreview.js) — wedding
+# music searches repeat the same popular songs constantly, so once a track's
+# preview URL is looked up it's stored here and never needs asking iTunes
+# again. Exists because iTunes' per-IP rate limit (shared across every
+# unrelated Cloudflare customer's egress traffic, not just this app's own)
+# was 429ing a large fraction of lookups even after request pacing/retries —
+# see that file's own comments for the full story.
+[[kv_namespaces]]
+binding = "ITUNES_PREVIEW_CACHE"
+id = "58f6de676ff548eb9186723ffc0eb92d"

@@ -13,6 +13,47 @@ const ITUNES_SEARCH_URL = 'https://itunes.apple.com/search'
 // (same as if Spotify itself had no preview), so SongSearchPicker.jsx keeps
 // treating it as "no preview available".
 
+// Cloudflare KV cache (see wrangler.toml's own comment on this binding) —
+// wedding searches repeat the same popular songs constantly, so once a
+// track's preview URL is found it's stored here and never needs asking
+// iTunes again. This is the real fix for the rate-limit problem the
+// comments below describe: every cache hit is one fewer request competing
+// for the shared, already-saturated per-IP budget. Bridged onto
+// process.env by functions/_lib/adapt.js's bridgeEnv() the same way every
+// other credential in this codebase is — absent in local dev and in any
+// runtime without the binding, where caching is simply skipped (falls
+// through to a live iTunes lookup every time, same as before this existed).
+//
+// Only successful lookups are ever cached, deliberately never a miss/null:
+// a null here is ambiguous between "iTunes genuinely has no match" and
+// "still rate-limited after the retry below" — caching that would risk
+// permanently hiding a track's preview just because the moment it was
+// first searched happened to be rate-limited.
+const CACHE_TTL_SECONDS = 60 * 60 * 24 * 30 // 30 days — a track's audio clip URL doesn't change
+
+function cacheKey(title, artist) {
+  return `preview:${artist.trim().toLowerCase()}::${title.trim().toLowerCase()}`
+}
+
+async function getCachedPreviewUrl(kv, title, artist) {
+  if (!kv) return undefined
+  try {
+    return (await kv.get(cacheKey(title, artist))) || undefined
+  } catch (err) {
+    console.error(`[itunesPreview] cache read for "${artist} ${title}" failed:`, err)
+    return undefined
+  }
+}
+
+async function setCachedPreviewUrl(kv, title, artist, previewUrl) {
+  if (!kv) return
+  try {
+    await kv.put(cacheKey(title, artist), previewUrl, { expirationTtl: CACHE_TTL_SECONDS })
+  } catch (err) {
+    console.error(`[itunesPreview] cache write for "${artist} ${title}" failed:`, err)
+  }
+}
+
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -28,7 +69,7 @@ function delay(ms) {
 // latency for the common (already-succeeding) case.
 const RETRY_BACKOFF_MS = 400
 
-async function findItunesPreviewUrl(title, artist, attempt = 0) {
+async function findItunesPreviewUrl(kv, title, artist, attempt = 0) {
   try {
     const params = new URLSearchParams({
       term: `${artist} ${title}`,
@@ -51,13 +92,15 @@ async function findItunesPreviewUrl(title, artist, attempt = 0) {
     if (!response.ok) {
       if (response.status === 429 && attempt === 0) {
         await delay(RETRY_BACKOFF_MS)
-        return findItunesPreviewUrl(title, artist, attempt + 1)
+        return findItunesPreviewUrl(kv, title, artist, attempt + 1)
       }
       console.error(`[itunesPreview] lookup for "${artist} ${title}" failed: HTTP ${response.status}`)
       return null
     }
     const data = await response.json()
-    return data?.results?.[0]?.previewUrl ?? null
+    const previewUrl = data?.results?.[0]?.previewUrl ?? null
+    if (previewUrl) await setCachedPreviewUrl(kv, title, artist, previewUrl)
+    return previewUrl
   } catch (err) {
     console.error(`[itunesPreview] lookup for "${artist} ${title}" threw:`, err)
     return null
@@ -86,23 +129,33 @@ const STAGGER_MS = 150
 // rate-limit budget on tracks nobody was about to click regardless.
 const MAX_LOOKUPS = 4
 
-// Fills in `previewUrl` on the first MAX_LOOKUPS tracks that came back from
-// Spotify without one, by looking each up on iTunes one at a time. Tracks
-// that already have a Spotify preview (Extended Quota Mode apps, or the
-// rare track Spotify does still serve one for) are left untouched — iTunes
-// is only asked to cover the gap. Anything past the cap is returned as-is
-// (still shown in results, just not selectable) rather than spending more
-// of the shared rate-limit budget on tracks unlikely to be reached.
-export async function backfillPreviewUrls(tracks) {
+// Fills in `previewUrl` on every track that came back from Spotify without
+// one. Cache reads first, for every track, in parallel — a KV read never
+// touches iTunes' rate limit, so there's no reason to ration those the way
+// live lookups are rationed below. Only tracks that are still missing a
+// preview after that (first-ever search for that song, or it fell out of a
+// since-expired cache entry) spend from the MAX_LOOKUPS budget, one at a
+// time on iTunes itself. Tracks that already have a Spotify preview
+// (Extended Quota Mode apps, or the rare track Spotify does still serve one
+// for) skip both steps entirely.
+export async function backfillPreviewUrls(tracks, kv) {
+  const afterCache = await Promise.all(
+    tracks.map(async (track) => {
+      if (track.previewUrl) return track
+      const cached = await getCachedPreviewUrl(kv, track.title, track.artist)
+      return cached ? { ...track, previewUrl: cached } : track
+    }),
+  )
+
   const results = []
   let lookups = 0
-  for (const track of tracks) {
+  for (const track of afterCache) {
     if (track.previewUrl || lookups >= MAX_LOOKUPS) {
       results.push(track)
       continue
     }
     lookups += 1
-    const previewUrl = await findItunesPreviewUrl(track.title, track.artist)
+    const previewUrl = await findItunesPreviewUrl(kv, track.title, track.artist)
     results.push(previewUrl ? { ...track, previewUrl } : track)
     await delay(STAGGER_MS)
   }

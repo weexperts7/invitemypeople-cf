@@ -162,6 +162,9 @@ export async function searchSpotifyTracks(query, limit = 8) {
   const tracks = (data?.tracks?.items ?? []).map(toSimpleTrack)
   // See itunesPreview.js: covers the (common) case where Spotify itself
   // returned no preview_url, so a host isn't stuck unable to select almost
-  // anything they search for.
-  return backfillPreviewUrls(tracks)
+  // anything they search for. process.env.ITUNES_PREVIEW_CACHE is the KV
+  // binding bridged from context.env by functions/_lib/adapt.js — absent
+  // (and harmless to pass as undefined) on any runtime without it, same as
+  // every other optional credential in this codebase.
+  return backfillPreviewUrls(tracks, process.env.ITUNES_PREVIEW_CACHE)
 }

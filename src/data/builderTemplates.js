@@ -397,6 +397,35 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromWedding('velvet-theatre')
+    return {
+      id: 'wedding-velvet-theatre',
+      sourceId: 'velvet-theatre',
+      occasion: 'wedding',
+      hidden: src.hidden,
+      name: src.name,
+      tagline: 'Velvet curtain reveal, gold scratch coins & theatre-ticket events',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      // See the royal-plum-curtain entry above — carries the bespoke layout
+      // onto the buyer's real generated invite.
+      layout: src.layout,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2027-02-14',
+        time: '18:30',
+        venue: 'The Rambagh Palace, Jaipur',
+        message: src.couple.invitationLine,
+      },
+    }
+  })(),
 
   // ---- Ganesh Chaturthi ----------------------------------------------
   (() => {

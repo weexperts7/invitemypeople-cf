@@ -625,6 +625,56 @@ export const TEMPLATES = [
       inkSoft: '#e8c574',
     },
   },
+  {
+    id: 'velvet-theatre',
+    name: 'Velvet Theatre',
+    category: 'Modern',
+    weddingType: 'Hindu',
+    tags: ['Modern', 'Curtain Reveal', 'Interactive', 'Scratch Card'],
+    description:
+      'Red velvet theatre curtains rise on tap to reveal your names centre stage — then gold scratch-off coins for the date, a live countdown, your events as theatre tickets, a framed gallery and RSVP, all in a clean cream-and-oxblood editorial style.',
+    isFlagship: true,
+    // Bespoke experience component — see components/wedding/layoutRegistry.js
+    // and components/templates/VelvetTheatreTemplate/. Same `layout`
+    // mechanism and omitted `motif` as royal-plum-curtain above.
+    layout: 'velvet-theatre',
+    fonts: { serif: '"Cormorant Garamond", serif', script: '"Great Vibes", cursive' },
+    greeting: { symbol: null, line: 'Shubh Vivah' },
+    couple: {
+      names: 'Meera & Aarav',
+      invitationLine:
+        'We would love for you to celebrate with us the most special day of our lives. It would be an honour to have you present at this moment.',
+      people: [
+        { name: 'Meera Kapoor', parents: 'Daughter of Mr. Vikram & Mrs. Nandini Kapoor' },
+        { name: 'Aarav Mehta', parents: 'Son of Mr. Sanjay & Mrs. Ritu Mehta' },
+      ],
+    },
+    ceremoniesHeading: 'The Programme',
+    weddingDate: '2027-02-14T18:30:00',
+    ceremonies: [
+      { icon: Flower, title: 'Mehendi', date: 'Friday, 12 February 2027', time: '4:00 PM', venue: 'Kapoor Residence, Civil Lines, Jaipur' },
+      { icon: Music, title: 'Sangeet Night', date: 'Saturday, 13 February 2027', time: '7:30 PM', venue: 'The Rambagh Palace Lawns, Jaipur' },
+      { icon: Heart, title: 'The Wedding', date: 'Sunday, 14 February 2027', time: '6:30 PM', venue: 'The Rambagh Palace, Jaipur' },
+    ],
+    // Velvet reds rather than the template's own cream page: the catalog
+    // thumbnail (TemplateShowcase.jsx) builds its gradient from
+    // linen/champagne/blush, so the card previews the curtain itself.
+    // `linen` is also the desktop backdrop behind the preview card, hence
+    // the deepest red there.
+    palette: {
+      ivory: '#faf8f5',
+      linen: '#5e0b11',
+      champagne: '#8e161d',
+      champagneDeep: '#d6ad5a',
+      blush: '#4a070b',
+      blushDeep: '#d6ad5a',
+      rose: '#f3d58f',
+      gold: '#d6ad5a',
+      goldSoft: '#f3d58f',
+      ink: '#fff7ea',
+      inkSoft: '#efd7a1',
+    },
+  },
 ]
 
 export const CATEGORIES = ['All', ...new Set(TEMPLATES.map((t) => t.category))]

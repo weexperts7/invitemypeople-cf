@@ -106,6 +106,11 @@ export function rowToPartnerInvite(row) {
     groomParents: row.groom_parents,
     brideName: row.bride_name,
     brideParents: row.bride_parents,
+    // Portrait URLs and the main venue's picture, on templates that show
+    // them — see 0017_partner_invites_portraits_and_venue_photo.sql.
+    groomPhoto: row.groom_photo,
+    bridePhoto: row.bride_photo,
+    venuePhoto: row.venue_photo,
     // Admin-only, Mahogany Seal template only — see
     // 0014_admin_mahogany_caricature_video.sql /
     // 0015_admin_mahogany_hashtag.sql / api/_lib/adminCreateInvite.js.
@@ -194,6 +199,9 @@ export async function spendCreditForInvite(partnerId, {
   brideParents,
   hostToken,
   greetingLine,
+  groomPhoto,
+  bridePhoto,
+  venuePhoto,
 }) {
   const { data, error } = await getSupabase().rpc('spend_partner_credit_for_invite', {
     p_partner_id: partnerId,
@@ -220,6 +228,9 @@ export async function spendCreditForInvite(partnerId, {
     p_bride_parents: brideParents || null,
     p_host_token: hostToken,
     p_greeting_line: greetingLine || null,
+    p_groom_photo: groomPhoto || null,
+    p_bride_photo: bridePhoto || null,
+    p_venue_photo: venuePhoto || null,
   })
   if (error) throw error
   const row = Array.isArray(data) ? data[0] : data

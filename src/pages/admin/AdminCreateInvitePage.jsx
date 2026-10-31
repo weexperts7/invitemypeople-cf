@@ -26,11 +26,14 @@ import SEO from '../../components/SEO'
 import AdminForbidden from '../../components/admin/AdminForbidden'
 import PhotoUploader from '../../components/builder/PhotoUploader'
 import EventsListEditor from '../../components/builder/EventsListEditor'
+import SinglePhotoUploader from '../../components/builder/SinglePhotoUploader'
 import SongSearchPicker from '../../components/builder/SongSearchPicker'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { adminGetMe, adminListPartners, adminCreateInvite, adminUploadMahoganyVideo } from '../../utils/partnerApi'
 import { TEMPLATES } from '../../data/templatesData'
+import { findBuilderTemplateBySource } from '../../data/builderTemplates'
 import { slugify } from '../../utils/slugify'
+import { PORTRAIT_HINT, VENUE_PHOTO_HINT } from '../../utils/photoUpload'
 import { MAX_VIDEO_BYTES, ALLOWED_VIDEO_MIME_TYPES } from '../../utils/videoUpload'
 
 const SLUG_FORMAT_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -57,6 +60,11 @@ const EMPTY_FORM = {
   groomParents: '',
   brideName: '',
   brideParents: '',
+  // Portraits + the main venue's picture, on templates that show them
+  // (see `hasPortraits`/`hasVenuePhotos` in builderTemplates.js).
+  groomPhoto: '',
+  bridePhoto: '',
+  venuePhoto: '',
   // Partner branch only — the CLIENT's own contact details, same fields
   // PartnerCreateInvitePage.jsx collects. Required: this is where the
   // invitation-ready email (live link + private dashboard link) is sent.
@@ -247,6 +255,11 @@ export default function AdminCreateInvitePage() {
   // See the file-level comment above and templatesData.js's own comment on
   // this flag.
   const restrictedFields = Boolean(selectedTemplate?.simplifiedInviteFields)
+  // This form picks from the catalog, but these two flags live on the
+  // builder entry (see builderTemplates.js).
+  const builderTemplate = findBuilderTemplateBySource('wedding', templateId)
+  const showPortraits = Boolean(builderTemplate?.hasPortraits)
+  const showVenuePhotos = Boolean(builderTemplate?.hasVenuePhotos)
   // Every bespoke `layout` template (Mahogany Seal, Royal Plum Curtain —
   // see layoutRegistry.js) splits the couple's single "names" string on
   // "&" to get two separate names for its two-sided layout
@@ -309,9 +322,15 @@ export default function AdminCreateInvitePage() {
     if (next === destination) return
     setDestination(next)
     setPhotos([])
+    setForm((prev) => ({ ...prev, groomPhoto: '', bridePhoto: '', venuePhoto: '' }))
+    setEvents((prev) => prev.map((event) => ({ ...event, venuePhoto: '' })))
   }
 
   const handleField = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }))
+  const handlePhoto = (field) => (url) => setForm((prev) => ({ ...prev, [field]: url }))
+
+  const photoEndpoint = destination === 'partner' ? '/api/partners/photos' : '/api/photos'
+  const photoToken = destination === 'partner' ? accessToken : undefined
 
   const handleCaricatureVideoChange = async (e) => {
     const file = e.target.files?.[0]
@@ -422,6 +441,9 @@ export default function AdminCreateInvitePage() {
         groomParents: restrictedFields ? '' : form.groomParents.trim(),
         brideName: restrictedFields ? '' : form.brideName.trim(),
         brideParents: restrictedFields ? '' : form.brideParents.trim(),
+        groomPhoto: showPortraits ? form.groomPhoto : '',
+        bridePhoto: showPortraits ? form.bridePhoto : '',
+        venuePhoto: showVenuePhotos ? form.venuePhoto : '',
         clientEmail: destination === 'partner' ? form.clientEmail.trim() : '',
         clientPhone: destination === 'partner' ? form.clientPhone.trim() : '',
         hostName: destination === 'direct' ? form.hostName.trim() : '',
@@ -636,6 +658,16 @@ export default function AdminCreateInvitePage() {
                         placeholder="e.g. Son of Mr. Rajesh & Mrs. Kavita Malhotra"
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                       />
+                      {showPortraits && (
+                        <SinglePhotoUploader
+                          label="Groom's photo"
+                          hint={PORTRAIT_HINT}
+                          url={form.groomPhoto}
+                          onChange={handlePhoto('groomPhoto')}
+                          endpoint={photoEndpoint}
+                          token={photoToken}
+                        />
+                      )}
                     </div>
                     <div className="space-y-3">
                       <input
@@ -652,6 +684,16 @@ export default function AdminCreateInvitePage() {
                         placeholder="e.g. Daughter of Mr. Anil & Mrs. Sunita Kapoor"
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                       />
+                      {showPortraits && (
+                        <SinglePhotoUploader
+                          label="Bride's photo"
+                          hint={PORTRAIT_HINT}
+                          url={form.bridePhoto}
+                          onChange={handlePhoto('bridePhoto')}
+                          endpoint={photoEndpoint}
+                          token={photoToken}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -827,6 +869,19 @@ export default function AdminCreateInvitePage() {
                   placeholder="e.g. Rambagh Palace Gardens, Jaipur"
                   className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                 />
+                {showVenuePhotos && (
+                  <div className="mt-3">
+                    <SinglePhotoUploader
+                      shape="wide"
+                      label="Venue photo"
+                      hint={VENUE_PHOTO_HINT}
+                      url={form.venuePhoto}
+                      onChange={handlePhoto('venuePhoto')}
+                      endpoint={photoEndpoint}
+                      token={photoToken}
+                    />
+                  </div>
+                )}
               </div>
 
               {!restrictedFields && (
@@ -939,8 +994,8 @@ export default function AdminCreateInvitePage() {
                   key={destination}
                   photos={photos}
                   onChange={setPhotos}
-                  endpoint={destination === 'partner' ? '/api/partners/photos' : '/api/photos'}
-                  token={destination === 'partner' ? accessToken : undefined}
+                  endpoint={photoEndpoint}
+                  token={photoToken}
                 />
               </div>
 
@@ -953,7 +1008,13 @@ export default function AdminCreateInvitePage() {
                 <p className="mb-3 text-xs text-ink-soft">
                   Add other functions — Haldi, Sangeet, Mehndi, Reception — each with its own date, time and venue.
                 </p>
-                <EventsListEditor events={events} onChange={setEvents} />
+                <EventsListEditor
+                  events={events}
+                  onChange={setEvents}
+                  venuePhotoHint={showVenuePhotos ? VENUE_PHOTO_HINT : undefined}
+                  uploadEndpoint={photoEndpoint}
+                  uploadToken={photoToken}
+                />
               </div>
 
               <div className="border-t border-champagne-deep/30 pt-5">

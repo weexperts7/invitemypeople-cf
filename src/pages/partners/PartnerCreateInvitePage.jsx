@@ -24,14 +24,17 @@ import TemplateStyleSelector from '../../components/builder/TemplateStyleSelecto
 import InvitePreviewPanel from '../../components/builder/InvitePreviewPanel'
 import PhotoUploader from '../../components/builder/PhotoUploader'
 import EventsListEditor from '../../components/builder/EventsListEditor'
+import SinglePhotoUploader from '../../components/builder/SinglePhotoUploader'
 import SongSearchPicker from '../../components/builder/SongSearchPicker'
 import { usePartnerAuth } from '../../hooks/usePartnerAuth'
 import { getBuilderTemplateById, getBuilderTemplatesForOccasion, getOccasion } from '../../data/builderTemplates'
 import { getMyCredits, createClientInvite } from '../../utils/partnerApi'
 import { SITE_URL } from '../../data/routesSeo'
 import { todayDateInputValue } from '../../utils/todayDateInput'
+import { PORTRAIT_HINT, VENUE_PHOTO_HINT } from '../../utils/photoUpload'
 
 const OCCASION_ID = 'wedding' // Partner Portal is wedding-only for now — see B2B-PARTNER-PORTAL-SETUP.md.
+const PHOTO_ENDPOINT = '/api/partners/photos'
 
 const EMPTY_FORM = {
   names: '',
@@ -54,6 +57,9 @@ const EMPTY_FORM = {
   groomParents: '',
   brideName: '',
   brideParents: '',
+  groomPhoto: '',
+  bridePhoto: '',
+  venuePhoto: '',
 }
 
 // Shown once, right after a successful generation — the /p/:slug link this
@@ -160,6 +166,8 @@ export default function PartnerCreateInvitePage() {
   const handleField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
+  const handlePhoto = (field) => (url) => setForm((prev) => ({ ...prev, [field]: url }))
+
   const isPastDate = (dateStr) => Boolean(dateStr) && dateStr < todayDateInputValue()
 
   const isMissingRequired = () =>
@@ -194,6 +202,11 @@ export default function PartnerCreateInvitePage() {
         groomParents: form.groomParents.trim(),
         brideName: form.brideName.trim(),
         brideParents: form.brideParents.trim(),
+        // Kept in `form` across a style change, but only saved on a template
+        // that actually shows them.
+        groomPhoto: template.hasPortraits ? form.groomPhoto : '',
+        bridePhoto: template.hasPortraits ? form.bridePhoto : '',
+        venuePhoto: template.hasVenuePhotos ? form.venuePhoto : '',
         photos,
         events,
         bgSongTitle: song?.title || '',
@@ -351,6 +364,16 @@ export default function PartnerCreateInvitePage() {
                               placeholder="e.g. Son of Mr. Rajesh & Mrs. Kavita Malhotra"
                               className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                             />
+                            {template.hasPortraits && (
+                              <SinglePhotoUploader
+                                label="Groom's photo"
+                                hint={PORTRAIT_HINT}
+                                url={form.groomPhoto}
+                                onChange={handlePhoto('groomPhoto')}
+                                endpoint={PHOTO_ENDPOINT}
+                                token={accessToken}
+                              />
+                            )}
                           </div>
                           <div className="space-y-3">
                             <input
@@ -369,6 +392,16 @@ export default function PartnerCreateInvitePage() {
                               placeholder="e.g. Daughter of Mr. Anil & Mrs. Sunita Kapoor"
                               className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                             />
+                            {template.hasPortraits && (
+                              <SinglePhotoUploader
+                                label="Bride's photo"
+                                hint={PORTRAIT_HINT}
+                                url={form.bridePhoto}
+                                onChange={handlePhoto('bridePhoto')}
+                                endpoint={PHOTO_ENDPOINT}
+                                token={accessToken}
+                              />
+                            )}
                           </div>
                         </div>
                       </div>
@@ -475,6 +508,19 @@ export default function PartnerCreateInvitePage() {
                           placeholder="e.g. Rambagh Palace Gardens, Jaipur"
                           className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                         />
+                        {template.hasVenuePhotos && (
+                          <div className="mt-3">
+                            <SinglePhotoUploader
+                              shape="wide"
+                              label="Venue photo"
+                              hint={VENUE_PHOTO_HINT}
+                              url={form.venuePhoto}
+                              onChange={handlePhoto('venuePhoto')}
+                              endpoint={PHOTO_ENDPOINT}
+                              token={accessToken}
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -535,7 +581,7 @@ export default function PartnerCreateInvitePage() {
                         <PhotoUploader
                           photos={photos}
                           onChange={setPhotos}
-                          endpoint="/api/partners/photos"
+                          endpoint={PHOTO_ENDPOINT}
                           token={accessToken}
                         />
                       </div>
@@ -549,7 +595,13 @@ export default function PartnerCreateInvitePage() {
                           Add other functions — Haldi, Sangeet, Mehndi,
                           Reception — each with its own date, time and venue.
                         </p>
-                        <EventsListEditor events={events} onChange={setEvents} />
+                        <EventsListEditor
+                          events={events}
+                          onChange={setEvents}
+                          venuePhotoHint={template.hasVenuePhotos ? VENUE_PHOTO_HINT : undefined}
+                          uploadEndpoint={PHOTO_ENDPOINT}
+                          uploadToken={accessToken}
+                        />
                       </div>
 
                       <div className="border-t border-champagne-deep/30 pt-5">

@@ -635,6 +635,9 @@ export async function createClientInvite(req, res) {
     const groomParents = clean(body.groomParents, 200)
     const brideName = clean(body.brideName, 120)
     const brideParents = clean(body.brideParents, 200)
+    const groomPhoto = clean(body.groomPhoto, 500)
+    const bridePhoto = clean(body.bridePhoto, 500)
+    const venuePhoto = clean(body.venuePhoto, 500)
     if (!coupleNames) return res.status(400).json({ ok: false, error: 'coupleNames is required' })
     if (!weddingDate) return res.status(400).json({ ok: false, error: 'weddingDate is required' })
     if (isPastDate(weddingDate)) return res.status(400).json({ ok: false, error: 'weddingDate cannot be in the past' })
@@ -672,6 +675,9 @@ export async function createClientInvite(req, res) {
           brideParents: brideParents || null,
           hostToken: generateHostToken(),
           greetingLine: greetingLine || null,
+          groomPhoto: groomPhoto || null,
+          bridePhoto: bridePhoto || null,
+          venuePhoto: venuePhoto || null,
         })
         console.log(`[partners] ${user.email} created invite "${slug}" for ${coupleNames}`)
 

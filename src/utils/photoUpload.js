@@ -11,6 +11,12 @@ export const MAX_PHOTO_BYTES = 4 * 1024 * 1024
 export const MAX_PHOTOS = 6
 export const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
+// Helper text for builder/SinglePhotoUploader.jsx, shared by every form that
+// shows one (CreateInvitePage.jsx, PartnerCreateInvitePage.jsx,
+// AdminCreateInvitePage.jsx).
+export const PORTRAIT_HINT = 'Head and shoulders works best. Max 4MB.'
+export const VENUE_PHOTO_HINT = "Shown on this event's card instead of the illustration. Max 4MB."
+
 function extensionForMime(mime) {
   if (mime === 'image/png') return 'png'
   if (mime === 'image/webp') return 'webp'

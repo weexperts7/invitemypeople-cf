@@ -2,7 +2,8 @@
 // "Family Details" (`shape="arch"`, on templates with `hasPortraits` in
 // data/builderTemplates.js) or a venue's picture (`shape="wide"`, on templates
 // with `hasVenuePhotos`). Uploads as soon as a file is picked, same as
-// PhotoUploader.jsx.
+// PhotoUploader.jsx, with the same optional `endpoint`/`token` overrides for
+// the Partner Portal's own authenticated bucket.
 import { useRef, useState } from 'react'
 import { ImagePlus, Loader2, X } from 'lucide-react'
 import { ALLOWED_MIME_TYPES, MAX_PHOTO_BYTES, uploadPhoto } from '../../utils/photoUpload'
@@ -12,7 +13,7 @@ const SHAPES = {
   wide: { box: 'h-16 w-28', corners: 'rounded-lg', crop: 'object-center' },
 }
 
-export default function SinglePhotoUploader({ label, hint, url, onChange, shape = 'arch' }) {
+export default function SinglePhotoUploader({ label, hint, url, onChange, shape = 'arch', endpoint, token }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
   const inputRef = useRef(null)
@@ -25,7 +26,7 @@ export default function SinglePhotoUploader({ label, hint, url, onChange, shape 
 
     setUploading(true)
     try {
-      onChange(await uploadPhoto(file))
+      onChange(await uploadPhoto(file, { endpoint, token }))
     } catch (err) {
       console.error('[SinglePhotoUploader] upload failed:', err)
       setError(err.message || 'Upload failed')

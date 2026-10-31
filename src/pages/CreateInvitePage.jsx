@@ -45,10 +45,8 @@ import { getActivePrice, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
 import { getTemplatePrices } from '../utils/templatePriceApi'
 import { todayDateInputValue } from '../utils/todayDateInput'
+import { PORTRAIT_HINT, VENUE_PHOTO_HINT } from '../utils/photoUpload'
 import { ROUTES_SEO } from '../data/routesSeo'
-
-const PORTRAIT_HINT = 'Head and shoulders works best. Max 4MB.'
-const VENUE_PHOTO_HINT = "Shown on this event's card instead of the illustration. Max 4MB."
 
 const EMPTY_FORM = {
   names: '',

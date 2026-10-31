@@ -102,6 +102,12 @@ export function cleanCreateInvitePayload(body = {}) {
   const brideName = clean(body.brideName, 120)
   const brideParents = clean(body.brideParents, 200)
 
+  // Portraits + the main venue's picture — already-uploaded URLs, on
+  // templates that show them (see SinglePhotoUploader.jsx).
+  const groomPhoto = clean(body.groomPhoto, 500)
+  const bridePhoto = clean(body.bridePhoto, 500)
+  const venuePhoto = clean(body.venuePhoto, 500)
+
   // Photos — already-uploaded URLs (see PhotoUploader.jsx, which uploads
   // each file itself before this form is ever submitted), same shape and
   // cap as every other invite-creation route.
@@ -183,6 +189,9 @@ export function cleanCreateInvitePayload(body = {}) {
     groomParents,
     brideName,
     brideParents,
+    groomPhoto,
+    bridePhoto,
+    venuePhoto,
     photos,
     events,
     bgSongTitle,
@@ -251,6 +260,9 @@ export function buildDirectInviteRow(fields, admin) {
     groom_parents: fields.groomParents || null,
     bride_name: fields.brideName || null,
     bride_parents: fields.brideParents || null,
+    groom_photo: fields.groomPhoto || null,
+    bride_photo: fields.bridePhoto || null,
+    venue_photo: fields.venuePhoto || null,
     host_name: fields.hostName,
     host_email: fields.hostEmail,
     host_phone: fields.hostPhone,
@@ -330,6 +342,9 @@ export function buildPartnerInviteRow(fields) {
     groom_parents: fields.groomParents || null,
     bride_name: fields.brideName || null,
     bride_parents: fields.brideParents || null,
+    groom_photo: fields.groomPhoto || null,
+    bride_photo: fields.bridePhoto || null,
+    venue_photo: fields.venuePhoto || null,
     credit_transaction_id: null,
     host_token: generatePartnerHostToken(),
     caricature_video_url: fields.caricatureVideoUrl || null,

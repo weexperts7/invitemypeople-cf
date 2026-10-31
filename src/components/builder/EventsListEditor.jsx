@@ -17,6 +17,8 @@ export default function EventsListEditor({
   onChange,
   titlePlaceholder = 'e.g. Sangeet Night',
   venuePhotoHint,
+  uploadEndpoint,
+  uploadToken,
 }) {
   const addEvent = () => {
     if (events.length >= MAX_ADDITIONAL_EVENTS) return
@@ -94,6 +96,8 @@ export default function EventsListEditor({
                 hint={venuePhotoHint}
                 url={event.venuePhoto}
                 onChange={(url) => updateEvent(index, 'venuePhoto')({ target: { value: url } })}
+                endpoint={uploadEndpoint}
+                token={uploadToken}
               />
             </div>
           )}

@@ -366,6 +366,12 @@ export function getSatsangTemplateBySlug(slug) {
 // placeholder glyph if that file isn't present yet.
 export const GURUJI_PHOTO_SRC = '/images/guruji-photo.jpg'
 
+// Plays when a host doesn't pick their own bhajan: the 30-second iTunes preview
+// of Siddharth Mohan's "Mantra Jaap Om Namah Shivaya Shivji Sada Sahaye" (track
+// 1533605114), the same kind of clip SongSearchPicker.jsx gives hosts.
+export const DEFAULT_SATSANG_BHAJAN_URL =
+  'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/4f/70/57/4f70574a-f892-b0ce-eb98-8a9e6f70a96b/mzaf_15643745193665261066.plus.aac.p.m4a'
+
 // What an invite-only satsang tells its guests, unless the host rewrites it.
 export const DEFAULT_PRIVATE_NOTE = 'This is an invite-only satsang. Kindly do not forward this invite.'
 export const MAX_PRIVATE_NOTE = 160

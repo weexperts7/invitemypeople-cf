@@ -72,20 +72,21 @@ export default function SatsangExperience({ template, invitationSlug, showChrome
           InvitationExperience.jsx's own CTA — same "Create Your Own —
           price" copy site-wide rather than this occasion alone saying
           "Customize This Template". */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-5 sm:bottom-7 z-[70] flex justify-center px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.6, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6, ease: 'easeOut' }}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
-        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-[70]"
+        className="pointer-events-auto"
       >
         {/* A design the builder doesn't offer yet would otherwise drop the
             buyer into a different template. */}
         {template.fullExperience ? (
           <Link
             to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
-            className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+            className="flex items-center gap-2 whitespace-nowrap rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
           >
             <Heart className="w-4 h-4" />
             Create Your Own —{' '}
@@ -97,13 +98,14 @@ export default function SatsangExperience({ template, invitationSlug, showChrome
         ) : (
           <Link
             to="/guruji-satsangs"
-            className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+            className="flex items-center gap-2 whitespace-nowrap rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
           >
             <Heart className="w-4 h-4" />
             See Our Satsang Invitation
           </Link>
         )}
       </motion.div>
+      </div>
 
       <Layout template={template} />
     </>

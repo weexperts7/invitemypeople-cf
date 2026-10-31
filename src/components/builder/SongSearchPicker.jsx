@@ -15,7 +15,7 @@ const MIN_QUERY_LENGTH = 2
 const DEBOUNCE_MS = 400
 const APPLIED_PREVIEW_ID = 'applied'
 
-export default function SongSearchPicker({ value, onConfirm, onRemove }) {
+export default function SongSearchPicker({ value, onConfirm, onRemove, defaultTrackLabel = 'a soft default track' }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -275,7 +275,7 @@ export default function SongSearchPicker({ value, onConfirm, onRemove }) {
       )}
 
       <p className="mt-2 text-xs text-ink-soft">
-        Optional — skip this and we&apos;ll play a soft default track
+        Optional — skip this and we&apos;ll play {defaultTrackLabel}
         instead. Powered by Spotify; only songs with a 30-second preview
         available can be selected.
       </p>

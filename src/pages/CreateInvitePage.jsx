@@ -884,7 +884,9 @@ export default function CreateInvitePage() {
                           Background Music Selection <span className="normal-case text-ink-soft/70">(optional)</span>
                         </label>
                         <p className="mb-3 text-xs text-ink-soft">
-                          {occasionId !== 'wedding'
+                          {occasionId === 'guruji-satsang'
+                            ? 'Search for a Guruji bhajan or shabad, preview it, then confirm one to play the moment guests open your invitation.'
+                            : occasionId !== 'wedding'
                             ? 'Search for a devotional bhajan or festive instrumental, preview it, then confirm one to play the moment guests open your invitation.'
                             : 'Search Spotify, preview any track, then confirm one to play the moment guests open your invitation.'}
                         </p>
@@ -892,6 +894,7 @@ export default function CreateInvitePage() {
                           value={song}
                           onConfirm={setSong}
                           onRemove={() => setSong(null)}
+                          defaultTrackLabel={occasionId === 'guruji-satsang' ? 'the Guruji mantra jaap' : undefined}
                         />
                       </div>
                     )}

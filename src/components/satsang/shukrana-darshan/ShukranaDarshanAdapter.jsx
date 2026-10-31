@@ -1,8 +1,6 @@
 import ShukranaDarshanTemplate from '../../templates/ShukranaDarshanTemplate/ShukranaDarshanTemplate.tsx'
-import { GURUJI_PHOTO_SRC } from '../../../data/satsangTemplatesData'
+import { DEFAULT_SATSANG_BHAJAN_URL, GURUJI_PHOTO_SRC } from '../../../data/satsangTemplatesData'
 import { themeToCssVars } from '../../../utils/themeToCssVars'
-
-const DEFAULT_BG_MUSIC_URL = '/audio/default-background-music.mp3'
 
 // What the catalog page and the builder preview show until there's a real
 // sangat behind them, so a visitor can see these sections working. Never used
@@ -41,7 +39,7 @@ export default function ShukranaDarshanAdapter({ template, invitationSlug }) {
         langarTime: mahaprasad.time,
         langarNote: mahaprasad.note,
         photos: template.photos ?? [],
-        musicUrl: template.bgMusic?.previewUrl || DEFAULT_BG_MUSIC_URL,
+        musicUrl: template.bgMusic?.previewUrl || DEFAULT_SATSANG_BHAJAN_URL,
         invitationSlug,
         shareUrl: typeof window !== 'undefined' ? window.location.href : '',
         privateNote: template.privateNote ?? '',

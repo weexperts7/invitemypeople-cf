@@ -237,6 +237,9 @@ export default function LiveInvitePreview({
         groomParents: values.groomParents,
         brideName: values.brideName,
         brideParents: values.brideParents,
+        groomPhoto: values.groomPhoto,
+        bridePhoto: values.bridePhoto,
+        venuePhoto: values.venuePhoto,
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —

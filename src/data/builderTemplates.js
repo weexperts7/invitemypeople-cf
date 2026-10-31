@@ -426,6 +426,40 @@ export const BUILDER_TEMPLATES = [
       },
     }
   })(),
+  (() => {
+    const src = fromWedding('rang-mahal')
+    return {
+      id: 'wedding-rang-mahal',
+      // Shows a portrait on each family card — turns on SinglePhotoUploader in
+      // CreateInvitePage.jsx's "Family Details" section.
+      hasPortraits: true,
+      // Shows each event's venue photo on its card, in place of the illustration.
+      hasVenuePhotos: true,
+      sourceId: 'rang-mahal',
+      occasion: 'wedding',
+      hidden: src.hidden,
+      name: src.name,
+      tagline: 'Pull-to-open gatefold, light-the-diya date & Saat Phere ring',
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      weddingType: src.weddingType,
+      heroPhoto: src.heroPhoto,
+      greeting: src.greeting,
+      // See the royal-plum-curtain entry above — carries the bespoke layout
+      // onto the buyer's real generated invite.
+      layout: src.layout,
+      connective: src.couple.invitationLine,
+      example: {
+        names: src.couple.names,
+        date: '2027-01-24',
+        time: '19:00',
+        venue: 'The Palace Courtyard, Udaipur',
+        message: src.couple.invitationLine,
+      },
+    }
+  })(),
 
   // ---- Ganesh Chaturthi ----------------------------------------------
   (() => {

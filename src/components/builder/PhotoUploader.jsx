@@ -13,7 +13,7 @@
 // the consumer one) instead of the default public /api/photos.
 import { useRef, useState } from 'react'
 import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react'
-import { ALLOWED_MIME_TYPES, MAX_PHOTOS, MAX_PHOTO_BYTES } from '../../utils/photoUpload'
+import { ALLOWED_MIME_TYPES, MAX_PHOTOS, MAX_PHOTO_BYTES, uploadPhoto } from '../../utils/photoUpload'
 
 let nextItemId = 0
 
@@ -61,19 +61,11 @@ export default function PhotoUploader({ photos, onChange, endpoint = '/api/photo
       setItems((prev) => [...prev, { id, previewUrl, uploading: true, error: null, url: null }])
 
       try {
-        const formData = new FormData()
-        formData.append('photo', file)
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          body: formData,
-        })
-        const result = await res.json().catch(() => null)
-        if (!res.ok || !result?.ok) throw new Error(result?.error || 'Upload failed')
+        const url = await uploadPhoto(file, { endpoint, token })
 
         setItems((prev) => {
           const next = prev.map((it) =>
-            it.id === id ? { ...it, uploading: false, url: result.url } : it,
+            it.id === id ? { ...it, uploading: false, url } : it,
           )
           syncUrls(next)
           return next

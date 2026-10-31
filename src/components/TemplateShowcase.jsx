@@ -1,17 +1,13 @@
 // The landing page's "real, high-fidelity miniature preview" of a template —
-// not a cartoon standing in for the design, but the actual palette, motif
-// pattern, frame ornament and typography a guest will see once they open the
-// invitation, simply scaled down. Every piece here (CulturalMotif,
-// FrameBanner/FrameCorners, the palette itself) is the same code the live
-// InvitationExperience renders at full size, so the card is never lying
-// about what the template looks like.
+// not a cartoon standing in for the design, but the actual artwork a guest
+// will see once they open the invitation, simply scaled down (see
+// wedding/posterRegistry.js), so the card is never lying about what the
+// template looks like.
 //
 // `template.cardImage` (see templatesData.js) opts a template out of that
-// palette-driven card into a straight photo instead — see the early return
-// below for why.
-import CulturalMotif from './CulturalMotif'
-import { FrameBanner, FrameCorners } from './TemplateFrame'
-import MotifBadge from './MotifBadge'
+// poster into a straight photo instead — see the early return below for why.
+import PosterFrame from './wedding/PosterFrame'
+import { getWeddingPoster } from './wedding/posterRegistry'
 import { coupleNameTier } from '../utils/coupleNameFit'
 
 const COUPLE_NAME_SIZES = [
@@ -22,17 +18,14 @@ const COUPLE_NAME_SIZES = [
 ]
 
 export default function TemplateShowcase({ template, className = '' }) {
-  const { palette, motif, motifAccent, fonts, greeting, name, couple, cardImage } = template
+  const { palette, fonts, greeting, name, couple, cardImage } = template
 
   // A handful of bespoke templates (Mahogany Seal's 3D Pixar-style
-  // caricature, so far) don't have a `motif` this palette-driven card can
-  // draw from — an abstract gradient-and-typography card would be honest
-  // about the colors but say nothing about the one thing that actually
-  // makes that template different (a real, animated caricature of the
-  // couple). `cardImage` opts a template into showing that photo directly
-  // instead — still "the same code the live preview renders" in spirit,
-  // just the couple's caricature portrait rather than a synthesized
-  // palette card.
+  // caricature, so far) are defined by something their opening screen
+  // doesn't show — here, a real, animated caricature of the couple.
+  // `cardImage` opts a template into showing that photo directly instead —
+  // still "the same code the live preview renders" in spirit, just the
+  // couple's caricature portrait rather than a poster.
   if (cardImage?.src) {
     return (
       <div
@@ -70,79 +63,16 @@ export default function TemplateShowcase({ template, className = '' }) {
     )
   }
 
+  const Poster = getWeddingPoster(template.layout)
   return (
     <div
       className={`relative h-full w-full overflow-hidden ${className}`}
-      style={{
-        background: `linear-gradient(155deg, ${palette.linen} 0%, ${palette.champagne} 55%, ${palette.blush} 100%)`,
-      }}
       role="img"
       aria-label={`${name} template preview`}
     >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: `radial-gradient(circle at 82% 88%, ${palette.blushDeep}55, transparent 55%)`,
-        }}
-      />
-
-      <CulturalMotif motif={motif} palette={palette} accent={motifAccent} />
-      <FrameCorners motif={motif} palette={palette} accent={motifAccent} size="w-9 h-9 sm:w-11 sm:h-11" />
-
-      <div className="relative flex h-full w-full flex-col items-center justify-center gap-2 px-6 py-8 text-center">
-        <MotifBadge
-          motif={motif}
-          palette={palette}
-          accent={motifAccent}
-          className="absolute -z-10 top-6 left-1/2 -translate-x-1/2 w-28 h-28 opacity-30"
-        />
-
-        <FrameBanner
-          motif={motif}
-          palette={palette}
-          accent={motifAccent}
-          className="w-[85%] max-w-[220px] h-auto mb-1"
-        />
-
-        {greeting?.symbol && (
-          <p className="text-lg leading-none" style={{ color: palette.gold }}>
-            {greeting.symbol}
-          </p>
-        )}
-
-        {/* line-clamp-2 guards this miniature card against a template whose
-            greeting is a full mantra/verse rather than a short 2-3 word
-            tagline (e.g. Rajasthani Royal's) — without it, the wrapped text
-            grows past the card's fixed height and pushes/overflows the rest
-            of the centered layout. Every other template's short one-line
-            greeting is already well under 2 lines, so this is a no-op for
-            them. */}
-        <p
-          className="text-[9px] font-medium uppercase tracking-[0.28em] line-clamp-2"
-          style={{ color: palette.inkSoft }}
-        >
-          {greeting?.line ?? name}
-        </p>
-
-        <span
-          className="block h-px w-10 origin-center"
-          style={{ background: palette.goldSoft }}
-        />
-
-        <p
-          className={`${COUPLE_NAME_SIZES[coupleNameTier(couple?.names ?? 'Aarav & Diya')]} leading-none whitespace-nowrap`}
-          style={{ color: palette.rose, fontFamily: '"Great Vibes", cursive' }}
-        >
-          {couple?.names ?? 'Aarav & Diya'}
-        </p>
-
-        <p
-          className="mt-1 text-[10px] uppercase tracking-[0.22em]"
-          style={{ color: palette.ink, fontFamily: fonts?.serif ?? '"Cormorant Garamond", serif' }}
-        >
-          {name}
-        </p>
-      </div>
+      <PosterFrame>
+        <Poster template={template} />
+      </PosterFrame>
     </div>
   )
 }

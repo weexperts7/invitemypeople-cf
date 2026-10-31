@@ -105,6 +105,17 @@ alter table public.invites
   add column if not exists bride_parents text;
 ```
 
+Add the `groom_photo`/`bride_photo` columns (each person's portrait on
+templates that show one, see `hasPortraits` in `builderTemplates.js`) and
+`venue_photo` (the main event's venue picture, see `hasVenuePhotos`) with:
+
+```sql
+alter table public.invites
+  add column if not exists groom_photo text,
+  add column if not exists bride_photo text,
+  add column if not exists venue_photo text;
+```
+
 ### 1b. Create the `invite-photos` Storage bucket
 
 Buyers can optionally upload their own photos (see `CreateInvitePage.jsx`) —

@@ -3,7 +3,7 @@ import { iconForEventTitle } from './eventIcon'
 
 // Formats one buyer-submitted event (main or additional) into the shape
 // EventTimeline.jsx expects.
-function toCeremony({ title, date, time, venue, locationUrl }) {
+function toCeremony({ title, date, time, venue, locationUrl, venuePhoto }) {
   return {
     icon: iconForEventTitle(title),
     title,
@@ -11,6 +11,7 @@ function toCeremony({ title, date, time, venue, locationUrl }) {
     time: formatInviteTime(time),
     venue,
     mapHref: locationUrl?.trim() || mapsSearchUrl(venue),
+    venuePhoto: venuePhoto || '',
   }
 }
 
@@ -45,6 +46,7 @@ export function buildWeddingExperienceTemplate(invite, template) {
     time: invite.time,
     venue: invite.venue,
     locationUrl: invite.locationUrl,
+    venuePhoto: invite.venuePhoto,
   })
   const additionalEvents = (invite.events ?? []).map(toCeremony)
 
@@ -55,10 +57,22 @@ export function buildWeddingExperienceTemplate(invite, template) {
   // sides are independently optional: a buyer who fills in only one still
   // gets that one card, and leaving both blank reproduces today's
   // behavior (an empty array — WelcomeSplash renders nothing there).
-  const people = [
-    invite.groomName?.trim() && { name: invite.groomName.trim(), parents: invite.groomParents?.trim() || '' },
-    invite.brideName?.trim() && { name: invite.brideName.trim(), parents: invite.brideParents?.trim() || '' },
-  ].filter(Boolean)
+  const familyCards = [
+    {
+      name: invite.groomName?.trim() || '',
+      parents: invite.groomParents?.trim() || '',
+      photo: invite.groomPhoto || '',
+    },
+    {
+      name: invite.brideName?.trim() || '',
+      parents: invite.brideParents?.trim() || '',
+      photo: invite.bridePhoto || '',
+    },
+  ]
+  const people = familyCards.filter((p) => p.name)
+  // Templates that show portraits (see `hasPortraits` in builderTemplates.js)
+  // read this instead: a photo earns a card even when its name was left blank.
+  const portraits = familyCards.filter((p) => p.name || p.photo)
 
   return {
     ...template,
@@ -66,6 +80,7 @@ export function buildWeddingExperienceTemplate(invite, template) {
       names: invite.names,
       invitationLine: invite.message?.trim() || template.connective,
       people,
+      portraits,
     },
     // The short invocation at the top of the hero (WelcomeSplash.jsx's
     // greeting.line — "Shubh Vivah", "Radhe Radhe", "Rab Rakha", "Together

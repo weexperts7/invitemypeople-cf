@@ -994,6 +994,24 @@
   cursor: pointer;
 }
 
+/* --- Catalog-card poster (VelvetTheatrePoster.tsx) ----------------- */
+
+.vtt-poster,
+.vtt-poster .vtt-stage {
+  height: 100%;
+  min-height: 0;
+}
+
+.vtt-poster .vtt-stage-content {
+  gap: 12px;
+  padding: 92px 21% 40px;
+}
+
+.vtt-poster .vtt-stage-invite,
+.vtt-poster .vtt-stage-line {
+  display: none;
+}
+
 /* ------------------------------------------------------------------ */
 /* Small phones + reduced motion                                       */
 /* ------------------------------------------------------------------ */

@@ -30,6 +30,7 @@ import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDec
 import TemplateStyleSelector from '../components/builder/TemplateStyleSelector'
 import InvitePreviewPanel from '../components/builder/InvitePreviewPanel'
 import PhotoUploader from '../components/builder/PhotoUploader'
+import SinglePhotoUploader from '../components/builder/SinglePhotoUploader'
 import EventsListEditor from '../components/builder/EventsListEditor'
 import SongSearchPicker from '../components/builder/SongSearchPicker'
 import PaymentModal from '../components/builder/PaymentModal'
@@ -45,6 +46,9 @@ import { createInvite } from '../utils/inviteApi'
 import { getTemplatePrices } from '../utils/templatePriceApi'
 import { todayDateInputValue } from '../utils/todayDateInput'
 import { ROUTES_SEO } from '../data/routesSeo'
+
+const PORTRAIT_HINT = 'Head and shoulders works best. Max 4MB.'
+const VENUE_PHOTO_HINT = "Shown on this event's card instead of the illustration. Max 4MB."
 
 const EMPTY_FORM = {
   names: '',
@@ -69,6 +73,9 @@ const EMPTY_FORM = {
   groomParents: '',
   brideName: '',
   brideParents: '',
+  groomPhoto: '',
+  venuePhoto: '',
+  bridePhoto: '',
 }
 
 // Ganesh Chaturthi's "Festival Schedule" reuses the generic "Additional
@@ -268,6 +275,8 @@ export default function CreateInvitePage() {
   const handleField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
+  const handlePhoto = (field) => (url) => setForm((prev) => ({ ...prev, [field]: url }))
+
   const isPastDate = (dateStr) => Boolean(dateStr) && dateStr < todayDateInputValue()
 
   const missingRequired =
@@ -327,6 +336,11 @@ export default function CreateInvitePage() {
           groomParents: form.groomParents.trim(),
           brideName: form.brideName.trim(),
           brideParents: form.brideParents.trim(),
+          // Kept in `form` across a style change, but only saved on a
+          // template that actually shows them.
+          groomPhoto: template.hasPortraits ? form.groomPhoto : '',
+          bridePhoto: template.hasPortraits ? form.bridePhoto : '',
+          venuePhoto: template.hasVenuePhotos ? form.venuePhoto : '',
           amount: activePrice,
           paymentId,
           photos,
@@ -490,6 +504,14 @@ export default function CreateInvitePage() {
                               placeholder="e.g. Son of Mr. Rajesh & Mrs. Kavita Malhotra"
                               className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                             />
+                            {template.hasPortraits && (
+                              <SinglePhotoUploader
+                                label="Groom's photo"
+                                hint={PORTRAIT_HINT}
+                                url={form.groomPhoto}
+                                onChange={handlePhoto('groomPhoto')}
+                              />
+                            )}
                           </div>
                           <div className="space-y-3">
                             <input
@@ -508,6 +530,14 @@ export default function CreateInvitePage() {
                               placeholder="e.g. Daughter of Mr. Anil & Mrs. Sunita Kapoor"
                               className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                             />
+                            {template.hasPortraits && (
+                              <SinglePhotoUploader
+                                label="Bride's photo"
+                                hint={PORTRAIT_HINT}
+                                url={form.bridePhoto}
+                                onChange={handlePhoto('bridePhoto')}
+                              />
+                            )}
                           </div>
                         </div>
                       </div>
@@ -598,6 +628,17 @@ export default function CreateInvitePage() {
                         placeholder="e.g. Rambagh Palace Gardens, Jaipur"
                         className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 transition-shadow focus:outline-none focus:ring-2 focus:ring-gold-soft"
                       />
+                      {template.hasVenuePhotos && (
+                        <div className="mt-3">
+                          <SinglePhotoUploader
+                            shape="wide"
+                            label="Venue photo"
+                            hint={VENUE_PHOTO_HINT}
+                            url={form.venuePhoto}
+                            onChange={handlePhoto('venuePhoto')}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -725,7 +766,11 @@ export default function CreateInvitePage() {
                           Add other functions — Haldi, Sangeet, Mehndi,
                           Reception — each with its own date, time and venue.
                         </p>
-                        <EventsListEditor events={events} onChange={setEvents} />
+                        <EventsListEditor
+                          events={events}
+                          onChange={setEvents}
+                          venuePhotoHint={template.hasVenuePhotos ? VENUE_PHOTO_HINT : undefined}
+                        />
                       </div>
                     )}
 

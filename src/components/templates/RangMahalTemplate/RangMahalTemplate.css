@@ -1,0 +1,1445 @@
+/*
+ * RangMahalTemplate — self-contained stylesheet, scoped under `.rmt-root` so
+ * nothing leaks into (or is overridden by) the app's global CSS / Tailwind
+ * theme. Owns its own font import, same as RoyalPlumTemplate.css.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Mukta:wght@400;500;600&family=Pinyon+Script&family=Tiro+Devanagari+Sanskrit&display=swap');
+
+.rmt-root {
+  --rmt-maroon: #721a27;
+  --rmt-maroon-deep: #4b1018;
+  --rmt-night: #2a0a12;
+  --rmt-ink: #442f24;
+  --rmt-ink-soft: rgba(68, 47, 36, 0.76);
+  --rmt-gold: #c8963e;
+  --rmt-gold-deep: #a6752b;
+  --rmt-gold-light: #f0cf86;
+  --rmt-marigold: #ef9a12;
+  --rmt-rani: #c2185b;
+  --rmt-cream: #fff8e8;
+  --rmt-line: rgba(166, 117, 43, 0.38);
+
+  /* Handmade paper grain over a warm wash, under a faint printed toile of
+     chhatris. All inline SVG: one small tile, no image requests. */
+  --rmt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .16 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  --rmt-toile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke='%23b98a45' stroke-opacity='.34' stroke-linecap='round'%3E%3Cg id='c'%3E%3Cpath d='M46 16v8M30 44q16-26 32 0M24 44h44M29 44v32M63 44v32M36 76V58q10-12 20 0v18M18 76h56M12 84h68M30 44q2-6 6-8M62 44q-2-6-6-8'/%3E%3Cpath d='M8 84q-2-14 8-18M84 84q2-14-8-18'/%3E%3C/g%3E%3Cg transform='translate(112 112)'%3E%3Cpath d='M46 16v8M30 44q16-26 32 0M24 44h44M29 44v32M63 44v32M36 76V58q10-12 20 0v18M18 76h56M12 84h68M30 44q2-6 6-8M62 44q-2-6-6-8'/%3E%3Cpath d='M8 84q-2-14 8-18M84 84q2-14-8-18'/%3E%3C/g%3E%3Cpath d='M166 40v12M160 46h12M56 150v12M50 156h12'/%3E%3C/svg%3E");
+  --rmt-paper:
+    var(--rmt-grain),
+    var(--rmt-toile),
+    linear-gradient(180deg, #fbeed4, #f8e6c6);
+  --rmt-mauli: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='40' fill='none'%3E%3Cpath d='M6 0c7 10 7 10 0 20s-7 10 0 20' stroke='%23b3261e' stroke-width='2.4'/%3E%3Cpath d='M6 0c-7 10-7 10 0 20s7 10 0 20' stroke='%23e8ab2c' stroke-width='1.8'/%3E%3C/svg%3E");
+
+  --rmt-font-script: 'Pinyon Script', cursive;
+  --rmt-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --rmt-font-body: 'Mukta', system-ui, sans-serif;
+  --rmt-font-sacred: 'Tiro Devanagari Sanskrit', 'Mukta', serif;
+
+  /* Cormorant's default old-style figures make "1" read as a small "I". */
+  font-variant-numeric: lining-nums;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100svh;
+  background: var(--rmt-paper);
+  color: var(--rmt-ink);
+  font-family: var(--rmt-font-body);
+  /* clip, not hidden: `hidden` would make this a scroll container and break
+     the sticky overlays in the desktop preview (.rmt-pinned). */
+  overflow-x: clip;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The sacred mauli thread running down both edges of the page. */
+.rmt-root::before,
+.rmt-root::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 6;
+  width: 12px;
+  background: var(--rmt-mauli) repeat-y;
+  pointer-events: none;
+}
+
+.rmt-root::before { left: 3px; }
+.rmt-root::after { right: 3px; }
+
+.rmt-root *,
+.rmt-root *::before,
+.rmt-root *::after {
+  box-sizing: inherit;
+}
+
+.rmt-root ::selection {
+  background: var(--rmt-maroon);
+  color: var(--rmt-cream);
+}
+
+.rmt-root h1,
+.rmt-root h2,
+.rmt-root h3,
+.rmt-root p,
+.rmt-root figure,
+.rmt-root blockquote {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Gatefold stage                                                      */
+/* ------------------------------------------------------------------ */
+
+.rmt-stage {
+  position: relative;
+  height: 100svh;
+  min-height: 540px;
+  overflow: hidden;
+  background: var(--rmt-night);
+}
+
+.rmt-stage--closed {
+  cursor: pointer;
+}
+
+.rmt-blessing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 86px 28px 72px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 46%, #8b2433 0%, #5a1420 55%, var(--rmt-night) 100%);
+}
+
+.rmt-toran {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.35));
+}
+
+.rmt-toran svg {
+  display: block;
+  width: 100%;
+  height: 84px;
+}
+
+.rmt-jharokha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(310px, 100%);
+  padding: 54px 24px 36px;
+  text-align: center;
+  background: var(--rmt-paper);
+  /* A Mughal arch cut from the paper. */
+  border-radius: 155px 155px 14px 14px;
+  box-shadow:
+    0 0 0 1px var(--rmt-gold),
+    0 0 0 7px rgba(240, 207, 134, 0.14),
+    0 0 0 8px rgba(240, 207, 134, 0.5),
+    0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.rmt-kalash {
+  width: 134px;
+  height: auto;
+  filter: drop-shadow(0 8px 10px rgba(114, 26, 39, 0.3));
+}
+
+.rmt-shloka {
+  font-family: var(--rmt-font-sacred);
+  font-size: 23px;
+  line-height: 1.4;
+  color: var(--rmt-maroon);
+}
+
+.rmt-blessing-line {
+  font-family: var(--rmt-font-serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.35;
+  color: var(--rmt-ink);
+}
+
+.rmt-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  color: var(--rmt-gold-light);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.rmt-scroll-cue svg {
+  animation: rmt-bob 1.8s ease-in-out infinite;
+}
+
+/* --- The two doors ------------------------------------------------- */
+
+.rmt-fold {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  perspective: 1300px;
+  perspective-origin: 50% 45%;
+}
+
+.rmt-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.rmt-door--left {
+  left: 0;
+  transform-origin: left center;
+}
+
+.rmt-door--right {
+  right: 0;
+  transform-origin: right center;
+}
+
+.rmt-door-face,
+.rmt-door-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rmt-door-face {
+  overflow: hidden;
+}
+
+/* The fold's own shadow, deepening toward the seam. */
+.rmt-door-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rmt-door--left .rmt-door-face::after {
+  background: linear-gradient(270deg, rgba(68, 47, 36, 0.12), transparent 2%);
+}
+
+.rmt-door--right .rmt-door-face::after {
+  background: linear-gradient(90deg, rgba(68, 47, 36, 0.12), transparent 2%);
+}
+
+.rmt-door-back {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle, rgba(240, 207, 134, 0.5) 1.3px, transparent 1.6px) 0 0 / 14px 14px,
+    var(--rmt-maroon);
+}
+
+.rmt-door-print {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 200%;
+}
+
+.rmt-door--left .rmt-door-print { left: 0; }
+.rmt-door--right .rmt-door-print { right: 0; }
+
+.rmt-cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  padding: 196px 34px 136px;
+  text-align: center;
+  background: var(--rmt-paper);
+}
+
+.rmt-cover-frame {
+  position: absolute;
+  inset: 26px 24px 22px;
+  border: 1px solid var(--rmt-gold);
+  outline: 1px solid var(--rmt-line);
+  outline-offset: 4px;
+  border-radius: 140px 140px 8px 8px;
+  pointer-events: none;
+}
+
+.rmt-names {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--rmt-font-script);
+  font-weight: 400;
+  line-height: 1.12;
+  color: var(--rmt-maroon);
+  /* Pinyon's hairlines all but vanish on a phone; this gives them body. */
+  -webkit-text-stroke: 0.4px currentColor;
+}
+
+.rmt-names-amp {
+  font-size: 0.62em;
+  line-height: 1.1;
+  color: var(--rmt-gold-deep);
+}
+
+.rmt-cover-date {
+  padding: 7px 16px;
+  border-top: 1px solid var(--rmt-line);
+  border-bottom: 1px solid var(--rmt-line);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rmt-ink);
+}
+
+/* --- Latkan -------------------------------------------------------- */
+
+.rmt-latkan {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: 5;
+  width: 100px;
+  margin-left: -50px;
+  transform-origin: top center;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 8px 6px rgba(68, 47, 36, 0.35));
+}
+
+.rmt-latkan:active {
+  cursor: grabbing;
+}
+
+.rmt-latkan-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: top center;
+  animation: rmt-sway 3.4s ease-in-out infinite;
+}
+
+.rmt-pull-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  z-index: 5;
+  min-height: 46px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rmt-maroon);
+  color: var(--rmt-cream);
+  font-family: var(--rmt-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 24px -10px rgba(75, 16, 24, 0.75);
+  animation: rmt-nudge 2.6s ease-in-out infinite;
+}
+
+.rmt-pull-hint:focus-visible {
+  outline: 2px solid var(--rmt-gold);
+  outline-offset: 3px;
+}
+
+.rmt-burst {
+  position: absolute;
+  top: 34%;
+  left: 50%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.rmt-burst span {
+  position: absolute;
+  width: 11px;
+  height: 15px;
+  border-radius: 60% 40% 60% 40%;
+}
+
+@keyframes rmt-sway {
+  0%, 100% { transform: rotate(-2.2deg); }
+  50% { transform: rotate(2.2deg); }
+}
+
+@keyframes rmt-nudge {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+@keyframes rmt-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Overlays pinned to the viewport                                     */
+/* ------------------------------------------------------------------ */
+
+.rmt-pinned {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 0;
+}
+
+.rmt-pinned--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
+.rmt-petals {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100svh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rmt-petals span {
+  position: absolute;
+  top: -24px;
+  width: 11px;
+  height: 15px;
+  border-radius: 60% 40% 60% 40%;
+  background: var(--rmt-marigold);
+  opacity: 0.6;
+  animation: rmt-fall 13s linear infinite;
+}
+
+.rmt-petals span:nth-child(3n) { background: var(--rmt-rani); }
+.rmt-petals span:nth-child(3n + 1) { background: #b3261e; width: 9px; height: 12px; }
+.rmt-petals span:nth-child(1) { left: 6%; animation-delay: 0s; }
+.rmt-petals span:nth-child(2) { left: 18%; animation-delay: -7s; animation-duration: 15s; }
+.rmt-petals span:nth-child(3) { left: 31%; animation-delay: -3s; }
+.rmt-petals span:nth-child(4) { left: 43%; animation-delay: -10s; animation-duration: 17s; }
+.rmt-petals span:nth-child(5) { left: 56%; animation-delay: -5s; animation-duration: 14s; }
+.rmt-petals span:nth-child(6) { left: 68%; animation-delay: -12s; }
+.rmt-petals span:nth-child(7) { left: 81%; animation-delay: -1s; animation-duration: 16s; }
+.rmt-petals span:nth-child(8) { left: 92%; animation-delay: -9s; }
+
+@keyframes rmt-fall {
+  to { transform: translate3d(34px, calc(100svh + 40px), 0) rotate(420deg); }
+}
+
+.rmt-sound {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(240, 207, 134, 0.7);
+  border-radius: 50%;
+  background: var(--rmt-maroon);
+  color: var(--rmt-cream);
+  box-shadow: 0 10px 22px -8px rgba(40, 0, 0, 0.6);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sections                                                            */
+/* ------------------------------------------------------------------ */
+
+.rmt-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 68px 30px;
+  text-align: center;
+}
+
+.rmt-section > * {
+  max-width: 440px;
+  width: 100%;
+}
+
+.rmt-section--night {
+  --rmt-ink-soft: rgba(255, 240, 214, 0.8);
+  color: var(--rmt-cream);
+  background:
+    radial-gradient(circle, rgba(240, 207, 134, 0.1) 1.2px, transparent 1.5px) 0 0 / 22px 22px,
+    radial-gradient(ellipse 90% 70% at 50% 40%, #5a1420, var(--rmt-night));
+  transition: box-shadow 1.2s ease;
+}
+
+.rmt-section--night .rmt-kicker {
+  color: var(--rmt-gold-light);
+}
+
+.rmt-section--night .rmt-title {
+  color: var(--rmt-cream);
+}
+
+/* Leheriya: the diagonal wave-dye stripes of Rajasthani turbans, as a faint
+   wash behind the event cards. */
+.rmt-section--leheriya {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(239, 154, 18, 0.1) 0 12px,
+    rgba(194, 24, 91, 0.06) 12px 24px,
+    transparent 24px 42px
+  );
+}
+
+[data-rmt-reveal] > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-rmt-reveal][data-rmt-in] > * {
+  opacity: 1;
+  transform: none;
+}
+
+[data-rmt-reveal][data-rmt-in] > *:nth-child(2) { transition-delay: 0.07s; }
+[data-rmt-reveal][data-rmt-in] > *:nth-child(3) { transition-delay: 0.14s; }
+[data-rmt-reveal][data-rmt-in] > *:nth-child(n + 4) { transition-delay: 0.21s; }
+
+.rmt-section--enter > * {
+  animation: rmt-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes rmt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.rmt-kicker {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rmt-maroon);
+}
+
+.rmt-title {
+  font-family: var(--rmt-font-script);
+  font-weight: 400;
+  font-size: 46px;
+  line-height: 1.15;
+  color: var(--rmt-maroon);
+}
+
+.rmt-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--rmt-ink-soft);
+}
+
+.rmt-lead {
+  font-family: var(--rmt-font-serif);
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--rmt-ink);
+}
+
+.rmt-note {
+  font-size: 13px;
+  color: var(--rmt-ink-soft);
+}
+
+.rmt-rule {
+  display: block;
+  width: 160px;
+  height: 22px;
+}
+
+/* --- The couple ---------------------------------------------------- */
+
+.rmt-couple {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.rmt-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rmt-person-amp {
+  font-family: var(--rmt-font-script);
+  font-size: 44px;
+  line-height: 1;
+  color: var(--rmt-gold-deep);
+}
+
+.rmt-arch {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 120px;
+  border-radius: 48px 48px 8px 8px;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.34) 1.2px, transparent 1.5px) 0 0 / 12px 12px,
+    linear-gradient(180deg, var(--rmt-maroon), var(--rmt-maroon-deep));
+  box-shadow:
+    0 0 0 1px var(--rmt-gold),
+    0 0 0 5px var(--rmt-cream),
+    0 0 0 6px var(--rmt-gold);
+  color: var(--rmt-gold-light);
+  font-family: var(--rmt-font-script);
+  font-size: 54px;
+}
+
+.rmt-arch--photo {
+  width: 168px;
+  height: 212px;
+  border-radius: 84px 84px 10px 10px;
+  overflow: hidden;
+}
+
+.rmt-arch--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Portraits frame the face high; keep it clear of the arch's crop. */
+  object-position: 50% 20%;
+}
+
+.rmt-person-name {
+  margin-top: 8px !important;
+  font-family: var(--rmt-font-script);
+  font-size: 36px;
+  line-height: 1.15;
+  color: var(--rmt-maroon);
+}
+
+/* --- Light the diyas ----------------------------------------------- */
+
+.rmt-diyas {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.rmt-diya {
+  flex: 1 1 0;
+  max-width: 104px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rmt-diya:disabled {
+  cursor: default;
+}
+
+.rmt-diya:focus-visible {
+  outline: 2px solid var(--rmt-gold-light);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.rmt-diya-value {
+  min-height: 44px;
+  font-family: var(--rmt-font-serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 44px;
+  color: var(--rmt-gold-light);
+  text-shadow: 0 0 18px rgba(255, 179, 0, 0.75);
+  animation: rmt-rise 0.6s ease both;
+}
+
+.rmt-diya-lamp {
+  position: relative;
+  display: block;
+  width: 86px;
+  height: 92px;
+}
+
+.rmt-diya-bowl {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+  filter: saturate(0.55) brightness(0.72);
+  transition: filter 0.6s ease;
+}
+
+.rmt-diya-flame {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  width: 30px;
+  height: auto;
+  margin-left: -15px;
+  transform: scale(0);
+  transform-origin: bottom center;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rmt-diya-halo {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  width: 130px;
+  height: 130px;
+  margin-left: -65px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 179, 0, 0.5), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+
+.rmt-diya--lit .rmt-diya-bowl {
+  filter: none;
+}
+
+.rmt-diya--lit .rmt-diya-flame {
+  transform: scale(1);
+  animation: rmt-flicker 1.5s ease-in-out 0.45s infinite;
+}
+
+.rmt-diya--lit .rmt-diya-halo {
+  opacity: 1;
+}
+
+.rmt-diya:not(.rmt-diya--lit) .rmt-diya-lamp {
+  animation: rmt-breathe 2.4s ease-in-out infinite;
+}
+
+.rmt-diya-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rmt-ink-soft);
+}
+
+.rmt-diya-note {
+  margin-top: 12px;
+  font-family: var(--rmt-font-serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--rmt-gold-light);
+}
+
+.rmt-section--aglow {
+  box-shadow: inset 0 0 120px rgba(255, 164, 28, 0.32);
+}
+
+@keyframes rmt-flicker {
+  0%, 100% { transform: scale(1) rotate(-1.5deg); }
+  35% { transform: scale(1.06, 0.95) rotate(1.5deg); }
+  70% { transform: scale(0.96, 1.05) rotate(-0.5deg); }
+}
+
+@keyframes rmt-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* --- Countdown windows --------------------------------------------- */
+
+.rmt-windows {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 72px));
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.rmt-window {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  height: 92px;
+  padding-bottom: 10px;
+  border: 1px solid var(--rmt-gold);
+  border-radius: 36px 36px 6px 6px;
+  background: rgba(255, 248, 232, 0.62);
+  box-shadow: inset 0 0 0 3px rgba(255, 248, 232, 0.8), inset 0 0 0 4px var(--rmt-line);
+}
+
+.rmt-window-value {
+  font-family: var(--rmt-font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--rmt-maroon);
+}
+
+.rmt-window-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rmt-ink-soft);
+}
+
+/* --- Celebrations -------------------------------------------------- */
+
+.rmt-events {
+  display: grid;
+  gap: 24px;
+  margin-top: 10px;
+}
+
+.rmt-event {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--rmt-cream);
+  text-align: left;
+  box-shadow:
+    0 0 0 1px var(--rmt-line),
+    0 20px 36px -24px rgba(75, 16, 24, 0.7);
+}
+
+.rmt-event:nth-child(odd) { transform: rotate(-0.5deg); }
+.rmt-event:nth-child(even) { transform: rotate(0.5deg); }
+
+.rmt-event-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 320 / 136;
+}
+
+.rmt-event-photo {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.rmt-event-body {
+  padding: 16px 18px 18px;
+}
+
+.rmt-event-body h3 {
+  font-family: var(--rmt-font-script);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--rmt-maroon);
+}
+
+.rmt-event-when {
+  margin-top: 4px !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rmt-ink);
+}
+
+.rmt-event-venue {
+  margin-top: 8px !important;
+  font-family: var(--rmt-font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--rmt-ink);
+}
+
+.rmt-event-address {
+  font-size: 14px;
+  color: var(--rmt-ink-soft);
+}
+
+.rmt-event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rmt-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--rmt-gold);
+  border-radius: 999px;
+  color: var(--rmt-maroon);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* --- Saat Phere ---------------------------------------------------- */
+
+.rmt-section > .rmt-phere {
+  position: relative;
+  width: 268px;
+  max-width: 268px;
+  margin: 14px auto 6px;
+}
+
+.rmt-phere-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.rmt-phere-ring circle {
+  fill: none;
+  stroke: rgba(240, 207, 134, 0.22);
+  stroke-width: 2;
+  stroke-dasharray: 2 6;
+}
+
+.rmt-phere-ring .rmt-phere-progress {
+  stroke: var(--rmt-gold-light);
+  stroke-width: 2.5;
+}
+
+.rmt-phere-fire {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, rgba(255, 120, 20, 0.5), transparent 50%);
+}
+
+.rmt-kund {
+  width: 142px;
+  height: auto;
+  overflow: visible;
+}
+
+/* fill-box: without it an SVG path transforms around the whole viewBox, and
+   the tongues would swing about the corner instead of dancing at their base. */
+.rmt-kund-tongue {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: rmt-tongue 1.5s ease-in-out infinite;
+}
+
+.rmt-kund-tongue:nth-of-type(odd) {
+  animation-duration: 1.15s;
+}
+
+.rmt-kund-embers {
+  filter: blur(4px);
+  animation: rmt-pulse-ember 1.8s ease-in-out infinite;
+}
+
+.rmt-kund-spark {
+  opacity: 0;
+  animation: rmt-spark 2.8s ease-out infinite;
+}
+
+@keyframes rmt-tongue {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  25% { transform: scale(0.94, 1.09) skewX(-3deg); }
+  50% { transform: scale(1.05, 0.93) skewX(2deg); }
+  75% { transform: scale(0.97, 1.05) skewX(3deg); }
+}
+
+@keyframes rmt-pulse-ember {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+@keyframes rmt-spark {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(10px, -62px); }
+}
+
+.rmt-phere-step {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  padding: 0;
+  border: 1px solid rgba(240, 207, 134, 0.5);
+  border-radius: 50%;
+  background: var(--rmt-night);
+  color: var(--rmt-gold-light);
+  font-family: var(--rmt-font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.rmt-phere-step--on {
+  border-color: var(--rmt-gold-light);
+  background: var(--rmt-maroon);
+}
+
+.rmt-phere-step--now {
+  background: var(--rmt-gold-light);
+  color: var(--rmt-maroon-deep);
+  box-shadow: 0 0 22px rgba(255, 179, 0, 0.65);
+}
+
+.rmt-vow {
+  min-height: 118px;
+}
+
+.rmt-vow h3 {
+  font-family: var(--rmt-font-script);
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--rmt-gold-light);
+}
+
+.rmt-vow p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--rmt-cream);
+}
+
+/* --- Gallery ------------------------------------------------------- */
+
+.rmt-section > .rmt-gallery {
+  max-width: none;
+  width: calc(100% + 60px);
+  margin: 6px -30px 0;
+}
+
+.rmt-gallery {
+  display: flex;
+  gap: 16px;
+  padding: 14px 13%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.rmt-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.rmt-gallery--single {
+  justify-content: center;
+}
+
+.rmt-photo {
+  flex: 0 0 74%;
+  max-width: 320px;
+  overflow: hidden;
+  border-radius: 170px 170px 10px 10px;
+  scroll-snap-align: center;
+  background: var(--rmt-cream);
+  padding: 8px;
+  box-shadow:
+    0 0 0 1px var(--rmt-gold),
+    0 22px 36px -22px rgba(75, 16, 24, 0.7);
+}
+
+.rmt-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 164px 164px 6px 6px;
+}
+
+/* --- RSVP ---------------------------------------------------------- */
+
+.rmt-card {
+  margin-top: 8px;
+  padding: 22px 18px;
+  border-radius: 14px;
+  background: rgba(255, 248, 232, 0.82);
+  text-align: left;
+  box-shadow:
+    0 0 0 1px var(--rmt-gold),
+    inset 0 0 0 4px rgba(255, 248, 232, 0.9),
+    inset 0 0 0 5px var(--rmt-line);
+}
+
+.rmt-rsvp-done {
+  display: grid;
+  gap: 6px;
+  padding: 14px 0;
+  text-align: center;
+}
+
+.rmt-error {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(179, 38, 30, 0.1);
+  color: #b3261e;
+  font-size: 14px;
+}
+
+.rmt-field {
+  display: block;
+  margin-bottom: 15px;
+}
+
+.rmt-field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--rmt-ink);
+}
+
+.rmt-input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--rmt-line);
+  border-radius: 9px;
+  background: #fffdf6;
+  color: var(--rmt-ink);
+  font-family: var(--rmt-font-body);
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  font-size: 16px;
+}
+
+.rmt-input::placeholder {
+  color: rgba(68, 47, 36, 0.45);
+}
+
+.rmt-input:focus {
+  outline: none;
+  border-color: var(--rmt-maroon);
+  box-shadow: 0 0 0 3px rgba(114, 26, 39, 0.12);
+}
+
+.rmt-textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 11px 13px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.rmt-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rmt-choice {
+  min-height: 46px;
+  padding: 6px 8px;
+  border: 1px solid var(--rmt-line);
+  border-radius: 9px;
+  background: #fffdf6;
+  color: var(--rmt-ink);
+  font-family: var(--rmt-font-body);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.rmt-choice--on {
+  border-color: var(--rmt-maroon);
+  background: var(--rmt-maroon);
+  color: var(--rmt-cream);
+}
+
+.rmt-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--rmt-line);
+  border-radius: 999px;
+  background: #fffdf6;
+}
+
+.rmt-stepper button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--rmt-maroon);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.rmt-stepper button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.rmt-stepper span {
+  min-width: 30px;
+  text-align: center;
+  font-family: var(--rmt-font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+
+.rmt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rmt-maroon);
+  color: var(--rmt-cream);
+  font-family: var(--rmt-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rmt-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.rmt-btn--gold {
+  background: var(--rmt-gold-light);
+  color: var(--rmt-maroon-deep);
+}
+
+.rmt-btn--block {
+  width: 100%;
+}
+
+.rmt-section > .rmt-btn {
+  width: auto;
+}
+
+/* --- Wishes, hashtag, closing -------------------------------------- */
+
+.rmt-wishes {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.rmt-wish {
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(255, 248, 232, 0.82);
+  box-shadow: 0 0 0 1px var(--rmt-line);
+}
+
+.rmt-wish blockquote {
+  font-family: var(--rmt-font-serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.35;
+  color: var(--rmt-ink);
+}
+
+.rmt-wish figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rmt-maroon);
+}
+
+.rmt-section > .rmt-hashtag {
+  width: auto;
+  max-width: 100%;
+  padding: 8px 26px;
+  border: 1px dashed var(--rmt-gold-deep);
+  border-radius: 999px;
+  background: rgba(255, 248, 232, 0.7);
+  color: var(--rmt-maroon);
+  font-family: var(--rmt-font-script);
+  font-size: 30px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.rmt-closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 30px 96px;
+  text-align: center;
+}
+
+.rmt-closing-names {
+  font-family: var(--rmt-font-script);
+  font-size: 44px;
+  line-height: 1.15;
+  color: var(--rmt-maroon);
+}
+
+.rmt-closing-date {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rmt-ink);
+}
+
+.rmt-closing-diya {
+  position: relative;
+  width: 78px;
+  height: 72px;
+  margin-top: 8px;
+}
+
+.rmt-closing-bowl {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+}
+
+.rmt-closing-flame {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  width: 24px;
+  height: auto;
+  margin-left: -12px;
+  transform-origin: bottom center;
+  animation: rmt-flicker 1.5s ease-in-out infinite;
+}
+
+/* --- Catalog-card poster (RangMahalPoster.tsx) --------------------- */
+
+.rmt-poster,
+.rmt-poster .rmt-stage {
+  height: 100%;
+  min-height: 0;
+}
+
+.rmt-poster::before,
+.rmt-poster::after {
+  display: none;
+}
+
+.rmt-poster .rmt-blessing {
+  justify-content: flex-end;
+  padding: 0 0 26px;
+}
+
+.rmt-poster .rmt-jharokha {
+  width: 236px;
+  gap: 6px;
+  padding: 34px 12px 22px;
+  border-radius: 118px 118px 12px 12px;
+}
+
+.rmt-poster .rmt-kalash {
+  width: 92px;
+}
+
+.rmt-poster-names {
+  font-family: var(--rmt-font-script);
+  font-size: 34px;
+  line-height: 1.15;
+  white-space: nowrap;
+  color: var(--rmt-maroon);
+  -webkit-text-stroke: 0.3px currentColor;
+}
+
+.rmt-poster-date {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rmt-ink);
+}
+
+/* The latkan normally opens the card; here it just hangs over the toran. */
+.rmt-poster .rmt-latkan {
+  cursor: default;
+}
+
+.rmt-poster .rmt-latkan-art {
+  animation: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Small phones + reduced motion                                       */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 360px) {
+  .rmt-section {
+    padding: 56px 22px;
+  }
+
+  .rmt-section > .rmt-gallery {
+    width: calc(100% + 44px);
+    margin: 6px -22px 0;
+  }
+
+  .rmt-title {
+    font-size: 40px;
+  }
+
+  .rmt-window {
+    height: 84px;
+  }
+
+  .rmt-window-value {
+    font-size: 26px;
+  }
+
+  .rmt-window-label {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rmt-root *,
+  .rmt-root *::before,
+  .rmt-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

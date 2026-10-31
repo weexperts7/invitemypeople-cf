@@ -67,6 +67,11 @@ export default async function handler(req, res) {
       groom_parents: clean(body.groomParents, 200),
       bride_name: clean(body.brideName, 120),
       bride_parents: clean(body.brideParents, 200),
+      // Only sent when set, so a template without portraits never touches
+      // these columns (0016_invites_portraits_and_venue_photo.sql).
+      ...(body.groomPhoto && { groom_photo: clean(body.groomPhoto, 500) }),
+      ...(body.bridePhoto && { bride_photo: clean(body.bridePhoto, 500) }),
+      ...(body.venuePhoto && { venue_photo: clean(body.venuePhoto, 500) }),
       host_name: hostName,
       host_email: hostEmail,
       host_phone: hostPhone,

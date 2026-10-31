@@ -5,11 +5,19 @@
 // GeneratedInvitePage.jsx is what actually renders whatever ends up here,
 // once the invite is saved.
 import { Plus, X } from 'lucide-react'
+import SinglePhotoUploader from './SinglePhotoUploader'
 import { MAX_ADDITIONAL_EVENTS } from '../../utils/cleanEvents'
 
-const EMPTY_EVENT = { title: '', date: '', time: '', venue: '', locationUrl: '' }
+const EMPTY_EVENT = { title: '', date: '', time: '', venue: '', locationUrl: '', venuePhoto: '' }
 
-export default function EventsListEditor({ events, onChange, titlePlaceholder = 'e.g. Sangeet Night' }) {
+// `venuePhotoHint` also turns the venue photo on — only templates that show
+// one (`hasVenuePhotos` in data/builderTemplates.js) pass it.
+export default function EventsListEditor({
+  events,
+  onChange,
+  titlePlaceholder = 'e.g. Sangeet Night',
+  venuePhotoHint,
+}) {
   const addEvent = () => {
     if (events.length >= MAX_ADDITIONAL_EVENTS) return
     onChange([...events, { ...EMPTY_EVENT }])
@@ -77,6 +85,18 @@ export default function EventsListEditor({ events, onChange, titlePlaceholder = 
             placeholder="Location URL (optional)"
             className="mt-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
           />
+
+          {venuePhotoHint && (
+            <div className="mt-3">
+              <SinglePhotoUploader
+                shape="wide"
+                label="Venue photo"
+                hint={venuePhotoHint}
+                url={event.venuePhoto}
+                onChange={(url) => updateEvent(index, 'venuePhoto')({ target: { value: url } })}
+              />
+            </div>
+          )}
         </div>
       ))}
 

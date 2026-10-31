@@ -11,6 +11,8 @@ interface TheatreStageProps {
   /** Pixel height of one "screen" — see VelvetTheatreTemplate's useStageHeight. */
   height: number | null
   reduceMotion: boolean
+  /** Rendering inside a catalog card (see VelvetTheatrePoster.tsx), not as the invite. */
+  poster?: boolean
 }
 
 // Each drape is a polygon whose outer edge stays on the wall and whose inner
@@ -113,9 +115,12 @@ export default function TheatreStage({
   dateLine,
   height,
   reduceMotion,
+  poster = false,
 }: TheatreStageProps) {
   const isClosed = phase === 'closed'
   const isOpen = phase === 'open'
+  // A grid of posters must not add a page's worth of <h1>s to the catalog.
+  const Names = poster ? motion.div : motion.h1
   const initials = [firstName, secondName].filter(Boolean).map((n) => n.trim().charAt(0).toUpperCase())
   const longest = Math.max(firstName.length, secondName.length, 5)
   const nameSize = Math.round(Math.max(38, Math.min(66, 380 / longest)))
@@ -142,7 +147,7 @@ export default function TheatreStage({
         <motion.p className="vtt-stage-invite" {...reveal(1.25)}>
           You are cordially invited to celebrate the wedding of
         </motion.p>
-        <motion.h1 className="vtt-names" style={{ fontSize: nameSize }} {...reveal(1.45)}>
+        <Names className="vtt-names" style={{ fontSize: nameSize }} {...reveal(1.45)}>
           <span>{firstName}</span>
           {secondName && (
             <>
@@ -150,7 +155,7 @@ export default function TheatreStage({
               <span>{secondName}</span>
             </>
           )}
-        </motion.h1>
+        </Names>
         <motion.p className="vtt-stage-date" {...reveal(1.7)}>
           {dateLine}
         </motion.p>
@@ -176,7 +181,7 @@ export default function TheatreStage({
         <p className="vtt-tap-hint">Tap to raise the curtain</p>
       </motion.div>
 
-      {isOpen && (
+      {isOpen && !poster && (
         <motion.div
           className="vtt-scroll-cue"
           initial={{ opacity: 0 }}

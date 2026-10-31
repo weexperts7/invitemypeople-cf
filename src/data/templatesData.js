@@ -675,6 +675,51 @@ export const TEMPLATES = [
       inkSoft: '#efd7a1',
     },
   },
+  {
+    id: 'rang-mahal',
+    name: 'Rang Mahal',
+    category: 'Royal',
+    weddingType: 'Hindu',
+    tags: ['Rajasthani', 'Gatefold Reveal', 'Interactive', 'Saat Phere'],
+    description:
+      'A block-printed Rajasthani card. Guests pull a silk latkan to swing open the gatefold onto a marigold toran, light diyas to reveal your date, walk the Saat Phere around the sacred fire, and find each ceremony as its own miniature print.',
+    isFlagship: true,
+    // Bespoke experience component — see components/wedding/layoutRegistry.js
+    // and components/templates/RangMahalTemplate/. Same `layout` mechanism
+    // and omitted `motif` as royal-plum-curtain above.
+    layout: 'rang-mahal',
+    fonts: { serif: '"Cormorant Garamond", serif', script: '"Pinyon Script", cursive' },
+    greeting: { symbol: 'ॐ', line: 'With the blessings of our families' },
+    couple: {
+      names: 'Ishita & Advait',
+      invitationLine:
+        'Two families, one celebration. We would be honoured to have you beside us as we begin our forever.',
+      people: [
+        { name: 'Ishita Rathore', parents: 'Daughter of Mrs. Kavya & Mr. Devendra Rathore' },
+        { name: 'Advait Bhandari', parents: 'Son of Mrs. Meenal & Mr. Harsh Bhandari' },
+      ],
+    },
+    ceremoniesHeading: 'The Celebrations',
+    weddingDate: '2027-01-24T19:00:00',
+    ceremonies: [
+      { icon: Flower, title: 'Mehendi', date: 'Friday, 22 January 2027', time: '3:00 PM', venue: 'Rathore Haveli, Old City, Udaipur' },
+      { icon: Music, title: 'Sangeet', date: 'Saturday, 23 January 2027', time: '8:00 PM', venue: 'The Lake Pavilion, Udaipur' },
+      { icon: Heart, title: 'Wedding Ceremony', date: 'Sunday, 24 January 2027', time: '7:00 PM', venue: 'The Palace Courtyard, Udaipur' },
+    ],
+    palette: {
+      ivory: '#fff8e8',
+      linen: '#fbeed4',
+      champagne: '#f6e1bb',
+      champagneDeep: '#d9b878',
+      blush: '#efcfa0',
+      blushDeep: '#c2185b',
+      rose: '#721a27',
+      gold: '#a6752b',
+      goldSoft: '#c8963e',
+      ink: '#4b1018',
+      inkSoft: '#6b4a3a',
+    },
+  },
 ]
 
 export const CATEGORIES = ['All', ...new Set(TEMPLATES.map((t) => t.category))]

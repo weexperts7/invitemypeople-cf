@@ -17,6 +17,7 @@ export function cleanEvents(rawEvents, clean) {
       time: clean(e?.time, 10),
       venue: clean(e?.venue, 200),
       locationUrl: clean(e?.locationUrl, 500),
+      venuePhoto: clean(e?.venuePhoto, 500),
     }))
     // Drop rows the buyer added then left entirely blank.
     .filter((e) => e.title || e.date || e.venue)

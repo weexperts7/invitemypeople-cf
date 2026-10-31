@@ -8,6 +8,7 @@ import { FrameBanner } from './TemplateFrame'
 import { coupleNameTier } from '../utils/coupleNameFit'
 
 const COUPLE_NAME_SIZES = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg']
+const POSTER_NAME_SIZES = ['text-5xl', 'text-4xl', 'text-3xl', 'text-2xl']
 
 const PARTICLE_COUNT = 28
 
@@ -153,6 +154,9 @@ export default function EnvelopeLanding({
   palette,
   motifAccent,
   coupleNames = 'Aarav & Diya',
+  // Rendering inside a catalog card (see wedding/EnvelopePoster.jsx), not as
+  // the invite: a still picture, with the names where the tap cue would be.
+  poster = false,
 }) {
   const [stage, setStage] = useState('closed') // closed | opening | done
   const reduceMotion = useReducedMotion()
@@ -268,7 +272,7 @@ export default function EnvelopeLanding({
           whileTap={isPhulkari && stage === 'closed' ? { scale: reduceMotion ? 1 : 0.97 } : undefined}
           className="relative z-10 block w-64 sm:w-72 h-44 rounded-lg bg-champagne border border-gold-soft shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-4"
         >
-          {stage === 'closed' && !reduceMotion && <GoldShimmer />}
+          {stage === 'closed' && !reduceMotion && !poster && <GoldShimmer />}
 
           {/* flap */}
           <motion.div
@@ -296,7 +300,7 @@ export default function EnvelopeLanding({
           </motion.div>
 
           {/* glowing golden wax-stamp seal */}
-          {isPhulkari && stage === 'closed' && !reduceMotion && <SealGlow />}
+          {isPhulkari && stage === 'closed' && !reduceMotion && !poster && <SealGlow />}
           {isPhulkari && stage === 'opening' && !reduceMotion && <SealCrackFlash />}
           <motion.div
             className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose shadow-card flex items-center justify-center border border-blush-deep ${
@@ -316,7 +320,15 @@ export default function EnvelopeLanding({
             )}
           </motion.div>
 
-          {stage === 'closed' && (
+          {poster && (
+            <span
+              className={`absolute left-1/2 top-full mt-7 -translate-x-1/2 font-script ${POSTER_NAME_SIZES[coupleNameTier(coupleNames)]} leading-none text-rose whitespace-nowrap`}
+            >
+              {coupleNames}
+            </span>
+          )}
+
+          {stage === 'closed' && !poster && (
             <motion.p
               className="absolute -bottom-9 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-sm tracking-[0.25em] uppercase text-ink-soft whitespace-nowrap"
               animate={{ opacity: [0.5, 1, 0.5] }}

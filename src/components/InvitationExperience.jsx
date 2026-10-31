@@ -20,37 +20,9 @@ import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { coupleNameTier } from '../utils/coupleNameFit'
 import { slugify } from '../utils/slugify'
 import { buildCreateLink } from '../utils/createLink'
+import { themeToCssVars } from '../utils/themeToCssVars'
 
 const FOOTER_NAME_SIZES = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg']
-
-// Maps a template's palette and typography (see src/data/templatesData.js)
-// onto the same CSS custom properties src/index.css declares in @theme.
-// Every Tailwind color/font utility in this tree (bg-ivory, text-rose,
-// border-gold-soft, font-serif, ...) resolves to var(--color-*) / var(--font-*),
-// so overriding these on the wrapper re-skins the entire existing invitation
-// — palette, motifs, and heading typeface alike — without touching any child
-// component's markup.
-function themeToCssVars(template) {
-  if (!template) return undefined
-  const { palette, fonts } = template
-  return {
-    ...(palette && {
-      '--color-ivory': palette.ivory,
-      '--color-linen': palette.linen,
-      '--color-champagne': palette.champagne,
-      '--color-champagne-deep': palette.champagneDeep,
-      '--color-blush': palette.blush,
-      '--color-blush-deep': palette.blushDeep,
-      '--color-rose': palette.rose,
-      '--color-gold': palette.gold,
-      '--color-gold-soft': palette.goldSoft,
-      '--color-ink': palette.ink,
-      '--color-ink-soft': palette.inkSoft,
-    }),
-    ...(fonts?.serif && { '--font-serif': fonts.serif }),
-    ...(fonts?.script && { '--font-script': fonts.script }),
-  }
-}
 
 const MUSIC_VOLUME = 0.7
 // The standard track every invitation opens with unless the host picks

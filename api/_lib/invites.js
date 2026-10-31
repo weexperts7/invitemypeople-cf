@@ -98,6 +98,11 @@ export function rowToInvite(row) {
     groomParents: row.groom_parents,
     brideName: row.bride_name,
     brideParents: row.bride_parents,
+    // Portrait URLs, on templates that show one — see
+    // 0016_invites_portraits_and_venue_photo.sql.
+    groomPhoto: row.groom_photo,
+    bridePhoto: row.bride_photo,
+    venuePhoto: row.venue_photo,
     // Admin-only, Mahogany Seal template only — see
     // 0014_admin_mahogany_caricature_video.sql /
     // 0015_admin_mahogany_hashtag.sql / api/_lib/adminCreateInvite.js.

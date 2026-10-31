@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getSatsangLayoutComponent } from './satsang/layoutRegistry'
 import LegacySatsangExperience from './satsang/LegacySatsangExperience'
 import { buildCreateLink } from '../utils/createLink'
-import { getActivePrice } from '../data/sale'
+import { getDefaultPrice, getListPrice } from '../data/sale'
 import { findBuilderTemplateBySource } from '../data/builderTemplates'
 import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
@@ -13,7 +13,10 @@ import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 // falling back to the original shared layout for templates that don't
 // declare one yet. Each bespoke component owns its own structure, CSS, and
 // interactive presentation — this file just decides which one to render.
-export default function SatsangExperience({ template }) {
+// `invitationSlug`/`showChrome` are for a real generated invite (see
+// GeneratedInvitePage.jsx): guests get the invitation alone, with its RSVP
+// keyed to that invite, same as GaneshExperience.jsx's identical props.
+export default function SatsangExperience({ template, invitationSlug, showChrome = true }) {
   const navigate = useNavigate()
   // Called unconditionally, ABOVE the `!template` early return below, so
   // this obeys the Rules of Hooks regardless of which branch renders.
@@ -40,7 +43,10 @@ export default function SatsangExperience({ template }) {
   // identical comment. template.slug is the SATSANG_TEMPLATES catalog key,
   // not the builder/pricing key.
   const builderTemplate = findBuilderTemplateBySource('guruji-satsang', template.slug)
-  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
+  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getDefaultPrice(builderTemplate?.id)
+  const listPrice = getListPrice(builderTemplate?.id)
+
+  if (!showChrome) return <Layout template={template} invitationSlug={invitationSlug} />
 
   return (
     <>
@@ -74,13 +80,29 @@ export default function SatsangExperience({ template }) {
         whileTap={{ scale: 0.97 }}
         className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-[70]"
       >
-        <Link
-          to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
-          className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
-        >
-          <Heart className="w-4 h-4" />
-          Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
-        </Link>
+        {/* A design the builder doesn't offer yet would otherwise drop the
+            buyer into a different template. */}
+        {template.fullExperience ? (
+          <Link
+            to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
+            className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+          >
+            <Heart className="w-4 h-4" />
+            Create Your Own —{' '}
+            {listPrice > ctaPrice && (
+              <span className="font-medium text-ivory/70 line-through">&#8377;{listPrice.toLocaleString('en-IN')}</span>
+            )}{' '}
+            &#8377;{ctaPrice.toLocaleString('en-IN')}
+          </Link>
+        ) : (
+          <Link
+            to="/guruji-satsangs"
+            className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+          >
+            <Heart className="w-4 h-4" />
+            See Our Satsang Invitation
+          </Link>
+        )}
       </motion.div>
 
       <Layout template={template} />

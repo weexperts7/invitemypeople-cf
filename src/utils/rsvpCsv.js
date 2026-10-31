@@ -11,6 +11,7 @@ const HEADERS = [
   'Song',
   'Advice',
   'Message',
+  'Seva',
   'Submitted At',
 ]
 
@@ -37,6 +38,7 @@ export function rsvpsToCsv(rsvps) {
       r.song,
       r.advice,
       r.message,
+      r.seva,
       r.createdAt,
     ]
       .map(csvField)

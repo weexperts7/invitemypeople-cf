@@ -26,6 +26,7 @@ import MobilePreviewFrame from './MobilePreviewFrame'
 import { formatInviteDate, formatInviteTime, mapsSearchUrl } from '../../utils/formatInviteDateTime'
 import { iconForEventTitle } from '../../utils/eventIcon'
 import { writeDraftInvitePreview } from '../../utils/draftInvitePreview'
+import { resolvePrivateNote } from '../../data/satsangTemplatesData'
 
 function TimelineEntry({ palette, title, date, time, venue }) {
   const Icon = iconForEventTitle(title)
@@ -176,7 +177,7 @@ export default function LiveInvitePreview({
   // tree in the iframe below (InvitationExperience / GaneshExperience — see
   // LiveDraftPreviewPage.jsx, which branches on the draft's own
   // `occasionId`); Guruji Satsang still gets the lighter hero-card preview.
-  const isRichPreview = isWedding || occasionId === 'ganesh-chaturthi'
+  const isRichPreview = isWedding || occasionId === 'ganesh-chaturthi' || Boolean(template.fullExperience)
 
   // The iframe's own first mount — fetching/parsing its JS, then React
   // mounting the real InvitationExperience tree (envelope animation,
@@ -240,6 +241,7 @@ export default function LiveInvitePreview({
         groomPhoto: values.groomPhoto,
         bridePhoto: values.bridePhoto,
         venuePhoto: values.venuePhoto,
+        privateNote: resolvePrivateNote(values),
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —

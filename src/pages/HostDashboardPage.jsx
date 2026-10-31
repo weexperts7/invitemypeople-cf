@@ -237,6 +237,12 @@ export default function HostDashboardPage() {
                     <p className="mt-2 text-sm text-ink-soft leading-relaxed">{rsvp.message}</p>
                   )}
 
+                  {rsvp.seva && (
+                    <p className="mt-2 text-sm text-ink">
+                      <span className="text-ink-soft">Offered seva:</span> {rsvp.seva}
+                    </p>
+                  )}
+
                   {(rsvp.song || rsvp.advice) && (
                     <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/80">
                       {rsvp.song && (

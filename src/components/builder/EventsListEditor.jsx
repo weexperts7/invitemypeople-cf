@@ -19,6 +19,9 @@ export default function EventsListEditor({
   venuePhotoHint,
   uploadEndpoint,
   uploadToken,
+  // Satsang's programme: one evening at one venue, so each row is only a
+  // title and a time.
+  titleAndTimeOnly = false,
 }) {
   const addEvent = () => {
     if (events.length >= MAX_ADDITIONAL_EVENTS) return
@@ -57,13 +60,15 @@ export default function EventsListEditor({
             className="mb-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 pr-8 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
           />
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="date"
-              value={event.date}
-              onChange={updateEvent(index, 'date')}
-              className="rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-gold-soft"
-            />
+          <div className={`grid gap-3 ${titleAndTimeOnly ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {!titleAndTimeOnly && (
+              <input
+                type="date"
+                value={event.date}
+                onChange={updateEvent(index, 'date')}
+                className="rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-gold-soft"
+              />
+            )}
             <input
               type="time"
               value={event.time}
@@ -72,21 +77,25 @@ export default function EventsListEditor({
             />
           </div>
 
-          <input
-            type="text"
-            value={event.venue}
-            onChange={updateEvent(index, 'venue')}
-            placeholder="Venue name"
-            className="mt-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
-          />
+          {!titleAndTimeOnly && (
+            <>
+              <input
+                type="text"
+                value={event.venue}
+                onChange={updateEvent(index, 'venue')}
+                placeholder="Venue name"
+                className="mt-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
+              />
 
-          <input
-            type="text"
-            value={event.locationUrl}
-            onChange={updateEvent(index, 'locationUrl')}
-            placeholder="Location URL (optional)"
-            className="mt-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
-          />
+              <input
+                type="text"
+                value={event.locationUrl}
+                onChange={updateEvent(index, 'locationUrl')}
+                placeholder="Location URL (optional)"
+                className="mt-3 w-full rounded-lg border border-champagne-deep/50 bg-ivory px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft"
+              />
+            </>
+          )}
 
           {venuePhotoHint && (
             <div className="mt-3">

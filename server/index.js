@@ -21,6 +21,7 @@ import {
 import { cleanEvents } from '../src/utils/cleanEvents.js'
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from '../src/utils/email.js'
 import { searchSpotifyTracks } from '../src/utils/spotify.js'
+import { MAX_JAAP_PER_REQUEST } from '../src/utils/jaap.js'
 import { randomBytes } from 'node:crypto'
 // B2B Partner Portal — these routes need real Supabase (Auth + the
 // `partners`/`partner_credit_transactions` tables), in both dev and prod,
@@ -104,6 +105,9 @@ const INVITES_FILE = path.join(DATA_DIR, 'invites.json')
 // straight to disk here and served back statically, same "flat file instead
 // of a real bucket" tradeoff INVITES_FILE makes for the invites table.
 const UPLOADS_DIR = path.join(DATA_DIR, 'uploads')
+// Sangat Jaap totals, { [slug]: count } — local-dev counterpart to the
+// `satsang_jaap` table (see api/jaap.js).
+const JAAP_FILE = path.join(DATA_DIR, 'jaap.json')
 const DIST_DIR = path.join(ROOT, 'dist')
 
 // `--port N` wins so `npm run dev` can pin the API and never fight the Vite
@@ -276,6 +280,7 @@ app.post('/api/rsvps', async (req, res) => {
       song: clean(body.song, 300),
       advice: clean(body.advice, 2000),
       message: clean(body.message, 2000),
+      seva: isAttending ? clean(body.seva, 300) : '',
     }
 
     const total = await enqueue(async () => {
@@ -326,6 +331,42 @@ app.get('/api/wishes', async (req, res) => {
   } catch (err) {
     console.error('[wishes] failed to read:', err)
     res.status(500).json({ ok: false, error: 'could not load wishes' })
+  }
+})
+
+// Sangat Jaap — local-dev mirror of api/jaap.js.
+async function readJaap() {
+  try {
+    return JSON.parse(await fsp.readFile(JAAP_FILE, 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+app.all('/api/jaap', async (req, res) => {
+  const isPost = req.method === 'POST'
+  const slug = clean(isPost ? req.body?.slug : req.query.slug, 80)
+  try {
+    const invites = await readAllInvites()
+    if (!invites.some((i) => i.slug === slug)) {
+      return res.status(404).json({ ok: false, error: 'invitation not found' })
+    }
+    if (!isPost) return res.json({ ok: true, count: (await readJaap())[slug] ?? 0 })
+
+    const added = Math.floor(Number(req.body?.count))
+    if (!(added >= 1 && added <= MAX_JAAP_PER_REQUEST)) {
+      return res.status(400).json({ ok: false, error: 'invalid count' })
+    }
+    const count = await enqueue(async () => {
+      const totals = await readJaap()
+      totals[slug] = (totals[slug] ?? 0) + added
+      await fsp.writeFile(JAAP_FILE, JSON.stringify(totals, null, 2))
+      return totals[slug]
+    })
+    res.json({ ok: true, count })
+  } catch (err) {
+    console.error('[jaap] failed:', err)
+    res.status(500).json({ ok: false, error: 'could not update jaap' })
   }
 })
 
@@ -432,6 +473,7 @@ app.post('/api/invites', async (req, res) => {
         groomPhoto: clean(body.groomPhoto, 500),
         bridePhoto: clean(body.bridePhoto, 500),
         venuePhoto: clean(body.venuePhoto, 500),
+        privateNote: clean(body.privateNote, 200),
         hostName,
         hostEmail,
         hostPhone,
@@ -516,6 +558,7 @@ app.get('/api/invites/:slug/host', async (req, res) => {
         song: e.song,
         advice: e.advice,
         message: e.message,
+        seva: e.seva,
         createdAt: e.submittedAt,
       }))
       .reverse()

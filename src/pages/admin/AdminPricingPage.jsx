@@ -7,13 +7,13 @@ import { adminGetMe } from '../../utils/partnerApi'
 import { getTemplatePrices, setTemplatePrice, resetTemplatePrice } from '../../utils/templatePriceApi'
 import { OCCASIONS, BUILDER_TEMPLATES } from '../../data/builderTemplates'
 import { PRICING } from '../../data/templatesData'
-import { getActivePrice, isSaleActive } from '../../data/sale'
+import { getActivePrice, getDefaultPrice, isSaleActive } from '../../data/sale'
 
 const MIN_PRICE = 1
 const MAX_PRICE = 100000
 
 function EditableRow({ template, override, onSave, onReset }) {
-  const defaultPrice = getActivePrice()
+  const defaultPrice = getDefaultPrice(template.id)
   const effectivePrice = override?.price ?? defaultPrice
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(String(effectivePrice))

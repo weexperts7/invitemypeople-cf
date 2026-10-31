@@ -7,8 +7,7 @@ import GaneshShowcase from './GaneshShowcase'
 // Chaturthi templates are fully built (GaneshShowcase below is the real
 // template art, not a placeholder) but deliberately not advertised yet
 // ahead of the ad campaign launch (see routesSeo.js's COMING_SOON_ROUTES
-// comment for the full picture: SatsangTemplateCard.jsx mirrors this
-// exact treatment). The card still shows real template art/name/tags to
+// comment for the full picture). The card still shows real template art/name/tags to
 // build anticipation — only the two action buttons are gone, replaced
 // with a single "Launching Soon" link to the dedicated landing page.
 export default function GaneshTemplateCard({ template }) {

@@ -103,6 +103,9 @@ export function rowToInvite(row) {
     groomPhoto: row.groom_photo,
     bridePhoto: row.bride_photo,
     venuePhoto: row.venue_photo,
+    // An invite-only satsang's "please do not forward" note — see
+    // 0018_satsang_seva_and_jaap.sql.
+    privateNote: row.private_note,
     // Admin-only, Mahogany Seal template only — see
     // 0014_admin_mahogany_caricature_video.sql /
     // 0015_admin_mahogany_hashtag.sql / api/_lib/adminCreateInvite.js.

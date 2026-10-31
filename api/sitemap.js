@@ -53,7 +53,7 @@ function buildSitemap() {
   for (const t of TEMPLATES) {
     entries.push(urlEntry(`/templates/wedding/${t.id}`, TEMPLATE_META))
   }
-  for (const t of SATSANG_TEMPLATES) {
+  for (const t of SATSANG_TEMPLATES.filter((s) => s.fullExperience)) {
     entries.push(urlEntry(`/satsang/${t.slug}`, TEMPLATE_META))
   }
   for (const t of GANESH_TEMPLATES) {

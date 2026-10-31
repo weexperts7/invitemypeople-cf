@@ -19,7 +19,7 @@
 // from the catalog), never anything else about the templates catalog.
 import { getSupabase } from './supabase.js'
 import { requireAdmin } from './auth.js'
-import { getActivePrice } from '../../src/data/sale.js'
+import { getDefaultPrice } from '../../src/data/sale.js'
 
 export function clean(value, max) {
   return String(value ?? '')
@@ -32,9 +32,9 @@ const MAX_PRICE = 100000
 
 /**
  * The price actually charged for a given template right now: its admin-set
- * override if one exists, otherwise today's global default (the launch-sale
- * price while it's running, the standing launch price once it ends — see
- * src/data/sale.js). Used by POST /api/create-order to re-derive the
+ * override if one exists, otherwise its default (Guruji Satsang's own price, or
+ * the launch-sale price while it's running and the standing launch price once
+ * it ends — see src/data/sale.js). Used by POST /api/create-order to re-derive the
  * expected charge server-side.
  *
  * Never throws: a missing/misconfigured Supabase connection, a network
@@ -43,7 +43,7 @@ const MAX_PRICE = 100000
  * pricing lookup failure can never be the reason checkout breaks.
  */
 export async function getEffectivePrice(templateKey) {
-  const fallback = getActivePrice()
+  const fallback = getDefaultPrice(templateKey)
   const key = clean(templateKey, 80)
   if (!key) return fallback
 

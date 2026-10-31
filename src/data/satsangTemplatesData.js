@@ -18,6 +18,57 @@
 // `layout` render through the original shared LegacySatsangExperience.
 export const SATSANG_TEMPLATES = [
   {
+    slug: 'shukrana-darshan',
+    name: 'Shukrana Darshan',
+    layout: 'shukrana-darshan',
+    // Works as a real paid invite end to end (see
+    // buildSatsangExperienceTemplate.js) — the other Satsang templates are
+    // still demo-only and stay out of the builder until they do too.
+    fullExperience: true,
+    tagline: 'Light the jyot, chant with your sangat & offer seva',
+    description:
+      "Guests light a jyot to open Guruji's darshan, chant together on a shared Sangat Jaap mala, offer seva as they RSVP, and leave their shukrana for the whole sangat to read.",
+    metaDescription:
+      'Interactive Guruji Satsang invitation: light the jyot, shared Sangat Jaap mala, seva sign-up, langar details, shukrana wall and RSVP.',
+    tags: ['Interactive', 'Sangat Jaap', 'Seva Sign-up'],
+    motif: 'lotus-peacock',
+    motifAccent: '#8a1538',
+    fonts: { serif: '"Cormorant Garamond", serif' },
+    greeting: { symbol: 'ॐ', line: 'Jai Guruji' },
+    host: {
+      familyName: 'The Malhotra Family',
+      hostLine: "With Guruji's blessings, our family invites you and your loved ones to join us for satsang.",
+    },
+    event: {
+      date: 'Saturday, 12 December 2026',
+      time: '6:00 PM',
+      venue: 'Malhotra Residence, Sector 21, Gurugram',
+      startISO: '2026-12-12T18:00:00',
+    },
+    programme: [
+      { title: 'Shabad Kirtan', time: '6:00 PM' },
+      { title: 'Satsang', time: '7:00 PM' },
+      { title: 'Langar Prasad', time: '8:30 PM' },
+    ],
+    mahaprasad: {
+      time: '8:30 PM',
+      note: 'Please stay and take langar prasad with the sangat after satsang.',
+    },
+    palette: {
+      ivory: '#fff6e3',
+      linen: '#fbecd0',
+      champagne: '#f6dcae',
+      champagneDeep: '#e2b871',
+      blush: '#f8dfd3',
+      blushDeep: '#e6a890',
+      rose: '#8a1538',
+      gold: '#c98a1c',
+      goldSoft: '#f2c463',
+      ink: '#3a0f18',
+      inkSoft: '#6e3b3c',
+    },
+  },
+  {
     slug: 'divine-peacock',
     name: 'The Royal Peacock',
     layout: 'royal-peacock',
@@ -314,3 +365,14 @@ export function getSatsangTemplateBySlug(slug) {
 // over automatically — see GurujiPhoto.jsx, which falls back to a devotional
 // placeholder glyph if that file isn't present yet.
 export const GURUJI_PHOTO_SRC = '/images/guruji-photo.jpg'
+
+// What an invite-only satsang tells its guests, unless the host rewrites it.
+export const DEFAULT_PRIVATE_NOTE = 'This is an invite-only satsang. Kindly do not forward this invite.'
+export const MAX_PRIVATE_NOTE = 160
+
+// The note to save and show for what's in the builder form, or '' for an
+// open invite.
+export function resolvePrivateNote({ privateInvite, privateNote }) {
+  if (!privateInvite) return ''
+  return privateNote?.trim() || DEFAULT_PRIVATE_NOTE
+}

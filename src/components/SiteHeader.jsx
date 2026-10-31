@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Building2, LogOut } from 'lucide-react'
 import Logo from './Logo'
+import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import PartnerAuthContext from '../context/PartnerAuthContext'
 import useBodyScrollLock from '../hooks/useBodyScrollLock'
@@ -20,7 +21,10 @@ const SECONDARY_LINKS = [
 // COMING_SOON_LINKS below instead — not advertised yet ahead of the ad
 // campaign launch (see routesSeo.js's COMING_SOON_ROUTES comment for the
 // full picture).
-const LIVE_OCCASIONS = [{ to: '/weddings', label: 'Weddings', icon: Heart }]
+const LIVE_OCCASIONS = [
+  { to: '/weddings', label: 'Weddings', icon: Heart },
+  { to: '/guruji-satsangs', label: 'Guruji Satsang', icon: FoldedHandsIcon },
+]
 const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
   to: `/${o.slug}`,
   label: o.label,

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import SEO from '../components/SEO'
 import InvitationExperience from '../components/InvitationExperience'
 import GaneshExperience from '../components/GaneshExperience'
+import SatsangExperience from '../components/SatsangExperience'
 import { getBuilderTemplateById } from '../data/builderTemplates'
 import { buildWeddingExperienceTemplate } from '../utils/buildWeddingExperienceTemplate'
 import { buildGaneshExperienceTemplate } from '../utils/buildGaneshExperienceTemplate'
+import { buildSatsangExperienceTemplate } from '../utils/buildSatsangExperienceTemplate'
 import { DRAFT_INVITE_PREVIEW_KEY, readDraftInvitePreview } from '../utils/draftInvitePreview'
 import { slugify } from '../utils/slugify'
 
@@ -71,10 +73,19 @@ export default function LiveDraftPreviewPage() {
   // never collide with the real invite once it's actually created.
   const invitationSlug = `preview-${slugify(draft.names) || 'draft'}`
 
-  // draft.occasionId is only ever 'wedding' or 'ganesh-chaturthi' here —
-  // LiveInvitePreview.jsx only mounts this iframe (isRichPreview) for those
-  // two; Guruji Satsang stays on the lighter hero-card preview and never
-  // reaches this page.
+  // LiveInvitePreview.jsx only mounts this iframe (isRichPreview) for wedding,
+  // Ganesh Chaturthi and `fullExperience` Satsang templates; the other Satsang
+  // templates stay on the lighter hero-card preview and never reach this page.
+  if (draft.occasionId === 'guruji-satsang') {
+    return (
+      <>
+        {seo}
+        {hideScrollbar}
+        <SatsangExperience template={buildSatsangExperienceTemplate(draft, template)} showChrome={false} />
+      </>
+    )
+  }
+
   if (draft.occasionId === 'ganesh-chaturthi') {
     return (
       <>

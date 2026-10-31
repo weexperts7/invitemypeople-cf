@@ -45,13 +45,12 @@ function fromSatsang(slug) {
 // by occasion, since "who" an invitation names differs (a couple vs. a
 // hosting family).
 //
-// `disabled: true` on Ganesh Chaturthi/Guruji Satsang: not pulled from the
-// builder, just gated off ahead of the ad campaign launch the same way
-// their template cards/nav/footer entries are (see routesSeo.js's
-// COMING_SOON_ROUTES comment for the full picture) — TemplateStyleSelector.jsx
-// greys these tabs out and won't fire onOccasionChange for them, and
-// CreateInvitePage.jsx refuses to honor a `?occasion=` deep link naming
-// either one.
+// `disabled: true` on Ganesh Chaturthi: not pulled from the builder, just
+// gated off ahead of the ad campaign launch the same way its template
+// cards/nav/footer entries are (see routesSeo.js's COMING_SOON_ROUTES comment
+// for the full picture) — TemplateStyleSelector.jsx greys the tab out and won't
+// fire onOccasionChange for it, and CreateInvitePage.jsx refuses to honor a
+// `?occasion=` deep link naming it.
 export const OCCASIONS = [
   {
     id: 'wedding',
@@ -74,7 +73,6 @@ export const OCCASIONS = [
     icon: FoldedHandsIcon,
     namesLabel: 'Host Family Name',
     namesPlaceholder: 'e.g. The Malhotra Family',
-    disabled: true,
   },
 ]
 
@@ -603,6 +601,33 @@ export const BUILDER_TEMPLATES = [
 
   // ---- Guruji Satsang -------------------------------------------------
   (() => {
+    const src = fromSatsang('shukrana-darshan')
+    return {
+      id: 'satsang-shukrana-darshan',
+      sourceId: 'shukrana-darshan',
+      occasion: 'guruji-satsang',
+      // Reachable from its own template page while the occasion stays
+      // "Soon" everywhere else — see CreateInvitePage.jsx.
+      fullExperience: src.fullExperience,
+      layout: src.layout,
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-12-12',
+        time: '18:00',
+        venue: src.event.venue,
+        message: src.host.hostLine,
+      },
+    }
+  })(),
+  (() => {
     const src = fromSatsang('divine-peacock')
     return {
       id: 'satsang-divine-peacock',
@@ -774,7 +799,11 @@ export function getBuilderTemplatesForOccasion(occasionId) {
   // royal-plum-curtain entry) so a style pulled from the public catalog
   // ahead of launch stays out of the builder's "choose your style" grid
   // too, not just the browsing gallery.
-  return BUILDER_TEMPLATES.filter((t) => t.occasion === occasionId && !t.hidden)
+  // Satsang templates join the builder one at a time, as each gains a real
+  // paid invite — see `fullExperience` in satsangTemplatesData.js.
+  return BUILDER_TEMPLATES.filter(
+    (t) => t.occasion === occasionId && !t.hidden && (occasionId !== 'guruji-satsang' || t.fullExperience),
+  )
 }
 
 export function getBuilderTemplateById(id) {

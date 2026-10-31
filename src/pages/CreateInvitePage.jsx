@@ -12,6 +12,7 @@ import {
   CreditCard,
   Link as LinkIcon,
   Loader2,
+  Lock,
   Mail,
   MapPin,
   MessageSquareText,
@@ -40,8 +41,9 @@ import {
   getBuilderTemplatesForOccasion,
   getOccasion,
 } from '../data/builderTemplates'
+import { DEFAULT_PRIVATE_NOTE, MAX_PRIVATE_NOTE, resolvePrivateNote } from '../data/satsangTemplatesData'
 import { PRICING } from '../data/templatesData'
-import { getActivePrice, isSaleActive } from '../data/sale'
+import { getDefaultPrice, getListPrice, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
 import { getTemplatePrices } from '../utils/templatePriceApi'
 import { todayDateInputValue } from '../utils/todayDateInput'
@@ -74,6 +76,9 @@ const EMPTY_FORM = {
   groomPhoto: '',
   venuePhoto: '',
   bridePhoto: '',
+  // Invite-only satsang. The note starts filled in, ready to reword.
+  privateInvite: false,
+  privateNote: DEFAULT_PRIVATE_NOTE,
 }
 
 // Ganesh Chaturthi's "Festival Schedule" reuses the generic "Additional
@@ -93,6 +98,22 @@ const GANESH_SCHEDULE_SEED = ['Morning Aarti', 'Evening Aarti', 'Visarjan Yatra'
   venue: '',
   locationUrl: '',
 }))
+
+// Satsang's programme starts filled in the same way; each row is only a title
+// and a time, with the date and venue coming from the main event.
+const SATSANG_PROGRAMME_SEED = ['Shabad Kirtan', 'Satsang', 'Langar Prasad'].map((title) => ({
+  title,
+  date: '',
+  time: '',
+  venue: '',
+  locationUrl: '',
+}))
+
+function eventSeedFor(occasionId) {
+  if (occasionId === 'ganesh-chaturthi') return GANESH_SCHEDULE_SEED
+  if (occasionId === 'guruji-satsang') return SATSANG_PROGRAMME_SEED
+  return []
+}
 
 // Shown once, right after a successful payment — the ONLY moment the host
 // dashboard link (with its one-time host_token, see api/invites/index.js)
@@ -188,10 +209,10 @@ export default function CreateInvitePage() {
   // TemplateStyleSelector skips the occasion tabs entirely rather than
   // inviting them to go browse a category they didn't ask for.
   const requestedOccasionId = searchParams.get('occasion')
-  // `!o.disabled` — a stale/hand-typed ?occasion=ganesh-chaturthi or
-  // ?occasion=guruji-satsang link (see OCCASIONS' own comment in
-  // builderTemplates.js) falls back to the default wedding occasion below,
-  // same as if the param were missing or invalid, rather than honoring it.
+  // `!o.disabled` — a stale/hand-typed ?occasion=ganesh-chaturthi link (see
+  // OCCASIONS' own comment in builderTemplates.js) falls back to the default
+  // wedding occasion below, same as if the param were missing or invalid,
+  // rather than honoring it.
   const occasionPreselected = OCCASIONS.some((o) => o.id === requestedOccasionId && !o.disabled)
   const initialOccasionId = occasionPreselected ? requestedOccasionId : OCCASIONS[0].id
 
@@ -204,9 +225,7 @@ export default function CreateInvitePage() {
   })
   const [form, setForm] = useState(EMPTY_FORM)
   const [photos, setPhotos] = useState([])
-  const [events, setEvents] = useState(() =>
-    initialOccasionId === 'ganesh-chaturthi' ? GANESH_SCHEDULE_SEED : [],
-  )
+  const [events, setEvents] = useState(() => eventSeedFor(initialOccasionId))
   // Background Music Selection (see builder/SongSearchPicker.jsx) — null
   // until the host confirms a Spotify search result; { title, artist,
   // albumArt, previewUrl } once they do. Optional: skipping it just means
@@ -222,6 +241,9 @@ export default function CreateInvitePage() {
 
   const occasion = getOccasion(occasionId)
   const template = getBuilderTemplateById(templateId)
+  // Whether this invite takes photos, a song and a schedule.
+  const hasFullBuilder =
+    occasionId === 'wedding' || occasionId === 'ganesh-chaturthi' || Boolean(template.fullExperience)
 
   // Super Admin Template Price Management overrides (see
   // api/_lib/templatePrices.js) — a sparse { [templateId]: price } map of
@@ -253,21 +275,28 @@ export default function CreateInvitePage() {
   // amount PaymentModal actually charges via Razorpay, reads from this so
   // nothing here can drift out of sync with what checkout enforces
   // server-side (POST /api/create-order re-derives this exact same value).
-  const activePrice = templatePriceOverrides[template.id] ?? getActivePrice()
+  const activePrice = templatePriceOverrides[template.id] ?? getDefaultPrice(template.id)
   const saleLive = isSaleActive()
   // Only meaningful as a "launch sale" badge when this template is actually
   // cheaper than the standing price — an admin override that happens to
   // price a template ABOVE PRICING.price (a premium template, say) should
   // never render as a negative-percent "sale".
+  const listPrice = getListPrice(template.id)
+  const comparePrice = listPrice ?? PRICING.price
   const savingsPercent =
-    activePrice < PRICING.price ? Math.round(((PRICING.price - activePrice) / PRICING.price) * 100) : 0
+    activePrice < comparePrice ? Math.round(((comparePrice - activePrice) / comparePrice) * 100) : 0
+  const showStruckPrice = (listPrice !== null || saleLive) && savingsPercent > 0
 
   const handleOccasionChange = (nextOccasionId) => {
     setOccasionId(nextOccasionId)
     setTemplateId(getBuilderTemplatesForOccasion(nextOccasionId)[0].id)
-    if (nextOccasionId === 'ganesh-chaturthi') {
-      setEvents((prev) => (prev.length === 0 ? GANESH_SCHEDULE_SEED : prev))
-    }
+    // Swaps an untouched starter list for the new occasion's, so a wedding
+    // never inherits a satsang programme. Anything the host edited stays.
+    setEvents((prev) =>
+      prev.length === 0 || prev === GANESH_SCHEDULE_SEED || prev === SATSANG_PROGRAMME_SEED
+        ? eventSeedFor(nextOccasionId)
+        : prev,
+    )
   }
 
   const handleField = (field) => (e) =>
@@ -339,6 +368,7 @@ export default function CreateInvitePage() {
           groomPhoto: template.hasPortraits ? form.groomPhoto : '',
           bridePhoto: template.hasPortraits ? form.bridePhoto : '',
           venuePhoto: template.hasVenuePhotos ? form.venuePhoto : '',
+          privateNote: occasionId === 'guruji-satsang' ? resolvePrivateNote(form) : '',
           amount: activePrice,
           paymentId,
           photos,
@@ -744,7 +774,7 @@ export default function CreateInvitePage() {
                       />
                     </div>
 
-                    {(occasionId === 'wedding' || occasionId === 'ganesh-chaturthi') && (
+                    {hasFullBuilder && (
                       <div>
                         <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
                           <Camera className="h-3.5 w-3.5 text-rose" />
@@ -791,14 +821,70 @@ export default function CreateInvitePage() {
                       </div>
                     )}
 
-                    {(occasionId === 'wedding' || occasionId === 'ganesh-chaturthi') && (
+                    {occasionId === 'guruji-satsang' && hasFullBuilder && (
+                      <div>
+                        <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <CalendarPlus className="h-3.5 w-3.5 text-rose" />
+                          Satsang Programme <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </label>
+                        <p className="mb-3 text-xs text-ink-soft">
+                          We&rsquo;ve started you off with the usual order — add
+                          each time, rename any of them, or delete what you don&rsquo;t need.
+                        </p>
+                        <EventsListEditor
+                          events={events}
+                          onChange={setEvents}
+                          titlePlaceholder="e.g. Shabad Kirtan"
+                          titleAndTimeOnly
+                        />
+                      </div>
+                    )}
+
+                    {occasionId === 'guruji-satsang' && hasFullBuilder && (
+                      <div className="border-t border-champagne-deep/30 pt-5">
+                        <p className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <Lock className="h-3.5 w-3.5 text-rose" />
+                          Invite-Only Satsang <span className="normal-case text-ink-soft/70">(optional)</span>
+                        </p>
+                        <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.privateInvite}
+                            onChange={(e) => setForm((prev) => ({ ...prev, privateInvite: e.target.checked }))}
+                            className="mt-0.5 h-5 w-5 shrink-0 accent-rose"
+                          />
+                          <span>This satsang is only for the people I invite. Ask guests not to forward it.</span>
+                        </label>
+                        {form.privateInvite && (
+                          <div className="mt-3">
+                            <label htmlFor="privateNote" className="mb-2 block text-xs text-ink-soft">
+                              Your note to guests. You can reword it.
+                            </label>
+                            <textarea
+                              id="privateNote"
+                              rows={2}
+                              maxLength={MAX_PRIVATE_NOTE}
+                              value={form.privateNote}
+                              onChange={handleField('privateNote')}
+                              placeholder={DEFAULT_PRIVATE_NOTE}
+                              className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft resize-none"
+                            />
+                            <p className="mt-2 text-xs text-ink-soft">
+                              Guests will see this on the invite, and we&rsquo;ll remove the buttons that ask them to invite others.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {hasFullBuilder && (
                       <div className="border-t border-champagne-deep/30 pt-5">
                         <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
                           <Music2 className="h-3.5 w-3.5 text-rose" />
                           Background Music Selection <span className="normal-case text-ink-soft/70">(optional)</span>
                         </label>
                         <p className="mb-3 text-xs text-ink-soft">
-                          {occasionId === 'ganesh-chaturthi'
+                          {occasionId !== 'wedding'
                             ? 'Search for a devotional bhajan or festive instrumental, preview it, then confirm one to play the moment guests open your invitation.'
                             : 'Search Spotify, preview any track, then confirm one to play the moment guests open your invitation.'}
                         </p>
@@ -865,10 +951,10 @@ export default function CreateInvitePage() {
                     <span className="font-semibold text-ink">
                       &#8377;{activePrice.toLocaleString('en-IN')}
                     </span>
-                    {saleLive && savingsPercent > 0 && (
+                    {showStruckPrice && (
                       <>
                         <span className="text-ink-soft/60 line-through">
-                          &#8377;{PRICING.price.toLocaleString('en-IN')}
+                          &#8377;{comparePrice.toLocaleString('en-IN')}
                         </span>
                         <span className="rounded-full bg-blush px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-rose">
                           Save {savingsPercent}%
@@ -892,7 +978,8 @@ export default function CreateInvitePage() {
       <PaymentModal
         open={paymentOpen}
         amount={activePrice}
-        originalAmount={saleLive && savingsPercent > 0 ? PRICING.price : null}
+        originalAmount={showStruckPrice ? comparePrice : null}
+        offerLabel={listPrice !== null ? 'Sangat Offer' : undefined}
         templateId={template.id}
         summary={{ templateName: template.name, names: form.names.trim() || occasion.namesPlaceholder }}
         onClose={() => (saving ? null : setPaymentOpen(false))}

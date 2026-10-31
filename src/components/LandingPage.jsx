@@ -36,7 +36,7 @@ import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import { ROUTES_SEO } from '../data/routesSeo'
 import { SHOW_WEDDING_TEMPLATE_FILTERS } from '../data/featureFlags'
 import TemplateCard from './TemplateCard'
-import SatsangTemplateCard from './SatsangTemplateCard'
+import SatsangSpotlight from './SatsangSpotlight'
 import GaneshTemplateCard from './GaneshTemplateCard'
 import TemplateMarquee from './TemplateMarquee'
 import SaleBanner from './SaleBanner'
@@ -124,7 +124,7 @@ const COMPARISON_ROWS = [
     feature: 'Custom design',
     ours: {
       state: 'yes',
-      text: `${TEMPLATES.filter((t) => !t.hidden).length + SATSANG_TEMPLATES.length + GANESH_TEMPLATES.length}+ templates across every occasion`,
+      text: `${TEMPLATES.filter((t) => !t.hidden).length + SATSANG_TEMPLATES.filter((t) => t.fullExperience).length + GANESH_TEMPLATES.length}+ templates across every occasion`,
     },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
@@ -372,8 +372,8 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mx-auto mt-6 max-w-xl text-base sm:text-lg text-ink-soft"
           >
-            Interactive, mobile-first digital wedding invitations — with
-            Guruji Satsang and Ganesh Chaturthi launching soon — tap-to-open
+            Interactive, mobile-first digital wedding and Guruji Satsang
+            invitations — with Ganesh Chaturthi launching soon — tap-to-open
             envelopes, scratch-to-reveal cards, and built-in RSVP management.
           </motion.p>
 
@@ -390,19 +390,17 @@ export default function LandingPage() {
               <Heart className="w-4 h-4" />
               Wedding Invitations
             </a>
-            {/* Both link to their "launching soon" landing page, not an
-                in-page scroll — the sections below still showcase the real
-                template art, just without a working Preview/Customize path
-                (see SatsangTemplateCard.jsx/GaneshTemplateCard.jsx's own
-                comment for the full picture). */}
-            <Link
-              to="/guruji-satsang-invites"
+            <a
+              href="#satsang-templates"
               className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-ink shadow-soft transition-transform hover:scale-[1.03]"
             >
               <FoldedHandsIcon className="w-4 h-4" />
               Guruji Satsang Invitations
-              <span className="text-[10px] uppercase tracking-[0.15em] text-ink/60">Soon</span>
-            </Link>
+            </a>
+            {/* Links to its "launching soon" landing page, not an in-page
+                scroll — the section below still showcases the real template
+                art, just without a working Preview/Customize path (see
+                GaneshTemplateCard.jsx's own comment for the full picture). */}
             <Link
               to="/ganesh-chaturthi-invites"
               className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3.5 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
@@ -517,67 +515,7 @@ export default function LandingPage() {
         )}
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Guruji Satsang template scroller — same treatment, equal billing */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="satsang-templates" className="bg-champagne/50 pt-16 sm:pt-20 pb-16 sm:pb-20 scroll-mt-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10 px-6"
-        >
-          <div className="mb-4 flex justify-center">
-            <SectionEyebrow icon={FoldedHandsIcon} tone="gold">Guruji Satsang Invitations · Launching Soon</SectionEyebrow>
-          </div>
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">
-            Devotional Templates
-          </h2>
-          <p className="text-ink-soft">
-            {SATSANG_TEMPLATES.length} template{SATSANG_TEMPLATES.length === 1 ? '' : 's'} —
-            Guruji&rsquo;s photo, a live Divine Blessing scratch card and RSVP built in,
-            launching soon
-          </p>
-          {/* Links to the "launching soon" landing page, not the real
-              /guruji-satsangs gallery — not advertised yet ahead of the ad
-              campaign launch (see routesSeo.js's COMING_SOON_ROUTES comment). */}
-          <Link
-            to="/guruji-satsang-invites"
-            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
-          >
-            See what&rsquo;s launching soon
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </motion.div>
-
-        <TemplateMarquee
-          items={SATSANG_TEMPLATES}
-          keyExtractor={(t) => t.slug}
-          itemWidth={300}
-          secondsPerItem={7}
-          reverse
-          renderItem={(template) => <SatsangTemplateCard template={template} />}
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-8 flex justify-center px-6"
-        >
-          <a
-            href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Guruji Satsang invitations.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
-          >
-            <Eye className="w-4 h-4" />
-            Notify Me on WhatsApp
-          </a>
-        </motion.div>
-      </section>
+      <SatsangSpotlight />
 
       {/* ---------------------------------------------------------------- */}
       {/* Ganesh Chaturthi template scroller — same treatment, equal billing */}
@@ -661,8 +599,8 @@ export default function LandingPage() {
               More Celebrations, Coming Soon
             </h2>
             <p className="text-ink-soft max-w-xl mx-auto">
-              Weddings are live today — Guruji Satsang and Ganesh Chaturthi
-              are launching soon, with digital invitations for every
+              Weddings and Guruji Satsang are live today — Ganesh Chaturthi
+              is launching soon, with digital invitations for every
               celebration on the way after that.
             </p>
           </motion.div>

@@ -28,7 +28,7 @@ async function verifyPayment(response) {
   return result.paymentId
 }
 
-export default function PaymentModal({ open, amount, originalAmount, templateId, summary, onSuccess, onClose }) {
+export default function PaymentModal({ open, amount, originalAmount, offerLabel = 'Launch Sale', templateId, summary, onSuccess, onClose }) {
   const reduceMotion = useReducedMotion()
   const [stage, setStage] = useState('confirm') // confirm | processing | verifying | success | error
   const [errorMessage, setErrorMessage] = useState(null)
@@ -250,7 +250,7 @@ export default function PaymentModal({ open, amount, originalAmount, templateId,
                       </div>
                       {originalAmount > amount && (
                         <span className="mt-1.5 inline-flex items-center rounded-full bg-blush px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-rose">
-                          Launch Sale — Save {Math.round(((originalAmount - amount) / originalAmount) * 100)}%
+                          {offerLabel} — Save {Math.round(((originalAmount - amount) / originalAmount) * 100)}%
                         </span>
                       )}
                     </div>

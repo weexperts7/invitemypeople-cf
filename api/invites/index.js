@@ -72,6 +72,8 @@ export default async function handler(req, res) {
       ...(body.groomPhoto && { groom_photo: clean(body.groomPhoto, 500) }),
       ...(body.bridePhoto && { bride_photo: clean(body.bridePhoto, 500) }),
       ...(body.venuePhoto && { venue_photo: clean(body.venuePhoto, 500) }),
+      // Same, for an invite-only satsang (0018_satsang_seva_and_jaap.sql).
+      ...(body.privateNote && { private_note: clean(body.privateNote, 200) }),
       host_name: hostName,
       host_email: hostEmail,
       host_phone: hostPhone,

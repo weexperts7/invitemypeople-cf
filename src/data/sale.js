@@ -55,6 +55,28 @@ export function getActivePrice(now = new Date()) {
   return isSaleActive(now) ? SALE_PRICE : PRICING.shagunPrice
 }
 
+// Guruji Satsang's own price for the sangat, shown against SATSANG_LIST_PRICE.
+// Keyed off the builder id's `satsang-` prefix rather than a list of templates
+// so each new Satsang template picks it up, and so server code can use it
+// without importing the template catalog (see pricing.js's import-safety rule).
+export const SATSANG_PRICE = 799
+export const SATSANG_LIST_PRICE = 2399
+
+const isSatsangTemplate = (templateKey) => String(templateKey ?? '').startsWith('satsang-')
+
+// What a template costs when no admin has set its own price — see
+// api/_lib/templatePrices.js, which falls back to this at checkout. Use this,
+// not getActivePrice(), anywhere the template is known.
+export function getDefaultPrice(templateKey, now = new Date()) {
+  return isSatsangTemplate(templateKey) ? SATSANG_PRICE : getActivePrice(now)
+}
+
+// The struck-through price shown beside a template's real one, if it has its
+// own. Every other template's depends on the sale, so callers handle those.
+export function getListPrice(templateKey) {
+  return isSatsangTemplate(templateKey) ? SATSANG_LIST_PRICE : null
+}
+
 // Rounded whole-percent savings vs the non-discounted PRICING.price, for
 // copy like "Save 56%" — computed rather than hand-typed so it can never
 // drift out of sync with SALE_PRICE.

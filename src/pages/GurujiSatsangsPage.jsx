@@ -1,24 +1,39 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { Flame, Eye, MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Flame, PencilLine, Send, Eye } from 'lucide-react'
+import { useReducedMotion } from 'framer-motion'
 import { FoldedHandsIcon } from '../components/icons/FoldedHandsIcon'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
-import SatsangTemplateCard from '../components/SatsangTemplateCard'
+import SatsangSpotlight from '../components/SatsangSpotlight'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { ROUTES_SEO } from '../data/routesSeo'
+import { buildCreateLink } from '../utils/createLink'
 
-const WHATSAPP_NUMBER = '918847044554'
-function getWhatsAppLink(message) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
-}
+const STEPS = [
+  {
+    icon: PencilLine,
+    title: 'Add your satsang details',
+    text: 'Your family name, date, venue, programme and photos.',
+  },
+  {
+    icon: Eye,
+    title: 'Watch it come together',
+    text: 'The live preview updates as you type, then checkout takes a minute.',
+  },
+  {
+    icon: Send,
+    title: 'Share it with your sangat',
+    text: 'Send one link on WhatsApp, and see every RSVP and seva on your dashboard.',
+  },
+]
 
-// The dedicated Guruji Satsang template gallery — the homepage's Satsang
-// section stays a lighter teaser marquee that links here for the complete
-// browsing experience (see LandingPage.jsx).
+// Where anyone looking for a Guruji Satsang invite lands: the invitation
+// available today (SatsangSpotlight.jsx), how it works, and a way to start.
 export default function GurujiSatsangsPage() {
   const reduceMotion = useReducedMotion()
+  const template = SATSANG_TEMPLATES.find((t) => t.fullExperience)
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
@@ -26,7 +41,7 @@ export default function GurujiSatsangsPage() {
       <SiteHeader />
 
       <main>
-        <section className="relative overflow-hidden bg-petals px-6 pt-16 pb-16 sm:pt-20 sm:pb-20">
+        <section className="relative overflow-hidden bg-petals px-6 pt-12 pb-4 sm:pt-16">
           {!reduceMotion && (
             <>
               <FloatingOrb className="left-[8%] top-10 bg-champagne-deep/40" size={150} duration={11} />
@@ -42,60 +57,43 @@ export default function GurujiSatsangsPage() {
             <h1 className="font-serif text-3xl sm:text-5xl leading-[1.1] text-ink mb-4">
               Devotional Invitations for Guruji&rsquo;s Satsang
             </h1>
-            {/* Not advertised yet ahead of the ad campaign launch (see
-                routesSeo.js's COMING_SOON_ROUTES comment) — this page
-                itself stays reachable for anyone with a direct/bookmarked
-                link, but its copy and cards (SatsangTemplateCard.jsx) no
-                longer claim it's orderable right now. */}
             <p className="mx-auto max-w-xl text-ink-soft">
-              {SATSANG_TEMPLATES.length} template{SATSANG_TEMPLATES.length === 1 ? '' : 's'} —
-              Guruji&rsquo;s photo, a live Divine Blessing scratch card and
-              RSVP built in. Launching soon.
+              Create a beautiful satsang invitation in minutes and share it with
+              your sangat on WhatsApp.
             </p>
           </div>
         </section>
+
+        <SatsangSpotlight />
 
         <section className="bg-ivory px-6 py-14 sm:py-16">
-          <div className="mx-auto max-w-6xl">
-            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {SATSANG_TEMPLATES.map((template) => (
-                <SatsangTemplateCard key={template.slug} template={template} />
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-center font-serif text-2xl sm:text-3xl text-ink">How it works</h2>
+            <ol className="mt-8 grid gap-6 sm:grid-cols-3">
+              {STEPS.map(({ icon: Icon, title, text }, i) => (
+                <li key={title} className="rounded-2xl border border-champagne-deep/40 bg-linen/60 p-5">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blush text-rose">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-3 font-serif text-xl text-ink">
+                    {i + 1}. {title}
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{text}</p>
+                </li>
               ))}
-            </motion.div>
+            </ol>
 
-            <div className="mt-12 flex justify-center">
-              <a
-                href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Guruji Satsang invitations.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
-              >
-                <Eye className="w-4 h-4" />
-                Notify Me on WhatsApp
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-ink px-6 py-16 sm:py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-2xl sm:text-3xl text-ivory mb-3">
-              Launching soon
-            </h2>
-            <p className="text-white/70 mb-7">
-              We&rsquo;re putting the finishing touches on Guruji Satsang
-              invitations — message us and we&rsquo;ll let you know the
-              moment they&rsquo;re live.
-            </p>
-            <a
-              href={getWhatsAppLink("Hi! I'd like to be notified when InviteMyPeople launches digital Guruji Satsang invitations.")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-semibold text-ink shadow-soft transition-transform hover:scale-[1.03]"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Notify Me on WhatsApp
-            </a>
+            {template && (
+              <div className="mt-10 flex justify-center">
+                <Link
+                  to={buildCreateLink({ occasion: 'guruji-satsang', sourceId: template.slug })}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose px-7 py-3.5 text-sm font-semibold text-ivory shadow-soft transition-transform hover:scale-[1.03]"
+                >
+                  Create Your Satsang Invite
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       </main>

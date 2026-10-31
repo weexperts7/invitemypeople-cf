@@ -33,20 +33,17 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 // tagline for on-page display) and renders through the shared
 // ComingSoonPage.jsx.
 //
-// The first two entries are a different kind of "coming soon" than the
-// rest: Ganesh Chaturthi and Guruji Satsang templates are fully built and
-// already live at their own real routes (/templates/ganesh-chaturthi/*,
-// /satsang/:slug — GaneshChaturthiPage.jsx, GurujiSatsangsPage.jsx) —
+// The first entry is a different kind of "coming soon" than the rest:
+// Ganesh Chaturthi templates are fully built and already live at their own
+// real route (/templates/ganesh-chaturthi/* — GaneshChaturthiPage.jsx) —
 // they're just deliberately not being *advertised* yet ahead of the ad
-// campaign launch (see GaneshTemplateCard.jsx/SatsangTemplateCard.jsx,
-// SiteHeader.jsx, SiteFooter.jsx, LandingPage.jsx, all pointed at these two
-// slugs instead of the live category pages). Deliberately distinct slugs
-// from those real routes ('-invites' suffix, vs. the live pages' bare
-// '/guruji-satsangs' and '/templates/ganesh-chaturthi') so this list's
-// dynamic route in App.jsx can never collide with them — the real pages
-// stay directly reachable for anyone with an existing/bookmarked link,
-// this is purely about what visitors get routed to when they click a card
-// or nav link right now.
+// campaign launch (see GaneshTemplateCard.jsx, SiteHeader.jsx, SiteFooter.jsx,
+// LandingPage.jsx, all pointed at this slug instead of the live category
+// page). Deliberately a distinct slug from that real route ('-invites' suffix)
+// so this list's dynamic route in App.jsx can never collide with it — the real
+// page stays directly reachable for anyone with an existing/bookmarked link,
+// this is purely about what visitors get routed to when they click a card or
+// nav link right now.
 export const COMING_SOON_ROUTES = [
   {
     slug: 'ganesh-chaturthi-invites',
@@ -60,15 +57,6 @@ export const COMING_SOON_ROUTES = [
     // advertised yet.
     blurb:
       'Our Ganesh Chaturthi templates — a curtain-opening darshan reveal, full puja muhurat and RSVP built in — are fully designed and ready. We’re opening them up very soon as part of our upcoming launch.',
-  },
-  {
-    slug: 'guruji-satsang-invites',
-    label: 'Guruji Satsang',
-    title: 'Guruji Satsang Invites (Launching Soon) | InviteMyPeople',
-    description:
-      'Digital Guruji Satsang invitations are launching soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
-    blurb:
-      'Our Guruji Satsang templates — Guruji’s photo, a live Divine Blessing scratch card and RSVP built in — are fully designed and ready. We’re opening them up very soon as part of our upcoming launch.',
   },
   {
     slug: 'birthdays',
@@ -326,13 +314,13 @@ const STATIC_ROUTES_SEO = {
   '/guruji-satsangs': {
     title: 'Guruji Satsang Invitations | InviteMyPeople',
     description:
-      "Devotional digital invitations for Guruji Satsangs — Guruji's photo, a Divine Blessing scratch card and RSVP, all built in.",
+      "Create a Guruji Satsang invitation online: guests light the jyot, chant together, offer seva and RSVP, all from one WhatsApp link.",
     ogTitle: 'Guruji Satsang Invitations — InviteMyPeople',
     ogDescription:
-      'Devotional digital invitations for Guruji Satsangs, complete with a Divine Blessing scratch card and built-in RSVP tracking.',
+      'Create a Guruji Satsang invitation in minutes: light the jyot, chant together, offer seva and RSVP from one link.',
     h1: 'Devotional Invitations for Guruji’s Satsang',
     body: [
-      "Looking for a Guruji Satsang invite online that feels as devotional as the gathering itself? Our Satsang templates pair Guruji's photo with a Divine Blessing scratch card, a curated devotional palette, and the same interactive RSVP tracking used across every InviteMyPeople invitation, so hosts always know who's coming before the day arrives.",
+      "Looking for a Guruji Satsang invite online that feels as devotional as the gathering itself? Our Shukrana Darshan invitation opens with guests lighting the jyot to reveal Guruji's photo, in a devotional palette, with the same interactive RSVP tracking used across every InviteMyPeople invitation, so hosts always know who's coming before the day arrives.",
       { h2: 'A Guruji Satsang Invite Online, Built With Devotion' },
       "Each template opens with a gentle reveal befitting a sacred gathering, carries Guruji's photo and a greeting of your choosing, and includes full Mahaprasad details alongside the Satsang's date, time and venue — all on one shareable, mobile-first link. Guests tap to RSVP directly on the invitation itself, and every response, headcount and blessing flows straight into your private host dashboard.",
       { h2: 'Devotional Design, Practical Guest Management' },
@@ -346,7 +334,7 @@ const STATIC_ROUTES_SEO = {
       { h2: 'A Satsang Invitation Every Devotee Can Open Instantly' },
       "Guruji Satsang gatherings often bring together three generations of a family and community — elders who've followed Guruji for decades alongside grandchildren attending for the first time. InviteMyPeople's Satsang invitations open directly inside WhatsApp with a single tap, no app download or account required, so every devotee can view Guruji's photo, read the greeting, and RSVP in seconds regardless of how comfortable they are with technology. Large, clear text and a simple one-tap RSVP button mean the invitation never gets in the way of the devotion it's meant to carry.",
       { h2: 'For Every Kind of Devotional Gathering' },
-      "Whether you're hosting a weekly Satsang, a Bhajan Sandhya, a Guru Purnima celebration, a Katha or Pravachan, or a special occasion marking Guruji's visit to your city, our templates adapt to the scale and tone of the gathering — from an intimate home Satsang for thirty devotees to a community hall event for several hundred. Add multiple sessions or days if Guruji's visit spans more than one event, each with its own date, time and venue, all on the same shareable link.",
+      "Whether you're hosting a weekly Satsang, a Bhajan Sandhya, a Guru Purnima celebration, a Katha or Pravachan, or a special occasion marking Guruji's visit to your city, our templates adapt to the scale and tone of the gathering — from an intimate home Satsang for thirty devotees to a community hall event for several hundred. Add your programme for the evening, from Shabad Kirtan to Langar Prasad, each with its own time, all on the same shareable link.",
       { h2: 'Frequently Asked Questions About Guruji Satsang Invitations' },
       { h3: "Can I include Guruji's photo and a personal greeting?" },
       "Yes — every Satsang template is built around Guruji's photo as the visual centrepiece, and you can add your own greeting or message alongside the event details. It's personalised to your Satsang, not a generic devotional template with your details dropped in.",
@@ -518,7 +506,7 @@ export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
 // instead of re-deriving the same title format three times.
 //
 // Templates carry a rich, evocative `description` used as on-page marketing
-// copy (see SatsangTemplateCard.jsx/GaneshTemplateCard.jsx) that often runs
+// copy (see GaneshTemplateCard.jsx) that often runs
 // well past the ~155-character budget a meta description has to fit in —
 // `metaDescription` is an optional, shorter, SEO-specific override; templates
 // whose `description` already fits the budget don't need one.

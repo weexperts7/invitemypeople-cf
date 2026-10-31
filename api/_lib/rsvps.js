@@ -14,7 +14,11 @@ import { clean } from './invites.js'
 // and guests is forced to 0 whenever the guest declined.
 export function cleanRsvp(body) {
   const isAttending = body.attendanceStatus === 'joyfully'
+  const seva = isAttending ? clean(body.seva, 300) : ''
   return {
+    // Satsang only — left off entirely when empty, so every other template's
+    // RSVP never depends on this column (0018_satsang_seva_and_jaap.sql).
+    ...(seva && { seva }),
     guest_name: clean(body.guestName, 120),
     guest_email: clean(body.guestEmail, 200) || null,
     attendance: clean(body.attendanceStatus, 20) || 'joyfully',
@@ -49,6 +53,7 @@ export function rowToRsvp(row) {
     song: row.song,
     advice: row.advice,
     message: row.message,
+    seva: row.seva,
     createdAt: row.created_at,
   }
 }

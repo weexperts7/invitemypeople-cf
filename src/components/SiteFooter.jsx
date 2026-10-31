@@ -165,9 +165,8 @@ export default function SiteFooter() {
                   routes — not advertised yet ahead of the ad campaign
                   launch (see routesSeo.js's COMING_SOON_ROUTES comment). */}
               <li>
-                <Link to="/guruji-satsang-invites" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/guruji-satsangs" className="text-ink-soft hover:text-rose transition-colors">
                   Guruji Satsang Invitations
-                  <span className="ml-1.5 text-[10px] uppercase tracking-[0.1em] text-ink-soft/60">Soon</span>
                 </Link>
               </li>
               <li>

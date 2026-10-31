@@ -18,6 +18,7 @@ import WishesWall from '../components/WishesWall'
 import InvitePreviewCard from '../components/builder/InvitePreviewCard'
 import InvitationExperience from '../components/InvitationExperience'
 import GaneshExperience from '../components/GaneshExperience'
+import SatsangExperience from '../components/SatsangExperience'
 import EventConcludedView from '../components/EventConcludedView'
 import { resolveWeddingTemplateForInvite } from '../data/builderTemplates'
 import { getInviteBySlug } from '../utils/inviteApi'
@@ -25,6 +26,7 @@ import { formatInviteDate } from '../utils/formatInviteDateTime'
 import { getEventStatus } from '../utils/eventStatus'
 import { buildWeddingExperienceTemplate } from '../utils/buildWeddingExperienceTemplate'
 import { buildGaneshExperienceTemplate } from '../utils/buildGaneshExperienceTemplate'
+import { buildSatsangExperienceTemplate } from '../utils/buildSatsangExperienceTemplate'
 import { SITE_URL } from '../data/routesSeo'
 
 // Where a paid Invitation Builder submission (CreateInvitePage.jsx) lands —
@@ -176,7 +178,22 @@ export default function GeneratedInvitePage() {
     )
   }
 
-  // Guruji Satsang invites keep the lighter preview-card treatment (plus
+  // A `fullExperience` Satsang template gets the same treatment as the two
+  // occasions above.
+  if (invite.occasion === 'guruji-satsang' && template.fullExperience) {
+    return (
+      <>
+        {seo}
+        <SatsangExperience
+          template={buildSatsangExperienceTemplate(invite, template)}
+          invitationSlug={invite.slug}
+          showChrome={false}
+        />
+      </>
+    )
+  }
+
+  // Other Guruji Satsang invites keep the lighter preview-card treatment (plus
   // the copy-link/share banner) for now — those templates route through
   // several bespoke per-template layout components (see
   // SatsangExperience.jsx) that don't yet support an external slug override

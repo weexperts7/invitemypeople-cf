@@ -160,14 +160,15 @@
 /* --- Opening: the garden gate ------------------------------------------ */
 
 .gm-open {
+  container: gm-open / size;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   height: 100svh;
   min-height: 620px;
-  padding: 24px 24px 104px;
+  padding: 64px 24px clamp(76px, 12svh, 104px);
   overflow: hidden;
   background: linear-gradient(180deg, #fdeee0 0%, var(--gm-paper) 58%, #fde2e2 100%);
   text-align: center;
@@ -366,6 +367,18 @@
 }
 
 .gm-walk-on svg { animation: gm-nudge 1.7s ease-in-out infinite; }
+
+/* Shorter phones: the gate gives up height so the greeting stays on screen. */
+@container gm-open (max-height: 740px) {
+  .gm-family { font-size: 33px; }
+  .gm-gate { margin-top: 30px; zoom: 0.84; }
+  .gm-btn, .gm-walk-on { margin-top: 12px; }
+  .gm-bed .gm-bloom { width: 56px; height: 56px; }
+}
+
+@container gm-open (max-height: 650px) {
+  .gm-gate { margin-top: 26px; zoom: 0.74; }
+}
 
 @keyframes gm-rise-in {
   from { opacity: 0; transform: translateY(8px); }

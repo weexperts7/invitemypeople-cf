@@ -12,10 +12,16 @@ export function buildSatsangExperienceTemplate(invite, builderTemplate) {
 
   // Rows the buyer cleared are dropped; a row with no time still shows, since
   // the order of the evening is useful on its own.
-  const programme = (invite.events ?? [])
+  const isLangarRow = (p) => /langar|prasad/i.test(p.title)
+  const rows = (invite.events ?? [])
     .filter((e) => e?.title?.trim())
     .map((e) => ({ title: e.title.trim(), time: e.time ? formatInviteTime(e.time) : '' }))
-  const langar = programme.find((p) => /langar|prasad/i.test(p.title))
+
+  // Null on an invite saved before the builder asked, which takes its langar
+  // time from the programme and always shows the section.
+  const langar = invite.langar
+  const served = langar?.served !== false
+  const programme = served ? rows : rows.filter((p) => !isLangarRow(p))
 
   return {
     ...base,
@@ -31,7 +37,11 @@ export function buildSatsangExperienceTemplate(invite, builderTemplate) {
       startISO: invite.time ? `${invite.date}T${invite.time}:00` : `${invite.date}T00:00:00`,
     },
     programme,
-    mahaprasad: { ...base.mahaprasad, time: langar?.time ?? '' },
+    mahaprasad: {
+      served,
+      time: langar?.time ? formatInviteTime(langar.time) : (rows.find(isLangarRow)?.time ?? ''),
+      note: langar?.note || base.mahaprasad.note,
+    },
     photos: invite.photos ?? [],
     privateNote: invite.privateNote?.trim() || '',
     bgMusic: invite.bgSongPreviewUrl ? { previewUrl: invite.bgSongPreviewUrl } : null,

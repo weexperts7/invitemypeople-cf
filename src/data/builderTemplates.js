@@ -628,6 +628,31 @@ export const BUILDER_TEMPLATES = [
     }
   })(),
   (() => {
+    const src = fromSatsang('gulab-marg')
+    return {
+      id: 'satsang-gulab-marg',
+      sourceId: 'gulab-marg',
+      occasion: 'guruji-satsang',
+      fullExperience: src.fullExperience,
+      layout: src.layout,
+      name: src.name,
+      tagline: src.tagline,
+      palette: src.palette,
+      motif: src.motif,
+      motifAccent: src.motifAccent,
+      fonts: src.fonts,
+      greeting: src.greeting,
+      connective: src.host.hostLine,
+      example: {
+        names: src.host.familyName,
+        date: '2026-12-12',
+        time: '18:00',
+        venue: src.event.venue,
+        message: src.host.hostLine,
+      },
+    }
+  })(),
+  (() => {
     const src = fromSatsang('divine-peacock')
     return {
       id: 'satsang-divine-peacock',

@@ -27,6 +27,7 @@ import { formatInviteDate, formatInviteTime, mapsSearchUrl } from '../../utils/f
 import { iconForEventTitle } from '../../utils/eventIcon'
 import { writeDraftInvitePreview } from '../../utils/draftInvitePreview'
 import { resolvePrivateNote } from '../../data/satsangTemplatesData'
+import { resolveLangar } from '../../utils/satsangLangar'
 
 function TimelineEntry({ palette, title, date, time, venue }) {
   const Icon = iconForEventTitle(title)
@@ -242,6 +243,7 @@ export default function LiveInvitePreview({
         bridePhoto: values.bridePhoto,
         venuePhoto: values.venuePhoto,
         privateNote: resolvePrivateNote(values),
+        langar: resolveLangar(values),
         events,
         photos,
         // Background Music Selection (see builder/SongSearchPicker.jsx) —

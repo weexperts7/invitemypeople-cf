@@ -1,3 +1,4 @@
+import { sanitiseLangar } from '../src/utils/satsangLangar.js'
 import express from 'express'
 import formidable from 'formidable'
 import writeXlsxFile from 'write-excel-file/node'
@@ -474,6 +475,7 @@ app.post('/api/invites', async (req, res) => {
         bridePhoto: clean(body.bridePhoto, 500),
         venuePhoto: clean(body.venuePhoto, 500),
         privateNote: clean(body.privateNote, 200),
+        langar: sanitiseLangar(body.langar),
         hostName,
         hostEmail,
         hostPhone,

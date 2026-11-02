@@ -15,7 +15,7 @@ const STEPS = [
   {
     icon: PencilLine,
     title: 'Add your satsang details',
-    text: 'Your family name, date, venue, programme and photos.',
+    text: 'Your family name, date, venue and programme.',
   },
   {
     icon: Eye,

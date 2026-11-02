@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Eye, Flame, Flower2, HandHeart, MessageCircleHeart, Sparkles } from 'lucide-react'
+import { ArrowRight, DoorOpen, Eye, Flame, Flower2, HandHeart, Leaf, MessageCircleHeart, Sparkles } from 'lucide-react'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
+import RoseBloom from './templates/GulabMargTemplate/components/RoseBloom'
 import { GURUJI_PHOTO_SRC, SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { findBuilderTemplateBySource } from '../data/builderTemplates'
 import { getDefaultPrice, getListPrice } from '../data/sale'
@@ -9,40 +11,57 @@ import { buildCreateLink } from '../utils/createLink'
 import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
 const OCCASION = 'guruji-satsang'
-const FEATURES = [
-  { icon: Flame, label: 'Light the jyot to open Guruji’s darshan' },
-  { icon: Sparkles, label: 'Chant together on the Sangat Jaap' },
-  { icon: Flower2, label: 'Open a rose to receive Guruji’s vachan' },
-  { icon: HandHeart, label: 'RSVP and offer seva in one step' },
-  { icon: MessageCircleHeart, label: 'A Shukrana Wall for the whole sangat' },
-]
+const FEATURES = {
+  'shukrana-darshan': [
+    { icon: Flame, label: 'Light the jyot to open Guruji’s darshan' },
+    { icon: Sparkles, label: 'Chant together on the Sangat Jaap' },
+    { icon: Flower2, label: 'Open a rose to receive Guruji’s vachan' },
+    { icon: HandHeart, label: 'RSVP and offer seva in one step' },
+    { icon: MessageCircleHeart, label: 'A Shukrana Wall for the whole sangat' },
+  ],
+  'gulab-marg': [
+    { icon: DoorOpen, label: 'Open a garden gate onto Guruji’s darshan' },
+    { icon: Leaf, label: 'A rose vine grows beside the invitation as you read' },
+    { icon: Flower2, label: 'Offer a rose and watch the sangat’s bouquet grow' },
+    { icon: HandHeart, label: 'RSVP and offer seva in one step' },
+    { icon: MessageCircleHeart, label: 'A Shukrana Wall for the whole sangat' },
+  ],
+}
 
 // The opening screen of the real invite, drawn small so the home page shows
 // the actual design without loading the whole experience.
 function InvitePhone({ template, to }) {
+  const isRosePath = template.slug === 'gulab-marg'
+
   return (
     <Link
       to={to}
       aria-label={`Preview the ${template.name} invitation`}
       className="group relative block w-[232px] shrink-0 rounded-[2.4rem] bg-[#16060c] p-2.5 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/15 transition-transform duration-300 hover:-translate-y-1"
     >
-      <div className="relative flex h-[440px] flex-col items-center justify-center overflow-hidden rounded-[1.9rem] bg-[radial-gradient(circle_at_50%_34%,#a81c45_0%,#5e0e26_48%,#26060f_100%)] px-3 pb-10 text-center">
-        <div
-          aria-hidden="true"
-          className="absolute -inset-1/2 opacity-40 motion-safe:animate-[spin_70s_linear_infinite] bg-[repeating-conic-gradient(from_0deg,rgba(255,226,170,0.2)_0deg_9deg,transparent_9deg_24deg)]"
-        />
-        <img
-          src={GURUJI_PHOTO_SRC}
-          alt="Guruji"
-          loading="lazy"
-          className="relative h-32 w-32 rounded-full object-cover object-[50%_30%] shadow-[0_0_0_2px_#f6d488,0_0_0_6px_rgba(71,12,30,0.75),0_0_0_7px_#f6d488]"
-        />
-        <p className="relative mt-6 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#f6d488]">
+      <div className={`relative flex h-[440px] flex-col items-center justify-center overflow-hidden rounded-[1.9rem] px-3 pb-10 text-center ${isRosePath ? 'bg-[linear-gradient(180deg,#fdeee0_0%,#fffaf5_55%,#fde2e2_100%)]' : 'bg-[radial-gradient(circle_at_50%_34%,#a81c45_0%,#5e0e26_48%,#26060f_100%)]'}`}>
+        {isRosePath ? (
+          <RoseBloom open className="relative h-32 w-32" />
+        ) : (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute -inset-1/2 opacity-40 motion-safe:animate-[spin_70s_linear_infinite] bg-[repeating-conic-gradient(from_0deg,rgba(255,226,170,0.2)_0deg_9deg,transparent_9deg_24deg)]"
+            />
+            <img
+              src={GURUJI_PHOTO_SRC}
+              alt="Guruji"
+              loading="lazy"
+              className="relative h-32 w-32 rounded-full object-cover object-[50%_30%] shadow-[0_0_0_2px_#f6d488,0_0_0_6px_rgba(71,12,30,0.75),0_0_0_7px_#f6d488]"
+            />
+          </>
+        )}
+        <p className={`relative mt-6 text-[10px] font-semibold uppercase tracking-[0.24em] ${isRosePath ? 'text-[#b23a5e]' : 'text-[#f6d488]'}`}>
           {template.greeting.symbol} {template.greeting.line}
         </p>
-        <p className="relative mt-1 whitespace-nowrap font-script text-[25px] leading-tight text-white">{template.host.familyName}</p>
-        <p className="relative mt-1 font-serif text-sm italic text-ivory">invite you to Guruji&rsquo;s Satsang</p>
-        <p className="relative mt-3 whitespace-nowrap border-y border-[#f6d488]/50 px-2 py-1 text-[11px] font-medium tracking-wide text-[#f6d488]">
+        <p className={`relative mt-1 whitespace-nowrap leading-tight ${isRosePath ? 'font-serif text-[22px] font-semibold text-[#4a2b33]' : 'font-script text-[25px] text-white'}`}>{template.host.familyName}</p>
+        <p className={`relative mt-1 font-serif text-sm italic ${isRosePath ? 'text-[#7a5c60]' : 'text-ivory'}`}>invite you to Guruji&rsquo;s Satsang</p>
+        <p className={`relative mt-3 whitespace-nowrap border-y px-2 py-1 text-[11px] font-medium tracking-wide ${isRosePath ? 'border-[#9a7428]/40 text-[#9a7428]' : 'border-[#f6d488]/50 text-[#f6d488]'}`}>
           {template.event.date}
         </p>
         <span className="absolute bottom-4 inline-flex items-center gap-1.5 rounded-full bg-ivory/95 px-3.5 py-1.5 text-xs font-semibold text-rose shadow-card transition-transform group-hover:scale-105">
@@ -54,12 +73,13 @@ function InvitePhone({ template, to }) {
   )
 }
 
-// The one Guruji Satsang template that can be bought today. Picks up whichever
-// template has `fullExperience`, so nothing here changes until it's replaced
-// by a gallery once there are more to choose from.
+// The Guruji Satsang templates that can be bought today, one at a time. Lists
+// every template with `fullExperience`, so a new one appears here on its own.
 export default function SatsangSpotlight() {
   const priceOverrides = useTemplatePriceOverrides()
-  const template = SATSANG_TEMPLATES.find((t) => t.fullExperience)
+  const templates = SATSANG_TEMPLATES.filter((t) => t.fullExperience)
+  const [slug, setSlug] = useState(templates[0]?.slug)
+  const template = templates.find((t) => t.slug === slug)
   if (!template) return null
 
   const previewPath = `/satsang/${template.slug}`
@@ -85,11 +105,27 @@ export default function SatsangSpotlight() {
             An invitation your sangat will feel
           </h2>
           <p className="mt-3 text-base leading-relaxed text-ivory/85">
-            {template.name}: one link that brings your satsang to life on every phone.
+            {template.tagline}: one link that brings your satsang to life on every phone.
           </p>
 
+          {templates.length > 1 && (
+            <div className="mt-5 flex flex-wrap justify-center gap-2 md:justify-start" role="group" aria-label="Choose an invitation">
+              {templates.map((t) => (
+                <button
+                  key={t.slug}
+                  type="button"
+                  aria-pressed={t.slug === template.slug}
+                  onClick={() => setSlug(t.slug)}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${t.slug === template.slug ? 'border-gold-soft bg-gold-soft text-ink' : 'border-ivory/40 text-ivory hover:bg-ivory/10'}`}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           <ul className="mt-5 grid gap-2.5 text-left text-sm text-ivory/90">
-            {FEATURES.map(({ icon: Icon, label }) => (
+            {(FEATURES[template.slug] ?? []).map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-start gap-2.5">
                 <Icon className="mt-0.5 h-4 w-4 shrink-0 text-gold-soft" />
                 {label}

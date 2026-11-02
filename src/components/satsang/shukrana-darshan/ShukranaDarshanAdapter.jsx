@@ -36,6 +36,7 @@ export default function ShukranaDarshanAdapter({ template, invitationSlug }) {
         mapUrl: event.mapHref,
         startISO: event.startISO,
         programme,
+        langarServed: mahaprasad.served !== false,
         langarTime: mahaprasad.time,
         langarNote: mahaprasad.note,
         photos: template.photos ?? [],

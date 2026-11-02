@@ -106,6 +106,8 @@ export function rowToInvite(row) {
     // An invite-only satsang's "please do not forward" note — see
     // 0018_satsang_seva_and_jaap.sql.
     privateNote: row.private_note,
+    // A Satsang invite's Langar Prasad details — see 0019_invites_langar.sql.
+    langar: row.langar,
     // Admin-only, Mahogany Seal template only — see
     // 0014_admin_mahogany_caricature_video.sql /
     // 0015_admin_mahogany_hashtag.sql / api/_lib/adminCreateInvite.js.

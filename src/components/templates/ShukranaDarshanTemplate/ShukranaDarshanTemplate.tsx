@@ -10,15 +10,10 @@ import RoseThought from './components/RoseThought'
 import SkRsvpForm from './components/SkRsvpForm'
 import ShukranaWall from './components/ShukranaWall'
 import { CalendarIcon, LockIcon, MapPinIcon, ThaliIcon } from './components/Icons'
+import { calendarLink, pad, parseDate, useCountdown } from '../../../utils/satsangInvite'
 
 const MUSIC_VOLUME = 0.6
 const PETALS = Array.from({ length: 9 }, (_, i) => i)
-const pad = (n: number) => String(n).padStart(2, '0')
-
-function parseDate(iso: string) {
-  const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? null : d
-}
 
 // See RangMahalTemplate.tsx's useStageHeight: inside the desktop preview's
 // scrolling card the stage measures the card; on a phone CSS's 100svh applies
@@ -41,42 +36,6 @@ function useStageHeight(rootRef: React.RefObject<HTMLDivElement | null>) {
     return () => ro.disconnect()
   }, [rootRef])
   return height
-}
-
-/** Google Calendar link; an unset time becomes an all-day entry. */
-function calendarLink(data: ShukranaData, start: Date) {
-  const day = (d: Date) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`
-  const stamp = (d: Date) => `${day(d)}T${pad(d.getHours())}${pad(d.getMinutes())}00`
-  const dates = data.timeLine
-    ? `${stamp(start)}/${stamp(new Date(start.getTime() + 3 * 3_600_000))}`
-    : `${day(start)}/${day(new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1))}`
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: `Guruji Satsang — ${data.familyName}`,
-    dates,
-    ctz: 'Asia/Kolkata',
-    location: data.venue,
-  })
-  return `https://calendar.google.com/calendar/render?${params.toString()}`
-}
-
-function useCountdown(target: Date | null) {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    if (!target) return
-    const id = setInterval(() => setNow(Date.now()), 60_000)
-    return () => clearInterval(id)
-  }, [target])
-  if (!target) return null
-  const diff = Math.max(0, target.getTime() - now)
-  return {
-    done: diff === 0,
-    units: [
-      { label: 'Days', value: Math.floor(diff / 86_400_000) },
-      { label: 'Hours', value: Math.floor(diff / 3_600_000) % 24 },
-      { label: 'Minutes', value: Math.floor(diff / 60_000) % 60 },
-    ],
-  }
 }
 
 /**
@@ -252,13 +211,15 @@ export default function ShukranaDarshanTemplate({ data }: { data: ShukranaData }
 
           <MalaJaap slug={data.invitationSlug} demoCount={data.demo?.jaapCount} reduceMotion={reduceMotion} />
 
-          <section className="skd-section skd-section--saffron" data-skd-reveal aria-label="Langar prasad">
-            <ThaliIcon />
-            <p className="skd-kicker">Guruji&rsquo;s langar</p>
-            <h2 className="skd-title">Langar Prasad</h2>
-            {data.langarTime && <p className="skd-langar-time">Served at {data.langarTime}</p>}
-            <p className="skd-lead">{data.langarNote}</p>
-          </section>
+          {data.langarServed && (
+            <section className="skd-section skd-section--saffron" data-skd-reveal aria-label="Langar prasad">
+              <ThaliIcon />
+              <p className="skd-kicker">Guruji&rsquo;s langar</p>
+              <h2 className="skd-title">Langar Prasad</h2>
+              {data.langarTime && <p className="skd-langar-time">Served at {data.langarTime}</p>}
+              <p className="skd-lead">{data.langarNote}</p>
+            </section>
+          )}
 
           <RoseThought
             familyName={data.familyName}

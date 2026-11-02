@@ -1,0 +1,1222 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Jost:wght@400;500;600&display=swap');
+
+.gm-root {
+  --gm-paper: #fffaf5;
+  --gm-petal: #fdeaea;
+  --gm-rose: #b23a5e;
+  --gm-gilt: #9a7428;
+  --gm-deep: #b23a5e;
+  --gm-sun: #fbdc9b;
+  --gm-ink: #4a2b33;
+  --gm-ink-soft: #7a5c60;
+  --gm-line: rgba(154, 116, 40, 0.3);
+  --gm-gutter: 66px;
+  --gm-font-display: 'Fraunces', Georgia, serif;
+  --gm-font-body: 'Jost', system-ui, sans-serif;
+
+  position: relative;
+  width: 100%;
+  background: var(--gm-paper);
+  color: var(--gm-ink);
+  font-family: var(--gm-font-body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.gm-root *,
+.gm-root *::before,
+.gm-root *::after {
+  box-sizing: border-box;
+}
+
+/* --- Shared type and controls ------------------------------------------ */
+
+.gm-kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gm-gilt);
+}
+
+.gm-title {
+  margin: 4px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 31px;
+  font-weight: 400;
+  line-height: 1.16;
+  color: var(--gm-ink);
+}
+
+.gm-title--light { color: #fff; }
+
+.gm-kicker--light { color: #f8dca0; }
+
+.gm-centred { text-align: center; }
+
+.gm-title--detail {
+  font-size: 27px;
+  font-style: italic;
+  color: var(--gm-rose);
+}
+
+.gm-lead {
+  margin: 10px 0 0;
+  font-size: 18px;
+  color: var(--gm-ink-soft);
+}
+
+.gm-btn {
+  position: relative;
+  display: inline-block;
+  margin-top: 18px;
+  padding: 13px 26px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--gm-deep);
+  color: var(--gm-paper);
+  font-family: var(--gm-font-body);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gm-btn--line {
+  margin-top: 14px;
+  padding: 10px 20px;
+  border: 1px solid var(--gm-rose);
+  background: none;
+  color: var(--gm-rose);
+  font-size: 16px;
+}
+
+.gm-link {
+  display: inline-block;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--gm-rose);
+  color: var(--gm-rose);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.gm-btn:focus-visible,
+.gm-link:focus-visible,
+.gm-gate:focus-visible,
+.gm-sound:focus-visible {
+  outline: 2px solid var(--gm-rose);
+  outline-offset: 3px;
+}
+
+/* --- Overlay ----------------------------------------------------------- */
+
+.gm-pinned {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: 0;
+}
+
+.gm-pinned--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
+.gm-sound {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--gm-line);
+  border-radius: 50%;
+  background: rgba(253, 250, 242, 0.92);
+  color: var(--gm-deep);
+  cursor: pointer;
+}
+
+/* --- The rose ---------------------------------------------------------- */
+
+.gm-bloom {
+  display: block;
+  overflow: visible;
+}
+
+.gm-petal {
+  transform: scale(0.34);
+  transition: transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+
+.gm-bloom--open .gm-petal,
+[data-gm-in] .gm-bloom .gm-petal {
+  transform: none;
+}
+
+/* --- Opening: the garden gate ------------------------------------------ */
+
+.gm-open {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100svh;
+  min-height: 620px;
+  padding: 24px 24px 104px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdeee0 0%, var(--gm-paper) 58%, #fde2e2 100%);
+  text-align: center;
+}
+
+.gm-sun {
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  width: 460px;
+  height: 460px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(251, 220, 155, 0.95), rgba(251, 220, 155, 0));
+}
+
+.gm-open-copy {
+  position: relative;
+}
+
+.gm-sacred {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--gm-rose);
+}
+
+.gm-family {
+  margin: 8px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 37px;
+  font-weight: 400;
+  line-height: 1.12;
+  color: var(--gm-ink);
+}
+
+.gm-open-line {
+  max-width: 290px;
+  margin: 8px auto 0;
+  font-family: var(--gm-font-display);
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--gm-ink-soft);
+}
+
+.gm-open-date {
+  margin: 8px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gm-deep);
+}
+
+.gm-gate {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 204px;
+  height: 252px;
+  margin-top: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  perspective: 700px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gm-gate:disabled { cursor: default; }
+
+.gm-gate-frame {
+  position: absolute;
+  top: -14px;
+  left: -14px;
+  width: 232px;
+  height: 280px;
+  overflow: visible;
+}
+
+.gm-gate-glow {
+  filter: drop-shadow(0 12px 26px rgba(178, 58, 94, 0.22));
+}
+
+.gm-gate-photo {
+  opacity: 0;
+  transition: opacity 1.2s ease 0.7s;
+}
+
+.gm-gate--open .gm-gate-photo { opacity: 1; }
+
+.gm-gate-line {
+  fill: none;
+  stroke: #c9a75a;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.gm-door {
+  position: absolute;
+  top: 0;
+  width: 102px;
+  height: 252px;
+  overflow: visible;
+  transition: transform 1.4s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+
+.gm-door--left {
+  left: 0;
+  transform-origin: left center;
+}
+
+.gm-door--right {
+  right: 0;
+  transform-origin: right center;
+}
+
+.gm-gate--open .gm-door--left { transform: rotateY(-108deg); }
+.gm-gate--open .gm-door--right { transform: rotateY(108deg); }
+
+.gm-jaali {
+  stroke: none;
+}
+
+.gm-door pattern path,
+.gm-door pattern circle {
+  fill: none;
+  stroke: #c9a75a;
+  stroke-width: 1;
+}
+
+.gm-door-edge {
+  fill: none;
+  stroke: #b8923f;
+  stroke-width: 1.5;
+}
+
+.gm-door-ring {
+  fill: #fffaf5;
+  stroke: #b8923f;
+  stroke-width: 1.5;
+}
+
+.gm-gate-rose {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+}
+
+.gm-gate-rose--top { top: -30px; left: 79px; }
+.gm-gate-rose--left { top: 58px; left: -25px; }
+.gm-gate-rose--right { top: 58px; right: -25px; }
+
+.gm-open-hint {
+  position: relative;
+  margin: 26px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 19px;
+  font-style: italic;
+  color: var(--gm-deep);
+}
+
+.gm-bed {
+  position: absolute;
+  right: -14px;
+  bottom: 4px;
+  left: -14px;
+  display: flex;
+  justify-content: center;
+}
+
+.gm-bed .gm-bloom {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  margin: 0 -9px;
+}
+
+.gm-bed .gm-bloom:nth-child(even) { transform: translateY(-16px) rotate(24deg); }
+
+.gm-walk-on {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--gm-rose);
+  font-family: var(--gm-font-display);
+  font-size: 18px;
+  font-style: italic;
+  cursor: pointer;
+  animation: gm-rise-in 0.9s ease both;
+}
+
+.gm-walk-on svg { animation: gm-nudge 1.7s ease-in-out infinite; }
+
+@keyframes gm-rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes gm-nudge {
+  50% { transform: translateY(6px); }
+}
+
+/* --- The walk: bands of the invitation beside the vine ------------------ */
+
+.gm-walk {
+  position: relative;
+  isolation: isolate;
+  padding: 0 16px;
+  overflow: hidden;
+  background: var(--gm-paper);
+}
+
+.gm-vine-svg {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: var(--gm-gutter);
+  height: 100%;
+  pointer-events: none;
+}
+
+.gm-vine-svg path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.gm-vine-pencil {
+  stroke: rgba(154, 116, 40, 0.3);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 7;
+}
+
+.gm-vine-stem {
+  stroke: var(--gm-gilt);
+  stroke-width: 3;
+}
+
+.gm-vine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: var(--gm-gutter);
+  clip-path: inset(0 -20px calc(100% - var(--gm-grown, 0%)) -20px);
+  pointer-events: none;
+}
+
+.gm-leaf {
+  position: absolute;
+  width: 15px;
+  height: 8px;
+  border-radius: 90% 0;
+  background: var(--gm-gilt);
+  transform: rotate(-24deg);
+  transform-origin: 0 50%;
+}
+
+.gm-leaf--flip {
+  background: #c9a75a;
+  transform: rotate(204deg);
+}
+
+.gm-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.gm-tip::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: -7px;
+  width: 14px;
+  height: 18px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 40% 40%;
+  background: linear-gradient(180deg, #e27c97 0 62%, var(--gm-gilt) 63%);
+  box-shadow: 0 0 0 5px rgba(226, 124, 151, 0.2);
+}
+
+.gm-stop {
+  position: relative;
+  padding: 44px 0 50px;
+}
+
+/* A full-width band behind each stop, under the vine. Each stop then lays out
+   as its own object, so the invitation doesn't read as one long column. */
+.gm-stop::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: -16px;
+  bottom: 0;
+  left: -16px;
+  border-top: 1px solid var(--gm-line);
+  background: var(--gm-band, var(--gm-paper));
+}
+
+.gm-stop::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -6px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  border: 1px solid #c9a75a;
+  background: var(--gm-paper);
+  transform: rotate(45deg);
+}
+
+section.gm-stop:first-of-type::before { border-top: 0; }
+section.gm-stop:first-of-type::after { display: none; }
+
+.gm-stop--petal { --gm-band: var(--gm-petal); }
+.gm-stop--cream { --gm-band: #fdf2dc; }
+.gm-stop--rose { --gm-band: var(--gm-rose); }
+
+.gm-stop > * {
+  position: relative;
+  z-index: 2;
+}
+
+.gm-stop > .gm-bloom {
+  position: absolute;
+  top: 12px;
+  left: calc(var(--gm-gutter) / 2 - 37px);
+  width: 42px;
+  height: 42px;
+}
+
+.gm-page {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.8s ease 0.25s, transform 0.8s ease 0.25s;
+}
+
+[data-gm-in] > .gm-page {
+  opacity: 1;
+  transform: none;
+}
+
+/* You Are Invited: an arched printed card. */
+
+.gm-invite {
+  padding: 62px 26px 34px;
+  border: 1px solid #c9a75a;
+  border-radius: 170px 170px 12px 12px;
+  outline: 1px solid #c9a75a;
+  outline-offset: -8px;
+  background: #fff;
+  box-shadow: 0 22px 40px -28px rgba(178, 58, 94, 0.55);
+  text-align: center;
+}
+
+.gm-invite-title {
+  margin: 6px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 38px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.12;
+  color: var(--gm-rose);
+}
+
+.gm-invite-rule {
+  display: block;
+  width: 56px;
+  height: 1px;
+  margin: 16px auto;
+  background: #c9a75a;
+}
+
+.gm-invite-line {
+  margin: 0;
+  font-size: 18px;
+  color: var(--gm-ink-soft);
+}
+
+.gm-invite-family {
+  margin: 14px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 21px;
+  color: var(--gm-ink);
+}
+
+/* The day: a calendar leaf beside the time, then countdown dials. */
+
+.gm-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding-left: 30px;
+}
+
+.gm-leaf-page {
+  position: relative;
+  flex: none;
+  width: 132px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 28px -16px rgba(178, 58, 94, 0.7);
+  text-align: center;
+  transform: rotate(-3deg);
+}
+
+.gm-leaf-page span { display: block; }
+
+.gm-leaf-month {
+  padding: 7px 0 6px;
+  background: var(--gm-rose);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.gm-leaf-day {
+  margin-top: 6px;
+  font-family: var(--gm-font-display);
+  font-size: 68px;
+  line-height: 1;
+  color: var(--gm-ink);
+}
+
+.gm-leaf-weekday {
+  margin-top: 2px;
+  font-size: 15px;
+  color: var(--gm-ink-soft);
+}
+
+.gm-leaf-year {
+  margin-bottom: 9px;
+  font-size: 13px;
+  color: var(--gm-gilt);
+}
+
+.gm-day-side { min-width: 0; }
+
+.gm-day-time {
+  margin: 4px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--gm-rose);
+}
+
+.gm-day-note {
+  margin: 0;
+  font-size: 15px;
+  color: var(--gm-ink-soft);
+}
+
+.gm-count {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+  padding-left: 30px;
+}
+
+.gm-count-dial {
+  display: grid;
+  place-content: center;
+  width: 78px;
+  height: 78px;
+  border: 1px solid #c9a75a;
+  border-radius: 50%;
+  background: var(--gm-paper);
+  text-align: center;
+}
+
+.gm-count-value {
+  font-family: var(--gm-font-display);
+  font-size: 27px;
+  line-height: 1;
+  color: var(--gm-rose);
+}
+
+.gm-count-label {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--gm-ink-soft);
+}
+
+/* The place: a postcard. */
+
+.gm-postcard {
+  overflow: hidden;
+  border: 7px solid #fff;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 22px 34px -22px rgba(154, 116, 40, 0.8);
+  transform: rotate(1deg);
+}
+
+.gm-postcard-scene {
+  display: block;
+  width: 100%;
+  height: 132px;
+}
+
+.gm-postcard-route {
+  fill: none;
+  stroke: var(--gm-rose);
+  stroke-width: 2.5;
+  stroke-dasharray: 3 8;
+  stroke-linecap: round;
+}
+
+.gm-postcard-pin { fill: var(--gm-rose); }
+
+.gm-postcard-stamp {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 50px;
+  height: 50px;
+  padding: 5px;
+  border: 1px dashed #c9a75a;
+  background: #fff;
+}
+
+.gm-postcard-body {
+  padding: 16px 12px 16px;
+  text-align: center;
+}
+
+.gm-postcard-venue {
+  margin: 4px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.18;
+  color: var(--gm-ink);
+}
+
+/* The programme: arched cards that swipe sideways on a rose band. */
+
+.gm-moments {
+  display: flex;
+  gap: 12px;
+  margin: 22px -16px 0;
+  padding: 0 16px 6px;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.gm-moments::-webkit-scrollbar { display: none; }
+
+.gm-moments li {
+  display: flex;
+  flex: 0 0 136px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 176px;
+  padding: 48px 10px 18px;
+  border-radius: 68px 68px 10px 10px;
+  background: var(--gm-paper);
+  text-align: center;
+  scroll-snap-align: center;
+}
+
+.gm-moment-time {
+  font-family: var(--gm-font-display);
+  font-size: 23px;
+  line-height: 1.1;
+  color: var(--gm-rose);
+}
+
+.gm-moment-title {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--gm-ink);
+}
+
+.gm-swipe {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Langar: the time on a round thali. */
+
+.gm-langar { text-align: center; }
+
+.gm-thali {
+  display: grid;
+  place-items: center;
+  width: 216px;
+  height: 216px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#c9a75a 0deg 6deg, #e5cd92 6deg 12deg);
+  box-shadow: 0 20px 32px -20px rgba(154, 116, 40, 0.9);
+}
+
+.gm-thali-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 188px;
+  height: 188px;
+  border-radius: 50%;
+  outline: 1px dashed #c9a75a;
+  outline-offset: -10px;
+  background: #fffaf0;
+}
+
+.gm-thali-plate .gm-kicker {
+  max-width: 130px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.gm-thali-time {
+  margin-top: 6px;
+  font-family: var(--gm-font-display);
+  font-size: 31px;
+  line-height: 1.1;
+  color: var(--gm-rose);
+}
+
+.gm-thali-note {
+  margin-top: 4px;
+  font-family: var(--gm-font-display);
+  font-size: 15px;
+  font-style: italic;
+  color: var(--gm-ink-soft);
+}
+
+.gm-langar .gm-lead {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 290px;
+}
+
+/* Memories: loose prints. */
+
+.gm-gallery {
+  display: flex;
+  gap: 14px;
+  margin: 18px -16px 0;
+  padding: 8px 20px 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.gm-gallery::-webkit-scrollbar { display: none; }
+
+.gm-gallery img {
+  flex: 0 0 72%;
+  height: 220px;
+  padding: 7px 7px 22px;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 14px 24px -16px rgba(74, 43, 51, 0.7);
+  scroll-snap-align: center;
+}
+
+.gm-gallery img:nth-child(odd) { transform: rotate(-1.5deg); }
+.gm-gallery img:nth-child(even) { transform: rotate(1.5deg); }
+
+/* --- The paper note ---------------------------------------------------- */
+
+.gm-note {
+  position: relative;
+  display: grid;
+  max-width: 280px;
+  margin: 34px auto 0;
+  perspective: 900px;
+}
+
+/* The string the tag hangs from. */
+.gm-note::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 1px;
+  height: 38px;
+  background: #b8923f;
+}
+
+.gm-note-face {
+  position: relative;
+  grid-area: 1 / 1;
+  margin: 0;
+  padding: 36px 18px 22px;
+  border: 1px solid #c9a75a;
+  border-radius: 40px 40px 8px 8px;
+  background: #fdf2dc;
+  text-align: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.9s cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.gm-note-face::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  border: 1px solid #b8923f;
+  border-radius: 50%;
+  background: var(--gm-paper);
+}
+
+.gm-note-front p {
+  margin: 0;
+  font-family: var(--gm-font-display);
+  font-size: 19px;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.gm-note-back {
+  transform: rotateY(-180deg);
+}
+
+.gm-note--turned .gm-note-front { transform: rotateY(180deg); }
+.gm-note--turned .gm-note-back { transform: none; }
+
+.gm-note-back span {
+  display: block;
+  font-family: var(--gm-font-display);
+  font-size: 21px;
+  line-height: 1.3;
+  color: var(--gm-rose);
+}
+
+.gm-note-back small {
+  display: block;
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--gm-ink-soft);
+}
+
+/* --- RSVP and wall: Shukrana Darshan's, in the garden's clothes --------- */
+
+.gm-root .gm-borrowed {
+  --skd-crimson: var(--gm-deep);
+  --skd-cream: #fff;
+  --skd-blush: var(--gm-petal);
+  --skd-ink: var(--gm-ink);
+  --skd-ink-soft: var(--gm-ink-soft);
+  --skd-saffron: #e27c97;
+  --skd-gold: var(--gm-gilt);
+  --skd-line: var(--gm-line);
+  --skd-font-serif: var(--gm-font-display);
+  --skd-font-body: var(--gm-font-body);
+
+  width: auto;
+  background: none;
+  font-family: var(--gm-font-body);
+}
+
+.gm-borrowed .skd-section {
+  padding: 0;
+  background: none;
+  text-align: left;
+}
+
+/* Join the Sangat: a raised card with a rose header. */
+.gm-stop.gm-borrowed .skd-section {
+  padding: 22px 18px 24px;
+  border-radius: 16px;
+  background: linear-gradient(var(--gm-rose) 0 100px, #fff 100px);
+  box-shadow: 0 24px 40px -26px rgba(178, 58, 94, 0.8);
+  text-align: center;
+}
+
+.gm-stop.gm-borrowed .skd-kicker { color: #f8dca0; }
+.gm-stop.gm-borrowed .skd-section > .skd-title { color: #fff; }
+.gm-stop.gm-borrowed .skd-card { margin-top: 30px; text-align: left; }
+
+.gm-borrowed .skd-kicker {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--gm-gilt);
+}
+
+.gm-borrowed .skd-title {
+  font-family: var(--gm-font-display);
+  font-size: 31px;
+  color: var(--gm-ink);
+}
+
+.gm-borrowed .skd-note { text-align: left; }
+
+.gm-borrowed .skd-card {
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.gm-borrowed .skd-input,
+.gm-borrowed .skd-choice,
+.gm-borrowed .skd-seva-chip,
+.gm-borrowed .skd-stepper {
+  border-color: var(--gm-line);
+}
+
+.gm-borrowed .skd-input,
+.gm-borrowed .skd-choice,
+.gm-borrowed .skd-btn {
+  border-radius: 8px;
+}
+
+.gm-borrowed .skd-rsvp-done { text-align: left; }
+
+.gm-wall .skd-section {
+  padding: 48px 24px;
+  background: var(--gm-paper);
+}
+
+.gm-wall .skd-wish {
+  border: 1px solid var(--gm-line);
+  border-radius: 4px;
+  background: var(--gm-petal);
+}
+
+.gm-wall .skd-wish blockquote {
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.gm-wall .skd-wall-toggle { border-radius: 8px; }
+
+/* --- Darshan ----------------------------------------------------------- */
+
+.gm-darbar {
+  position: relative;
+  padding: 48px 24px 56px;
+  border-top: 1px solid var(--gm-line);
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdf1da 0%, var(--gm-paper) 100%);
+  text-align: center;
+}
+
+.gm-darbar > * { position: relative; }
+
+.gm-darbar .gm-darbar-sun {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  width: 520px;
+  height: 520px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(251, 220, 155, 0.85), rgba(251, 220, 155, 0));
+}
+
+.gm-darshan-photo {
+  display: block;
+  width: 214px;
+  height: 256px;
+  margin: 24px auto 0;
+  border-radius: 107px 107px 6px 6px;
+  object-fit: cover;
+  object-position: 50% 26%;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #c9a75a, 0 16px 36px -14px rgba(178, 58, 94, 0.5);
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+[data-gm-in] .gm-darshan-photo { opacity: 1; }
+
+.gm-bouquet {
+  width: 100%;
+  margin-top: 24px;
+  transition: height 0.9s ease;
+}
+
+.gm-wrap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  overflow: visible;
+  transform: translateX(-50%);
+  transition: width 0.9s ease, height 0.9s ease;
+}
+
+.gm-paper {
+  fill: #fdeee4;
+  stroke: #c9a75a;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.gm-paper--front { fill: #f9d9cd; }
+
+.gm-stems {
+  fill: none;
+  stroke: #b8923f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.gm-bow {
+  fill: var(--gm-rose);
+  stroke: var(--gm-rose);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.gm-bunch {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transition: top 0.9s ease;
+}
+
+.gm-bunch-base {
+  position: absolute;
+  border-radius: 50%;
+  background: #d9738f;
+  transform: translate(-50%, -50%);
+}
+
+.gm-rose {
+  position: absolute;
+  top: -17px;
+  left: -17px;
+  width: 34px;
+  height: 34px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E%3Cg fill='%23f4b5c1' stroke='%23c25877' stroke-width='.4'%3E%3Cellipse cy='-5.5' rx='5' ry='5.6'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(72)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(144)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(216)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(288)'/%3E%3C/g%3E%3Cg fill='%23e27c97' stroke='%23c25877' stroke-width='.4'%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(36)'/%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(156)'/%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(276)'/%3E%3C/g%3E%3Ccircle r='1.7' fill='%23a12f52'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.gm-rose--deep {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E%3Cg fill='%23d9607f' stroke='%23a12f52' stroke-width='.4'%3E%3Cellipse cy='-5.5' rx='5' ry='5.6'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(72)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(144)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(216)'/%3E%3Cellipse cy='-5.5' rx='5' ry='5.6' transform='rotate(288)'/%3E%3C/g%3E%3Cg fill='%23b23a5e' stroke='%23a12f52' stroke-width='.4'%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(36)'/%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(156)'/%3E%3Cellipse cy='-2.8' rx='3.2' ry='3.5' transform='rotate(276)'/%3E%3C/g%3E%3Ccircle r='1.7' fill='%236d0a28'/%3E%3C/svg%3E");
+}
+
+.gm-bouquet-count {
+  margin: 20px 0 0;
+  font-size: 16px;
+  color: var(--gm-ink-soft);
+}
+
+.gm-bouquet-done {
+  margin: 14px 0 0;
+  font-family: var(--gm-font-display);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--gm-deep);
+}
+
+/* --- Closing ----------------------------------------------------------- */
+
+.gm-closing {
+  padding: 50px 24px 96px;
+  background: var(--gm-deep);
+  color: var(--gm-paper);
+  text-align: center;
+}
+
+.gm-closing .gm-lead {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 300px;
+  color: inherit;
+}
+
+.gm-closing .gm-btn {
+  background: var(--gm-paper);
+  color: var(--gm-deep);
+}
+
+.gm-closing-word {
+  margin: 0;
+  font-family: var(--gm-font-display);
+  font-size: 42px;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.gm-closing-family {
+  margin: 24px 0 0;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+
+.gm-private {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  max-width: 320px;
+  margin: 14px auto 0;
+  font-size: 16px;
+}
+
+.gm-private svg { flex: none; margin-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-petal,
+  .gm-page,
+  .gm-door,
+  .gm-note-face,
+  .gm-gate-photo,
+  .gm-darshan-photo,
+  .gm-bouquet,
+  .gm-wrap,
+  .gm-bunch {
+    transition: none;
+  }
+
+  .gm-walk-on,
+  .gm-walk-on svg {
+    animation: none;
+  }
+
+  .gm-page,
+  .gm-darshan-photo {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -29,6 +29,8 @@ export interface ShukranaData {
   /** Local timestamp the countdown and calendar link use. */
   startISO: string
   programme: ProgrammeItem[]
+  /** False when the host isn't serving langar, which drops the section. */
+  langarServed: boolean
   langarTime: string
   langarNote: string
   photos: string[]

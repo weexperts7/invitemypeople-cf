@@ -3,6 +3,7 @@
 // validation and slug scheme, but persists to Supabase (see
 // api/_lib/supabase.js) instead of a flat JSON file, since Vercel's runtime
 // has no writable, persistent filesystem to keep one on.
+import { sanitiseLangar } from '../../src/utils/satsangLangar.js'
 import { slugify } from '../../src/utils/slugify.js'
 import { getSupabase } from '../_lib/supabase.js'
 import { clean, randomSlugSuffix, rowToInvite, generateHostToken, toEventDateColumn, isPastDate } from '../_lib/invites.js'
@@ -74,6 +75,8 @@ export default async function handler(req, res) {
       ...(body.venuePhoto && { venue_photo: clean(body.venuePhoto, 500) }),
       // Same, for an invite-only satsang (0018_satsang_seva_and_jaap.sql).
       ...(body.privateNote && { private_note: clean(body.privateNote, 200) }),
+      // And for a Satsang invite's langar (0019_invites_langar.sql).
+      ...(body.langar && { langar: sanitiseLangar(body.langar) }),
       host_name: hostName,
       host_email: hostEmail,
       host_phone: hostPhone,

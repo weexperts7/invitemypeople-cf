@@ -22,6 +22,7 @@ import {
   Sparkles,
   User,
   Users,
+  UtensilsCrossed,
   Wand2,
 } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
@@ -42,6 +43,7 @@ import {
   getOccasion,
 } from '../data/builderTemplates'
 import { DEFAULT_PRIVATE_NOTE, MAX_PRIVATE_NOTE, resolvePrivateNote } from '../data/satsangTemplatesData'
+import { DEFAULT_LANGAR_NOTE, MAX_LANGAR_NOTE, resolveLangar } from '../utils/satsangLangar'
 import { PRICING } from '../data/templatesData'
 import { getDefaultPrice, getListPrice, isSaleActive } from '../data/sale'
 import { createInvite } from '../utils/inviteApi'
@@ -79,6 +81,10 @@ const EMPTY_FORM = {
   // Invite-only satsang. The note starts filled in, ready to reword.
   privateInvite: false,
   privateNote: DEFAULT_PRIVATE_NOTE,
+  // Satsang langar, on by default with its note ready to reword.
+  langarServed: true,
+  langarTime: '',
+  langarNote: DEFAULT_LANGAR_NOTE,
 }
 
 // Ganesh Chaturthi's "Festival Schedule" reuses the generic "Additional
@@ -241,9 +247,11 @@ export default function CreateInvitePage() {
 
   const occasion = getOccasion(occasionId)
   const template = getBuilderTemplateById(templateId)
-  // Whether this invite takes photos, a song and a schedule.
+  // Whether this invite takes a song and a schedule.
   const hasFullBuilder =
     occasionId === 'wedding' || occasionId === 'ganesh-chaturthi' || Boolean(template.fullExperience)
+  // A Satsang invite is built around Guruji's photo, so hosts don't add their own.
+  const takesPhotos = hasFullBuilder && occasionId !== 'guruji-satsang'
 
   // Super Admin Template Price Management overrides (see
   // api/_lib/templatePrices.js) — a sparse { [templateId]: price } map of
@@ -369,9 +377,10 @@ export default function CreateInvitePage() {
           bridePhoto: template.hasPortraits ? form.bridePhoto : '',
           venuePhoto: template.hasVenuePhotos ? form.venuePhoto : '',
           privateNote: occasionId === 'guruji-satsang' ? resolvePrivateNote(form) : '',
+          ...(occasionId === 'guruji-satsang' && { langar: resolveLangar(form) }),
           amount: activePrice,
           paymentId,
-          photos,
+          photos: takesPhotos ? photos : [],
           events,
           bgSongTitle: song?.title || '',
           bgSongArtist: song?.artist || '',
@@ -393,7 +402,7 @@ export default function CreateInvitePage() {
         setSaving(false)
       }
     },
-    [occasionId, template, form, photos, events, song, activePrice],
+    [occasionId, template, form, photos, takesPhotos, events, song, activePrice],
   )
 
   const handleCopyLink = async (kind, url) => {
@@ -456,7 +465,7 @@ export default function CreateInvitePage() {
                   template={template}
                   values={form}
                   occasionId={occasionId}
-                  photos={photos}
+                  photos={takesPhotos ? photos : []}
                   events={events}
                   song={song}
                 />
@@ -774,7 +783,7 @@ export default function CreateInvitePage() {
                       />
                     </div>
 
-                    {hasFullBuilder && (
+                    {takesPhotos && (
                       <div>
                         <label className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
                           <Camera className="h-3.5 w-3.5 text-rose" />
@@ -837,6 +846,58 @@ export default function CreateInvitePage() {
                           titlePlaceholder="e.g. Shabad Kirtan"
                           titleAndTimeOnly
                         />
+                      </div>
+                    )}
+
+                    {occasionId === 'guruji-satsang' && hasFullBuilder && (
+                      <div className="border-t border-champagne-deep/30 pt-5">
+                        <p className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-ink-soft mb-2">
+                          <UtensilsCrossed className="h-3.5 w-3.5 text-rose" />
+                          Langar Prasad
+                        </p>
+                        <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.langarServed}
+                            onChange={(e) => setForm((prev) => ({ ...prev, langarServed: e.target.checked }))}
+                            className="mt-0.5 h-5 w-5 shrink-0 accent-rose"
+                          />
+                          <span>Langar prasad will be served at this satsang.</span>
+                        </label>
+                        {form.langarServed ? (
+                          <div className="mt-3 space-y-3">
+                            <div>
+                              <label htmlFor="langarTime" className="mb-2 block text-xs text-ink-soft">
+                                Serving time <span className="text-ink-soft/70">(optional)</span>
+                              </label>
+                              <input
+                                id="langarTime"
+                                type="time"
+                                value={form.langarTime}
+                                onChange={handleField('langarTime')}
+                                className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-gold-soft"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="langarNote" className="mb-2 block text-xs text-ink-soft">
+                                Your note to guests. You can reword it.
+                              </label>
+                              <textarea
+                                id="langarNote"
+                                rows={2}
+                                maxLength={MAX_LANGAR_NOTE}
+                                value={form.langarNote}
+                                onChange={handleField('langarNote')}
+                                placeholder={DEFAULT_LANGAR_NOTE}
+                                className="w-full rounded-xl border border-champagne-deep/50 bg-ivory/70 px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-gold-soft resize-none"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-ink-soft">
+                            We&rsquo;ll leave the Langar section off your invite, along with any langar row in your programme.
+                          </p>
+                        )}
                       </div>
                     )}
 

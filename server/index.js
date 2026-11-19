@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SITE_URL } from '../src/data/routesSeo.js'
 import { renderSeoHtml, getRedirectTarget } from '../src/utils/seoHtml.js'
+import { buildSitemap } from '../api/sitemap.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import {
@@ -900,6 +901,10 @@ function getIndexHtmlTemplate() {
   }
   return indexHtmlTemplate
 }
+
+app.get('/sitemap.xml', (_req, res) => {
+  res.set('Content-Type', 'application/xml; charset=utf-8').send(buildSitemap())
+})
 
 // When a production build exists, serve the site from this same server.
 if (fs.existsSync(DIST_DIR)) {

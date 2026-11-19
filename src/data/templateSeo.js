@@ -236,14 +236,19 @@ export function templatePage(kind, template) {
   }
 }
 
+function clip(text, max) {
+  if (text.length <= max) return text
+  const cut = text.slice(0, max - 1)
+  return `${cut.slice(0, cut.lastIndexOf(' '))}…`
+}
+
 function seoFor(kind, template) {
   const page = templatePage(kind, template)
   if (!page) {
     // Real, reachable page that is not for sale: keep a basic title and
     // description for browsers and link previews, and keep it out of the index.
-    const noun = { wedding: 'Wedding Invitation Template', satsang: 'Guruji Satsang', ganesh: 'Ganesh Chaturthi' }[kind]
-    const title = `${template.name} — ${noun}${SUFFIX}`
-    const description = template.metaDescription || template.description
+    const title = pickTitle([`${template.name} preview${SUFFIX}`, `${template.name} preview`])
+    const description = clip(template.metaDescription || template.description, 155)
     return { title, description, ogTitle: title, ogDescription: description, noindex: true }
   }
   return {

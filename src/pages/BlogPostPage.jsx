@@ -5,7 +5,7 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import SEO from '../components/SEO'
 import MusicVibeWidget from '../components/blog/MusicVibeWidget'
-import { getBlogPostBySlug, formatBlogDate } from '../data/blogPosts'
+import { getBlogPostBySlug, blogPostSeo, formatBlogDate } from '../data/blogPosts'
 
 // Blog-only interactive components a `{ widget }` block can reference — see
 // blogPosts.js's body-scheme comment. Keyed by name rather than importing
@@ -111,13 +111,9 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO
-        title={post.title}
-        description={post.description}
-        path={`/blog/${post.slug}`}
-        ogTitle={post.title}
-        ogDescription={post.description}
-      />
+      {/* Same title, description and BlogPosting data the server put in the
+          raw HTML, so the tab and a JS-rendering crawler agree with it. */}
+      <SEO {...blogPostSeo(post)} path={`/blog/${post.slug}`} />
       <SiteHeader />
 
       <main>

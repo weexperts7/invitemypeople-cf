@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useIsDemoPage } from '../../../../context/DemoPageContext'
 
 interface TheatreStageProps {
   phase: 'closed' | 'opening' | 'open'
@@ -119,8 +120,10 @@ export default function TheatreStage({
 }: TheatreStageProps) {
   const isClosed = phase === 'closed'
   const isOpen = phase === 'open'
-  // A grid of posters must not add a page's worth of <h1>s to the catalog.
-  const Names = poster ? motion.div : motion.h1
+  // A grid of posters must not add a page's worth of <h1>s to the catalog,
+  // and a public demo page's own H1 is the template name (DemoPageContext.js).
+  const isDemoPage = useIsDemoPage()
+  const Names = poster || isDemoPage ? motion.div : motion.h1
   const initials = [firstName, secondName].filter(Boolean).map((n) => n.trim().charAt(0).toUpperCase())
   const longest = Math.max(firstName.length, secondName.length, 5)
   const nameSize = Math.round(Math.max(38, Math.min(66, 380 / longest)))

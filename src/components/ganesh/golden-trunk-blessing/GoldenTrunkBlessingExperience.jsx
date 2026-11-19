@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import NameHeading from '../../NameHeading'
 import { CalendarDays, Clock, MapPin, Navigation, Gift, Sunrise } from 'lucide-react'
 import FallingPetals from '../../FallingPetals'
 import CulturalMotif from '../../CulturalMotif'
@@ -73,9 +74,9 @@ export default function GoldenTrunkBlessingExperience({ template, invitationSlug
             <p className="text-xs tracking-[0.35em] uppercase text-ink-soft mb-4">
               {greeting?.line ?? 'Ganpati Bappa Morya'}
             </p>
-            <h1 className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
+            <NameHeading className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
               {host?.familyName}
-            </h1>
+            </NameHeading>
             <p className="max-w-sm text-sm sm:text-base text-ink-soft leading-relaxed">
               {host?.hostLine}
             </p>

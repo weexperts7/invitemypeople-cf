@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import NameHeading from './NameHeading'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { Flower2 } from 'lucide-react'
 import { getMotifIcon } from '../data/motifIcons'
@@ -195,7 +196,7 @@ export default function WelcomeSplash({ greeting, motif, palette, motifAccent, c
         transition={{ duration: 0.9, delay: 0.25, ease: 'easeOut' }}
       />
 
-      <h1
+      <NameHeading
         aria-label={coupleNames}
         className={`font-script ${COUPLE_NAME_SIZES[coupleNameTier(coupleNames)]} text-rose leading-tight whitespace-nowrap`}
       >
@@ -216,7 +217,7 @@ export default function WelcomeSplash({ greeting, motif, palette, motifAccent, c
             {char === ' ' ? ' ' : char}
           </motion.span>
         ))}
-      </h1>
+      </NameHeading>
 
       <motion.p
         variants={fadeUp}

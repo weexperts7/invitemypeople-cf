@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import NameHeading from '../../../NameHeading'
 
 import type { GulabMargData } from '../types'
 import RoseBloom from './RoseBloom'
@@ -67,7 +68,7 @@ export default function OpeningScene({ data, height, started, open, onBegin, onW
         <p className="gm-sacred">
           {data.greetingSymbol} {data.greetingLine}
         </p>
-        <h1 className="gm-family">{data.familyName}</h1>
+        <NameHeading className="gm-family">{data.familyName}</NameHeading>
         <p className="gm-open-line">welcome you into the rose garden, for Guruji&rsquo;s Satsang</p>
         <p className="gm-open-date">{data.dateLine}</p>
       </div>

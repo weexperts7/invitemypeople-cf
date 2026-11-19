@@ -44,6 +44,8 @@ import MahoganySealCreatePage from './pages/MahoganySealCreatePage'
 import SatsangExperience from './components/SatsangExperience'
 import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
+import TemplatePageContent from './components/TemplatePageContent'
+import { DemoPageContext } from './context/DemoPageContext'
 import { getTemplateById } from './data/templatesData'
 import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
 import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
@@ -59,12 +61,18 @@ function WeddingRoute() {
   const { id } = useParams()
   const navigate = useNavigate()
   const template = getTemplateById(id)
+  // getTemplateById falls back to the first template for an unknown id, so
+  // the written content and indexing only apply when the id really matched.
+  const known = template && template.id === id
 
   return (
-    <>
-      {template && <SEO {...weddingSeo(template)} path={`/templates/wedding/${id}`} />}
+    <DemoPageContext.Provider value>
+      {template && (
+        <SEO {...weddingSeo(template)} path={`/templates/wedding/${id}`} noindex={!known || weddingSeo(template).noindex} />
+      )}
       <InvitationExperience template={template} isPreview onBack={() => navigate('/')} />
-    </>
+      {known && <TemplatePageContent kind="wedding" template={template} />}
+    </DemoPageContext.Provider>
   )
 }
 
@@ -113,10 +121,11 @@ function SatsangRoute() {
   const template = getSatsangTemplateBySlug(slug)
 
   return (
-    <>
+    <DemoPageContext.Provider value>
       {template && <SEO {...satsangSeo(template)} path={`/satsang/${slug}`} />}
       <SatsangExperience template={template} />
-    </>
+      {template && <TemplatePageContent kind="satsang" template={template} />}
+    </DemoPageContext.Provider>
   )
 }
 
@@ -127,12 +136,13 @@ function GaneshRoute() {
   const template = getGaneshTemplateBySlug(slug)
 
   return (
-    <>
+    <DemoPageContext.Provider value>
       {template && (
         <SEO {...ganeshSeo(template)} path={`/templates/ganesh-chaturthi/${slug}`} />
       )}
       <GaneshExperience template={template} />
-    </>
+      {template && <TemplatePageContent kind="ganesh" template={template} />}
+    </DemoPageContext.Provider>
   )
 }
 

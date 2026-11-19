@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import NameHeading from '../../../NameHeading'
 import { motion } from 'framer-motion'
 
 import { createBell } from './bell'
@@ -157,7 +158,7 @@ export default function JyotStage({ data, height, reduceMotion, onPrime, onOpene
         <p className="skd-hero-greeting">
           <span>{data.greetingSymbol}</span> {data.greetingLine}
         </p>
-        <h1 className="skd-hero-family">{data.familyName}</h1>
+        <NameHeading className="skd-hero-family">{data.familyName}</NameHeading>
         <p className="skd-hero-sub">invite you to Guruji&rsquo;s Satsang</p>
         <p className="skd-hero-date">{data.dateLine}</p>
         {data.privateNote && (

@@ -1,0 +1,262 @@
+// SEO and page content for each template's own page. Builds the title, meta
+// description, H1, the crawlable body, the breadcrumb and the structured data
+// from the template's data (templatesData.js and friends), the written copy in
+// templateCopy.js and the live prices, so nothing is typed twice.
+//
+// The `body` is a list of the same blocks routesSeo.js and blogPosts.js use.
+// It feeds both the server-rendered HTML (utils/seoHtml.js) and the visible
+// section under the demo (components/TemplatePageContent.jsx), so crawlers and
+// visitors read identical text.
+//
+// Plain data and string work only; safe to import from Node and from the
+// Cloudflare function. Do not import React, builderTemplates.js or anything
+// with JSX here.
+import { SITE_URL } from './siteUrl.js'
+import { TEMPLATES } from './templatesData.js'
+import { SATSANG_TEMPLATES } from './satsangTemplatesData.js'
+import { GANESH_TEMPLATES } from './ganeshTemplatesData.js'
+import { PRICING } from './pricing.js'
+import { SATSANG_PRICE, SATSANG_LIST_PRICE } from './sale.js'
+import { WEDDING_COPY, SATSANG_COPY, GANESH_COPY, SHARED_WEDDING_FEATURES } from './templateCopy.js'
+
+const WHATSAPP_NUMBER = '918847044554'
+const SUFFIX = ' | InviteMyPeople'
+const MAX_TITLE = 60
+
+const CATEGORY = {
+  wedding: { label: 'Weddings', href: '/weddings', noun: 'wedding' },
+  satsang: { label: 'Guruji Satsangs', href: '/guruji-satsangs', noun: 'Guruji Satsang' },
+  ganesh: { label: 'Ganesh Chaturthi', href: '/templates/ganesh-chaturthi', noun: 'Ganesh Chaturthi' },
+}
+
+export const rupees = (n) => `₹${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+
+function whatsappLink(message) {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+}
+
+// Same convention as data/builderTemplates.js (wedding-<id>, satsang-<slug>).
+// A check in the verification script compares these with the real list.
+function createHref(occasion, builderId) {
+  return `/create?${new URLSearchParams({ occasion, template: builderId }).toString()}`
+}
+
+function joinList(items) {
+  if (items.length <= 1) return items.join('')
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+}
+
+function pickTitle(candidates) {
+  return candidates.find((t) => t.length <= MAX_TITLE) ?? candidates[candidates.length - 1]
+}
+
+// Hidden wedding templates and the demo-only satsang designs are real pages
+// but not for sale, so they stay out of the index and carry no sales copy.
+export function isIndexable(kind, template) {
+  if (kind === 'wedding') return !template.hidden
+  if (kind === 'satsang') return Boolean(template.fullExperience)
+  return true
+}
+
+function describe(kind, template) {
+  const copy = { wedding: WEDDING_COPY, satsang: SATSANG_COPY, ganesh: GANESH_COPY }[kind][template.id ?? template.slug]
+  return copy ?? null
+}
+
+function siblings(kind, template) {
+  const cat = CATEGORY[kind]
+  const id = template.id ?? template.slug
+  const all = {
+    wedding: TEMPLATES.filter((t) => !t.hidden),
+    satsang: SATSANG_TEMPLATES.filter((t) => t.fullExperience),
+    ganesh: GANESH_TEMPLATES,
+  }[kind].filter((t) => (t.id ?? t.slug) !== id)
+  // Same tradition first, so a Sikh template links to the other Sikh and
+  // Hindu ones before the Western ones.
+  const sorted =
+    kind === 'wedding'
+      ? [...all.filter((t) => t.weddingType === template.weddingType), ...all.filter((t) => t.weddingType !== template.weddingType)]
+      : all
+  return sorted.slice(0, 5).map((t) => {
+    const tid = t.id ?? t.slug
+    const href = { wedding: `/templates/wedding/${tid}`, satsang: `/satsang/${tid}`, ganesh: `/templates/ganesh-chaturthi/${tid}` }[kind]
+    return { text: `${t.name} ${cat.noun} invitation`, href }
+  })
+}
+
+function priceFacts(kind, template) {
+  if (kind === 'satsang') return { price: SATSANG_PRICE, list: SATSANG_LIST_PRICE }
+  if (kind === 'wedding' && template.salePrice) return { price: template.salePrice, list: template.originalPrice }
+  if (kind === 'wedding') return { price: PRICING.shagunPrice, list: PRICING.price }
+  return null
+}
+
+function howItWorks(kind, template) {
+  const name = template.name
+  if (kind === 'ganesh') {
+    return [
+      `Ganesh Chaturthi invitations are launching soon. ${name} is fully designed, but ordering is not open yet. Message us on WhatsApp and we will tell you the moment it is.`,
+    ]
+  }
+  if (kind === 'wedding' && template.hasOwnCreateCta) {
+    return [
+      `Because the caricature video is made by hand, ${name} is arranged on WhatsApp rather than in the self-serve builder. Message us to start, and we send a short details form before making your caricature video and your invitation.`,
+    ]
+  }
+  return [
+    `Pick ${name} in the Invitation Builder, add your names, dates and venue, and watch a live phone preview update as you type. You can edit freely before you pay. Pay once through Razorpay and your live, shareable link is ready instantly.`,
+    'Would you rather have it set up for you? Choose the template, message us on WhatsApp and we deliver it in about 30 minutes. If a date or venue changes later, message us on WhatsApp and it is edited live.',
+  ]
+}
+
+function priceParagraph(kind, template) {
+  const facts = priceFacts(kind, template)
+  const name = template.name
+  if (!facts) return `We will share pricing when ordering opens for ${name}.`
+  if (kind === 'satsang') {
+    return `${name} is ${rupees(facts.price)}, a special price for Guruji's sangat, against a regular ${rupees(facts.list)}. The price is all-inclusive and covers the whole invitation.`
+  }
+  if (template.hasOwnCreateCta) {
+    return `${name} is ${rupees(facts.price)}, down from ${rupees(facts.list)}. The price includes your hand-animated caricature video.`
+  }
+  return `${name} is ${rupees(facts.price)} at our launch price, down from the regular ${rupees(facts.list)}. The price is all-inclusive, with no per-guest fees, and it covers every event on the invitation.`
+}
+
+function ctaFor(kind, template) {
+  const id = template.id ?? template.slug
+  if (kind === 'ganesh') {
+    return {
+      label: 'Notify me on WhatsApp',
+      href: whatsappLink("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations."),
+      external: true,
+    }
+  }
+  if (kind === 'wedding' && template.hasOwnCreateCta) {
+    return { label: 'Customise this template', href: whatsappLink(template.customizeWhatsAppMessage), external: true }
+  }
+  if (kind === 'wedding') return { label: 'Customise this template', href: createHref('wedding', `wedding-${id}`) }
+  return { label: 'Customise this template', href: createHref('guruji-satsang', `satsang-${id}`) }
+}
+
+function featureList(kind, template, copy) {
+  if (copy.features) return copy.features
+  if (kind === 'wedding') return SHARED_WEDDING_FEATURES
+  return []
+}
+
+// The whole page, or null when the template is not one to sell or index.
+export function templatePage(kind, template) {
+  if (!template || !isIndexable(kind, template)) return null
+  const copy = describe(kind, template)
+  if (!copy) return null
+
+  const cat = CATEGORY[kind]
+  const id = template.id ?? template.slug
+  const name = template.name
+  const path = { wedding: `/templates/wedding/${id}`, satsang: `/satsang/${id}`, ganesh: `/templates/ganesh-chaturthi/${id}` }[kind]
+  const url = `${SITE_URL}${path}`
+
+  const noun = { wedding: 'Wedding Invitation', satsang: 'Guruji Satsang Invitation', ganesh: 'Ganesh Chaturthi Invitation' }[kind]
+  const shortNoun = { wedding: 'Wedding Invitation', satsang: 'Satsang Invitation', ganesh: 'Ganesh Invitation' }[kind]
+  const title = pickTitle([`${name} ${noun}${SUFFIX}`, `${name} ${shortNoun}${SUFFIX}`, `${name} ${noun}`])
+
+  const h1 =
+    kind === 'wedding'
+      ? `${name} – ${template.weddingType} Digital Wedding Invitation`
+      : `${name} – Digital ${cat.noun} Invitation`
+
+  const breadcrumb = [{ label: 'Home', href: '/' }, { label: cat.label, href: cat.href }, { label: name }]
+  const features = featureList(kind, template, copy)
+  const cta = ctaFor(kind, template)
+  const sibs = siblings(kind, template)
+  const sameTradition = kind === 'wedding' ? `${template.weddingType} ` : ''
+
+  const body = [
+    { breadcrumb },
+    ...copy.intro,
+    { h2: `Who ${name} is for` },
+    copy.suits,
+    { h2: `What ${name} includes` },
+    `${name} includes ${joinList(features)}. Guests need no app and no account: it opens from a link on any phone.`,
+    { h2: kind === 'ganesh' ? 'Availability' : 'How it works' },
+    ...howItWorks(kind, template),
+    { h2: kind === 'ganesh' ? 'Pricing' : 'Price' },
+    priceParagraph(kind, template),
+    { cta: { label: cta.label, href: cta.href } },
+    { h2: `More ${sameTradition}${cat.noun} templates` },
+    { links: sibs },
+    ['See every design on our ', { text: `${cat.noun} invitations page`, href: cat.href }, '.'],
+  ]
+
+  const crumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumb.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.label,
+      item: c.href ? `${SITE_URL}${c.href}` : url,
+    })),
+  }
+  const jsonLd = [crumbLd]
+  const facts = priceFacts(kind, template)
+  if (facts) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: `${name} ${noun}`,
+      description: copy.meta,
+      category: 'Digital invitation',
+      brand: { '@type': 'Brand', name: 'InviteMyPeople' },
+      url,
+      offers: {
+        '@type': 'Offer',
+        url,
+        price: String(facts.price),
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+    })
+  }
+
+  return {
+    kind,
+    id,
+    name,
+    path,
+    url,
+    title,
+    description: copy.meta,
+    h1,
+    body,
+    cta,
+    breadcrumb,
+    categoryHref: cat.href,
+    jsonLd,
+  }
+}
+
+function seoFor(kind, template) {
+  const page = templatePage(kind, template)
+  if (!page) {
+    // Real, reachable page that is not for sale: keep a basic title and
+    // description for browsers and link previews, and keep it out of the index.
+    const noun = { wedding: 'Wedding Invitation Template', satsang: 'Guruji Satsang', ganesh: 'Ganesh Chaturthi' }[kind]
+    const title = `${template.name} — ${noun}${SUFFIX}`
+    const description = template.metaDescription || template.description
+    return { title, description, ogTitle: title, ogDescription: description, noindex: true }
+  }
+  return {
+    title: page.title,
+    description: page.description,
+    ogTitle: page.title,
+    ogDescription: page.description,
+    h1: page.h1,
+    body: page.body,
+    jsonLd: page.jsonLd,
+  }
+}
+
+export const weddingSeo = (template) => seoFor('wedding', template)
+export const satsangSeo = (template) => seoFor('satsang', template)
+export const ganeshSeo = (template) => seoFor('ganesh', template)

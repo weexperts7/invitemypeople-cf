@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import NameHeading from '../../../NameHeading'
 
 import { Kalash, Latkan, Toran } from './Motifs'
 
@@ -36,7 +37,7 @@ function Cover({ firstName, secondName, greetingLine, dateLine }: Pick<GatefoldP
     <div className="rmt-cover">
       <div className="rmt-cover-frame" />
       <p className="rmt-kicker">{greetingLine}</p>
-      <h1 className="rmt-names" style={{ fontSize: size }}>
+      <NameHeading className="rmt-names" style={{ fontSize: size }}>
         <span>{firstName}</span>
         {secondName && (
           <>
@@ -44,7 +45,7 @@ function Cover({ firstName, secondName, greetingLine, dateLine }: Pick<GatefoldP
             <span>{secondName}</span>
           </>
         )}
-      </h1>
+      </NameHeading>
       <p className="rmt-cover-date">{dateLine}</p>
     </div>
   )

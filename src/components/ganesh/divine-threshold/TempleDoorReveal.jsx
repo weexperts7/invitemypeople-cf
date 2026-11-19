@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import NameHeading from '../../NameHeading'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import GaneshIdolPhoto from '../../GaneshIdolPhoto'
@@ -77,9 +78,9 @@ export default function TempleDoorReveal({ template, onOpen }) {
         <p className="text-xs tracking-[0.35em] uppercase text-ivory/90 mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
           {greeting?.line ?? 'Ganpati Bappa Morya'}
         </p>
-        <h1 className="font-script text-4xl sm:text-5xl leading-tight mb-4 text-ivory drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
+        <NameHeading className="font-script text-4xl sm:text-5xl leading-tight mb-4 text-ivory drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
           {host?.familyName}
-        </h1>
+        </NameHeading>
         <p className="max-w-sm text-sm sm:text-base text-ivory/90 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
           {host?.hostLine}
         </p>

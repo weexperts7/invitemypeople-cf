@@ -16,17 +16,11 @@
 // (ideally ~150, to leave room for Google's own truncation) — both are hard
 // limits enforced by convention here, not by any runtime check, so keep new
 // entries within budget too.
-// The apex domain (invitemypeople.com) 308-redirects to this www subdomain
-// at the DNS/Vercel level — www is the one that actually serves content
-// (verify with `curl -I https://invitemypeople.com/`). Every canonical/
-// og:url/JSON-LD URL in this codebase has to point at the domain that
-// *doesn't* redirect, or a crawler following the canonical link lands on a
-// different final URL than the one declared — precisely the "canonical
-// link points to a different page" class of error. Keep index.html,
-// public/robots.txt, and api/sitemap.js's own SITE_URL constant in sync
-// with this one if it ever changes.
-export const SITE_URL = 'https://www.invitemypeople.com'
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
+// SITE_URL and DEFAULT_OG_IMAGE live in siteUrl.js (a leaf module, so
+// templateSeo.js can use them without a circular import) and are re-exported
+// here because most of the codebase imports them from this file.
+import { SITE_URL, DEFAULT_OG_IMAGE } from './siteUrl.js'
+export { SITE_URL, DEFAULT_OG_IMAGE }
 
 // "Coming soon" celebration categories: each still gets a real, linkable URL
 // (see occasionsData.js, which pairs this list with an icon and tagline) and
@@ -491,67 +485,6 @@ export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
   return acc
 }, { ...STATIC_ROUTES_SEO })
 
-// Shared title/description builders for the two dynamic, directly-linkable
-// template detail pages (/satsang/:slug and /templates/ganesh-chaturthi/:slug)
-// — used by src/App.jsx (client-side <SEO>), server/index.js (local dev SSR)
-// and api/render.js (production SSR) so all three stay in sync automatically
-// instead of re-deriving the same title format three times.
-//
-// Templates carry a rich, evocative `description` used as on-page marketing
-// copy (see GaneshTemplateCard.jsx) that often runs
-// well past the ~155-character budget a meta description has to fit in —
-// `metaDescription` is an optional, shorter, SEO-specific override; templates
-// whose `description` already fits the budget don't need one.
-// `h1` here has to match each template's actual rendered <h1> text
-// word-for-word (see the STATIC_ROUTES_SEO comment above for why) — without
-// it, every /satsang/:slug page's raw SSR HTML had no <h1> at all, since
-// setRootContent (server/index.js, api/render.js) only fires when `seo.h1`
-// is set. Satsang templates render one of three different things as their
-// <h1>, depending on their bespoke layout (see satsang/layoutRegistry.js —
-// keep this in sync with it):
-//   - 'royal-peacock' / 'golden-temple-altar': the host family name
-//     (RoyalPeacockExperience.jsx / GoldenTempleAltarExperience.jsx)
-//   - 'saffron-lotus-serenity': the greeting line instead
-//     (SaffronLotusExperience.jsx)
-//   - no `layout` at all: the fixed "Satsang Invitation" heading, with the
-//     family name appearing separately below it (LegacySatsangExperience.jsx)
-export function satsangSeo(template) {
-  const title = `${template.name} — Guruji Satsang | InviteMyPeople`
-  const description = template.metaDescription || template.description
-  let h1 = 'Satsang Invitation'
-  if (template.layout === 'saffron-lotus-serenity') h1 = template.greeting?.line || 'Jai Guruji'
-  else if (template.layout) h1 = template.host?.familyName || h1
-  return { title, description, ogTitle: title, ogDescription: description, h1 }
-}
-
-// Every Ganesh Chaturthi bespoke layout (including LegacyGaneshExperience,
-// via the shared GaneshCurtainReveal it renders — see
-// ganesh/layoutRegistry.js) consistently uses the host family name as its
-// <h1>, so no per-layout branching is needed here the way satsangSeo()
-// above requires.
-export function ganeshSeo(template) {
-  const title = `${template.name} — Ganesh Chaturthi | InviteMyPeople`
-  const description = template.metaDescription || template.description
-  return {
-    title,
-    description,
-    ogTitle: title,
-    ogDescription: description,
-    h1: template.host?.familyName || template.name,
-  }
-}
-
-// Every wedding template's <h1> is the couple's names (see WelcomeSplash.jsx,
-// which renders `coupleNames` as its aria-label'd <h1>) — mirrors
-// ganeshSeo()'s single, unbranched h1 source above.
-export function weddingSeo(template) {
-  const title = `${template.name} — Wedding Invitation Template | InviteMyPeople`
-  const description = template.metaDescription || template.description
-  return {
-    title,
-    description,
-    ogTitle: title,
-    ogDescription: description,
-    h1: template.couple?.names || template.name,
-  }
-}
+// Each template page's title, description, H1, body and structured data are
+// built in templateSeo.js from the template's own data and written copy.
+export { weddingSeo, satsangSeo, ganeshSeo } from './templateSeo.js'

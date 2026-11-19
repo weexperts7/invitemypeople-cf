@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import NameHeading from '../NameHeading'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import GaneshIdolPhoto from '../GaneshIdolPhoto'
 import Celebration from '../Celebration'
@@ -45,9 +46,9 @@ export default function GaneshCurtainReveal({ palette, greeting, host, onOpen })
           <p className="text-xs tracking-[0.3em] uppercase text-ink-soft mb-3">
             {greeting?.line ?? 'Ganpati Bappa Morya'}
           </p>
-          <h1 className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
+          <NameHeading className="font-script text-4xl sm:text-5xl leading-tight mb-4" style={{ color: rose }}>
             {host?.familyName}
-          </h1>
+          </NameHeading>
           <p className="max-w-xs text-sm sm:text-base text-ink-soft leading-relaxed">
             {host?.hostLine}
           </p>

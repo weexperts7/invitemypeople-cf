@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import NameHeading from '../../../NameHeading'
 import { formatDateLabel } from '../defaults'
 import AmbientLights from './AmbientLights'
 import ScratchCanvas from './ScratchCanvas'
@@ -116,9 +117,9 @@ export default function CoupleHero({
         />
       </div>
 
-      <h2 className="mst-font-display relative z-10 text-4xl font-semibold text-[#fbf3e3] sm:text-5xl">
+      <NameHeading as="h2" className="mst-font-display relative z-10 text-4xl font-semibold text-[#fbf3e3] sm:text-5xl">
         {name1} <span className="mst-font-script text-[#d4af37]">&amp;</span> {name2}
-      </h2>
+      </NameHeading>
 
       {/* The date scratch card sits right below the couple's name — the
           guest scratches away the gold seal to reveal the wedding date

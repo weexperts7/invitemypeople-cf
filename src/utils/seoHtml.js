@@ -101,14 +101,17 @@ const SR_ONLY_STYLE =
   'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;'
 
 function setRootContent(html, { h1, body, links }) {
-  const content = (body || []).map(renderBodyBlock).join('')
+  const blocks = body || []
+  // A breadcrumb leads the page on screen, so it leads the raw HTML too.
+  const lead = blocks[0] && blocks[0].breadcrumb ? renderBodyBlock(blocks[0]) : ''
+  const content = (lead ? blocks.slice(1) : blocks).map(renderBodyBlock).join('')
   const nav =
     links && links.length
       ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
       : ''
   return html.replace(
     '<div id="root"></div>',
-    () => `<div id="root"><div style="${SR_ONLY_STYLE}"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div></div>`,
+    () => `<div id="root"><div style="${SR_ONLY_STYLE}">${lead}<h1>${escapeHtml(h1)}</h1>${content}${nav}</div></div>`,
   )
 }
 

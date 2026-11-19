@@ -12,13 +12,11 @@ import { TEMPLATES } from '../src/data/templatesData.js'
 import { SATSANG_TEMPLATES } from '../src/data/satsangTemplatesData.js'
 import { GANESH_TEMPLATES } from '../src/data/ganeshTemplatesData.js'
 import { BLOG_POSTS } from '../src/data/blogPosts.js'
+import { LASTMOD } from '../src/data/lastmod.js'
+import { SITE_URL } from '../src/data/siteUrl.js'
 
-// Kept in sync with routesSeo.js's SITE_URL — see its comment for why this
-// has to be the www subdomain, not the apex domain (which redirects here).
-const SITE_URL = 'https://www.invitemypeople.com'
 
-// changefreq/priority per top-level path — mirrors the previous static
-// sitemap's weighting (homepage highest, coming-soon lowest).
+// changefreq/priority per top-level path — homepage highest.
 const STATIC_META = {
   '/': { changefreq: 'weekly', priority: '1.0' },
   '/about': { changefreq: 'monthly', priority: '0.9' },
@@ -31,7 +29,7 @@ const STATIC_META = {
   '/terms': { changefreq: 'yearly', priority: '0.3' },
   '/refund': { changefreq: 'yearly', priority: '0.3' },
 }
-const COMING_SOON_META = { changefreq: 'weekly', priority: '0.7' }
+const DEFAULT_META = { changefreq: 'monthly', priority: '0.6' }
 const TEMPLATE_META = { changefreq: 'monthly', priority: '0.6' }
 // /blog isn't a ROUTES_SEO key (see blogListSeo() in blogPosts.js — its SEO
 // is computed straight from BLOG_POSTS instead), so it and every post get
@@ -39,18 +37,25 @@ const TEMPLATE_META = { changefreq: 'monthly', priority: '0.6' }
 const BLOG_LIST_META = { changefreq: 'weekly', priority: '0.7' }
 const BLOG_POST_META = { changefreq: 'monthly', priority: '0.6' }
 
+// <lastmod> comes from src/data/lastmod.js (npm run lastmod). A URL with no
+// date there simply has no <lastmod>; a made-up date is worse than none.
 function urlEntry(loc, { changefreq, priority }) {
-  return `  <url>\n    <loc>${SITE_URL}${loc}</loc>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`
+  const date = LASTMOD[loc]
+  const lastmod = date ? `\n    <lastmod>${date}</lastmod>` : ''
+  return `  <url>\n    <loc>${SITE_URL}${loc}</loc>${lastmod}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`
 }
 
-function buildSitemap() {
+// Only pages that should be in search results: indexable, canonical and not a
+// redirect. Coming-soon categories (noindex), the retired /ganesh-chaturthi-invites
+// (a 301), and hidden or demo-only templates are all left out.
+export function buildSitemap() {
   const entries = []
 
-  for (const path of Object.keys(ROUTES_SEO)) {
-    const meta = STATIC_META[path] || COMING_SOON_META
-    entries.push(urlEntry(path, meta))
+  for (const [path, seo] of Object.entries(ROUTES_SEO)) {
+    if (seo.noindex) continue
+    entries.push(urlEntry(path, STATIC_META[path] || DEFAULT_META))
   }
-  for (const t of TEMPLATES) {
+  for (const t of TEMPLATES.filter((x) => !x.hidden)) {
     entries.push(urlEntry(`/templates/wedding/${t.id}`, TEMPLATE_META))
   }
   for (const t of SATSANG_TEMPLATES.filter((s) => s.fullExperience)) {

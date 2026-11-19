@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Search, Heart, Eye, MessageCircle } from 'lucide-react'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import CategoryContent from '../components/CategoryContent'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateCard from '../components/TemplateCard'
@@ -139,14 +140,17 @@ export default function WeddingsPage() {
           </div>
         </section>
 
+        <CategoryContent path="/weddings" />
+
         <section className="bg-ink px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-2xl sm:text-3xl text-ivory mb-3">
               Ready to make it yours?
             </h2>
             <p className="text-white/70 mb-7">
-              Message us your names, dates and details — we&rsquo;ll send
-              back a live, shareable invitation in 30 minutes.
+              Build it yourself and get your link instantly, or message us
+              your names, dates and details and we&rsquo;ll send back a live,
+              shareable invitation in about 30 minutes.
             </p>
             <a
               href={getWhatsAppLink("Hi! I'd like to get started with my digital wedding invitation.")}

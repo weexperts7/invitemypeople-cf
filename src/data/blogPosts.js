@@ -29,10 +29,16 @@
 //                                  components/blog/MusicVibeWidget.jsx)
 //   - [seg, seg, ...]           -> <p> whose segments are plain text or a
 //                                  { text, href } internal link (<a>/<Link>)
+import { SITE_URL, DEFAULT_OG_IMAGE } from './siteUrl.js'
+
 export const BLOG_POSTS = [
   {
     slug: 'how-to-collect-wedding-rsvps-whatsapp-india',
     date: '2026-08-09',
+    // Search-result copy; the on-page title and card text below are unchanged.
+    metaTitle: 'Collect Wedding RSVPs on WhatsApp in India, No Spreadsheets',
+    metaDescription:
+      'Learn how Indian couples use interactive digital wedding invitations and automated RSVP tracking to manage guest lists without spreadsheet chaos.',
     readingTime: '8 min read',
     title: 'How to Collect Wedding RSVPs via WhatsApp in India (Without Spreadsheet Chaos)',
     description:
@@ -118,6 +124,12 @@ export const BLOG_POSTS = [
   {
     slug: 'add-custom-background-music-digital-invitations',
     date: '2026-08-09',
+    // Search-result copy. "Free" and "2 minutes" are deliberately not claimed:
+    // the song feature has no separate charge but the invitation itself is
+    // paid, and nothing in the product supports a time promise.
+    metaTitle: 'Add Your Own Song to a Digital Wedding Invite (Step by Step)',
+    metaDescription:
+      'Search any song in our builder and add it as background music to your WhatsApp-ready digital invitation. Step-by-step guide with examples.',
     readingTime: '7 min read',
     title: 'Set the Vibe: How to Add Custom Background Music to Your Digital Invitations',
     description:
@@ -229,13 +241,34 @@ export function getBlogPostBySlug(slug) {
 // be handed straight to <SEO>, setRootContent's `seo` argument, and the
 // sitemap without any extra mapping at each call site.
 export function blogPostSeo(post) {
+  const title = post.metaTitle || post.title
+  const description = post.metaDescription || post.description
+  const url = `${SITE_URL}/blog/${post.slug}`
   return {
-    title: post.title,
-    description: post.description,
-    ogTitle: post.title,
-    ogDescription: post.description,
+    title,
+    description,
+    ogTitle: title,
+    ogDescription: description,
     h1: post.h1,
     body: post.body,
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description,
+        image: DEFAULT_OG_IMAGE,
+        datePublished: post.date,
+        dateModified: post.updated || post.date,
+        author: { '@type': 'Organization', name: 'InviteMyPeople', url: SITE_URL },
+        publisher: {
+          '@type': 'Organization',
+          name: 'InviteMyPeople',
+          logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg` },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+      },
+    ],
   }
 }
 

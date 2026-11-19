@@ -20,6 +20,8 @@
 // templateSeo.js can use them without a circular import) and are re-exported
 // here because most of the codebase imports them from this file.
 import { SITE_URL, DEFAULT_OG_IMAGE } from './siteUrl.js'
+import { HOW_IT_WORKS, getHomepageFaqs, faqBlocks, faqJsonLd } from './faqData.js'
+import { CATEGORY_BLOCKS, CATEGORY_JSONLD, CATEGORY_REPLACES_BODY } from './categoryContent.js'
 export { SITE_URL, DEFAULT_OG_IMAGE }
 
 // "Coming soon" celebration categories: each still gets a real, linkable URL
@@ -201,27 +203,9 @@ export const HOMEPAGE_SEO_BODY = [
     ' without the spreadsheet chaos, plus more guides on digital invitations and guest management as they publish.',
   ],
   { h2: 'How Digital Invites for Weddings & Events Work' },
-  'Getting your own digital invitation takes four simple steps, from picking a template to sharing a live link with your guests.',
-  { h2: 'Step 1: Pick a Template' },
-  'Choose a design for a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration. Every template is fully interactive from the moment you open it.',
-  { h2: 'Step 2: Fill In Your Details' },
-  'Add your names, dates and venue in the Invitation Builder. Add every function — Haldi, Sangeet, the ceremony, Reception — each with its own time and place.',
-  { h2: 'Step 3: Watch the Live Preview' },
-  'A phone preview updates the moment you type. You see exactly what your guests will see, before you publish anything.',
-  { h2: 'Step 4: Publish and Share' },
-  'Pay securely online. Your finished, shareable invitation link goes live instantly — ready to send on WhatsApp, or anywhere else your guests are.',
-  { h2: 'Frequently Asked Questions About Our Digital Invites' },
-  'Real answers to the questions hosts ask most before building their own wedding invitation, Guruji Satsang invite, or Ganesh Chaturthi invitation.',
-  { h2: 'Do Guests Need to Install an App?' },
-  'No. Every invitation is a mobile-first web page. It opens straight from the link, in any browser, on any phone.',
-  { h2: 'Can I Add My Own Background Music?' },
-  "Yes. Search for any song in the Invitation Builder and set it as your invitation's background music, so it plays the moment a guest opens the envelope. It's optional — skip it and a soft default track plays instead — and guests can always mute it themselves.",
-  { h2: 'How Do RSVPs and Guest Tracking Work?' },
-  "Guests tap to respond right on the invitation itself. Their attendance, guest count, and wishes flow straight into your private host dashboard — the same interactive RSVP tracking behind every InviteMyPeople template.",
-  { h2: 'Can Details Change After the Invitation Is Live?' },
-  'Yes. Edit any detail instantly, at any time. Everyone holding the link sees the update immediately, with no reprinting or resending needed.',
-  { h2: 'What Does a Digital Invite Cost?' },
-  'One flat, all-inclusive price covers your whole invitation and every event on it. There are no hidden per-guest or printing fees, on any template for any occasion.',
+  HOW_IT_WORKS.subtitle,
+  ...HOW_IT_WORKS.steps.flatMap((step, i) => [{ h2: `Step ${i + 1}: ${step.title}` }, step.description]),
+  ...faqBlocks('Frequently Asked Questions About Our Digital Invites', getHomepageFaqs()),
   { h2: 'One Platform for Every Celebration' },
   'Weddings, Guruji Satsangs, and Ganesh Chaturthi celebrations are live today, with birthdays, engagements, baby showers, housewarmings, corporate events, and anniversaries on the way. Every occasion runs on the same live builder, the same interactive RSVP tracking, and the same private host dashboard — one platform, built for celebrations across India.',
 ]
@@ -230,15 +214,16 @@ const STATIC_ROUTES_SEO = {
   '/': {
     title: 'InviteMyPeople | Digital Invites for Weddings & Events',
     description:
-      'Interactive digital invitations for weddings, Guruji Satsangs & more — budget-friendly, delivered on WhatsApp in 30 minutes.',
+      'Interactive digital invitations for weddings & Guruji Satsangs. Build your own and get your link instantly, or we set it up on WhatsApp in 30 minutes.',
     ogTitle: 'InviteMyPeople | Stunning Interactive Digital Invitations',
     ogDescription:
-      'Budget-friendly, interactive digital invitations for weddings, Guruji Satsangs, birthdays, engagements, baby showers, housewarmings, corporate events & anniversaries — delivered on WhatsApp in 30 minutes.',
+      'Interactive digital invitations for weddings and Guruji Satsangs, with more celebrations coming. Build your own for an instant link, or have us set it up on WhatsApp in about 30 minutes.',
     h1: 'Digital Invitations as unforgettable as your celebration',
     // See HOMEPAGE_SEO_BODY above for what this is and why it's shared with
     // LandingPage.jsx's own "About InviteMyPeople" section instead of being
     // duplicated here.
     body: HOMEPAGE_SEO_BODY,
+    jsonLd: [faqJsonLd(getHomepageFaqs())],
   },
   '/about': {
     title: 'About InviteMyPeople | Guest Management, Reinvented',
@@ -469,6 +454,21 @@ const STATIC_ROUTES_SEO = {
       'If you experience any technical difficulties during your invitation creation or believe you qualify for an exception under our policy, please reach out to us immediately at support@invitemypeople.com with your payment transaction ID and event details — we are always happy to help resolve issues promptly, and we aim to respond within a few business days, keeping you updated by email throughout. This applies across every occasion we support, whether your invitation was built as a digital wedding invitation maker template, a Guruji Satsang invite online, or a Ganesh Chaturthi celebration — the same policy and the same support inbox handle all of them.',
     ],
   },
+}
+
+// A page's own copy up to (not including) its old FAQ, which is replaced by
+// the data-driven FAQ in categoryContent.js.
+const withoutFaq = (body) => {
+  const i = body.findIndex((b) => b && b.h2 && /^Frequently Asked/.test(b.h2))
+  return i < 0 ? body : body.slice(0, i)
+}
+for (const path of Object.keys(CATEGORY_BLOCKS)) {
+  const route = STATIC_ROUTES_SEO[path]
+  STATIC_ROUTES_SEO[path] = {
+    ...route,
+    body: CATEGORY_REPLACES_BODY.has(path) ? CATEGORY_BLOCKS[path] : [...withoutFaq(route.body), ...CATEGORY_BLOCKS[path]],
+    jsonLd: CATEGORY_JSONLD[path],
+  }
 }
 
 export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {

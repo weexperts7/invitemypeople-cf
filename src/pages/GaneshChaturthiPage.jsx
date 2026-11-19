@@ -3,6 +3,7 @@ import { Flame, Eye, MessageCircle } from 'lucide-react'
 import { GaneshIcon } from '../components/icons/GaneshIcon'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import CategoryContent from '../components/CategoryContent'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import GaneshTemplateCard from '../components/GaneshTemplateCard'
@@ -75,6 +76,8 @@ export default function GaneshChaturthiPage() {
             </div>
           </div>
         </section>
+
+        <CategoryContent path="/templates/ganesh-chaturthi" />
 
         <section className="bg-ink px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">

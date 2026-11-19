@@ -4,6 +4,7 @@ import { useReducedMotion } from 'framer-motion'
 import { FoldedHandsIcon } from '../components/icons/FoldedHandsIcon'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import CategoryContent from '../components/CategoryContent'
 import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import SatsangSpotlight from '../components/SatsangSpotlight'
@@ -96,6 +97,7 @@ export default function GurujiSatsangsPage() {
             )}
           </div>
         </section>
+        <CategoryContent path="/guruji-satsangs" />
       </main>
 
       <SiteFooter />

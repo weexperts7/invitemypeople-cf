@@ -28,8 +28,9 @@ import {
 } from 'lucide-react'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { GaneshIcon } from './icons/GaneshIcon'
-import { TEMPLATES, WEDDING_TYPES, PRICING } from '../data/templatesData'
-import { getActivePrice, getSavingsPercent, isSaleActive } from '../data/sale'
+import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
+import { getActivePrice, SATSANG_PRICE } from '../data/sale'
+import { HOW_IT_WORKS, getHomepageFaqs } from '../data/faqData'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { GANESH_TEMPLATES } from '../data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
@@ -57,8 +58,12 @@ function getWhatsAppLink(message) {
 // live countdown like SaleBanner.jsx, so second-by-second reactivity isn't
 // needed here.
 const ACTIVE_PRICE = getActivePrice()
-const SAVINGS_PERCENT = getSavingsPercent()
-const SALE_LIVE = isSaleActive()
+// The cheapest live template, for "From ₹X" copy: Guruji Satsang's price.
+const MIN_PRICE = Math.min(ACTIVE_PRICE, SATSANG_PRICE)
+// Templates a visitor can actually buy today. Ganesh Chaturthi is launching
+// soon, so it is not counted.
+const LIVE_TEMPLATE_COUNT =
+  TEMPLATES.filter((t) => !t.hidden).length + SATSANG_TEMPLATES.filter((t) => t.fullExperience).length
 
 // Rotating solid-fill tones so each badge/card/icon reads as distinct at a
 // glance, instead of every element sharing the same pale blush/rose combo.
@@ -78,23 +83,10 @@ const HIGHLIGHTS = [
 ]
 
 
-const STEPS = [
-  {
-    icon: LayoutTemplate,
-    title: 'Select a Template',
-    description: 'Browse our collection and pick the design that matches your celebration.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Connect on WhatsApp',
-    description: 'Send us your names, dates, and event details right on WhatsApp — no forms, no signup.',
-  },
-  {
-    icon: Timer,
-    title: 'Delivered in 30 Minutes',
-    description: 'Your personalized, ready-to-share invitation lands back in your chat, fully live.',
-  },
-]
+// Copy comes from faqData.js, which the raw HTML and the FAQ structured data
+// also read; only the icons live here.
+const STEP_ICONS = [LayoutTemplate, MessageCircle, Timer]
+const STEPS = HOW_IT_WORKS.steps.map((step, i) => ({ ...step, icon: STEP_ICONS[i] }))
 
 const COMPARISON_ROWS = [
   {
@@ -111,12 +103,7 @@ const COMPARISON_ROWS = [
   },
   {
     feature: 'Cost',
-    ours: {
-      state: 'yes',
-      text: SALE_LIVE
-        ? `₹${ACTIVE_PRICE.toLocaleString('en-IN')} all-inclusive — launch sale, save ${SAVINGS_PERCENT}%`
-        : `₹${ACTIVE_PRICE.toLocaleString('en-IN')} all-inclusive, any celebration`,
-    },
+    ours: { state: 'yes', text: `From ₹${MIN_PRICE.toLocaleString('en-IN')}, all-inclusive` },
     printed: { state: 'no', text: 'Card + printing + courier, per guest' },
     whatsapp: { state: 'partial', text: '"Free" but generic, no real design' },
   },
@@ -124,7 +111,7 @@ const COMPARISON_ROWS = [
     feature: 'Custom design',
     ours: {
       state: 'yes',
-      text: `${TEMPLATES.filter((t) => !t.hidden).length + SATSANG_TEMPLATES.filter((t) => t.fullExperience).length + GANESH_TEMPLATES.length}+ templates across every occasion`,
+      text: `${LIVE_TEMPLATE_COUNT} ready-made templates for weddings and Guruji Satsangs, Ganesh Chaturthi launching soon`,
     },
     printed: { state: 'partial', text: 'Limited to what the print shop offers' },
     whatsapp: { state: 'no', text: 'One-size-fits-all template' },
@@ -152,44 +139,7 @@ function ComparisonMark({ state }) {
   return <Icon className={`w-4 h-4 ${icon}`} strokeWidth={2.5} />
 }
 
-const FAQS = [
-  {
-    question: 'How does the whole process work?',
-    answer:
-      'Pick a template in our Invitation Builder, then fill in your names, dates, and venue — the phone preview updates live as you type, so you see exactly what your guests will get. Once it looks right, pay securely online and your own live, shareable invitation link is ready instantly — no forms with us, no waiting on a reply.',
-  },
-  {
-    question: 'How much does it cost?',
-    answer: SALE_LIVE
-      ? `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or just ₹${ACTIVE_PRICE.toLocaleString('en-IN')} during our current launch sale — a ${SAVINGS_PERCENT}% saving, all-inclusive with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`
-      : `A personalized invitation is ₹${PRICING.price.toLocaleString('en-IN')}, or ₹${ACTIVE_PRICE.toLocaleString('en-IN')} at our launch price — all-inclusive, with no per-guest or printing costs. Payment is a one-time, secure checkout powered by Razorpay.`,
-  },
-  {
-    question: 'Can I make changes after I see my invitation?',
-    answer:
-      'Yes — you can edit every detail live in the builder before you pay, so nothing is locked in until you\'re happy with it.',
-  },
-  {
-    question: 'Do my guests need to install an app?',
-    answer:
-      'No. Every template is a mobile-first web page that opens straight from the shared link in any browser — no app, download, or account required.',
-  },
-  {
-    question: 'Can I add my own background music?',
-    answer:
-      'Yes — search for any song right in the builder and pick it as your invitation\'s background music, so it starts playing the moment a guest taps the envelope open. It\'s entirely optional; skip it and we\'ll play a soft default track instead. Either way, a mute button lets every guest turn it off if they\'d rather open your invitation in silence.',
-  },
-  {
-    question: 'How do RSVPs work?',
-    answer:
-      'Guests tap to respond right on the invitation — attendance, guest count, and blessings or wishes all flow straight into your private host dashboard, so there\'s no chasing phone calls.',
-  },
-  {
-    question: 'Can I update details after the date changes or a venue moves?',
-    answer:
-      'Absolutely — message us the update on WhatsApp and we\'ll edit it live. Everyone with the link instantly sees the latest details, no reprinting or resending required.',
-  },
-]
+const FAQS = getHomepageFaqs()
 
 function FaqItem({ item, isOpen, onToggle }) {
   const reduceMotion = useReducedMotion()
@@ -742,7 +692,7 @@ export default function LandingPage() {
               <SectionEyebrow icon={Timer} tone="gold">The Process</SectionEyebrow>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-2">How It Works</h2>
-            <p className="text-ink-soft">Three steps, thirty minutes, done.</p>
+            <p className="text-ink-soft">{HOW_IT_WORKS.subtitle}</p>
           </motion.div>
 
           <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-6">
@@ -1003,9 +953,9 @@ export default function LandingPage() {
             Ready when you are.
           </h2>
           <p className="mx-auto max-w-lg text-white/70 mb-9">
-            Message us on WhatsApp with your event details, or pick a
-            template to preview first — either way, you&rsquo;ll have a
-            live invitation in 30 minutes.
+            Build your own in the Invitation Builder and get your link
+            instantly, or message us on WhatsApp with your event details
+            and we&rsquo;ll deliver it in about 30 minutes.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a

@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, MessageCircle, ChevronDown, Heart, Sparkles, Building2, LogOut } from 'lucide-react'
 import Logo from './Logo'
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
+import { GaneshIcon } from './icons/GaneshIcon'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
 import PartnerAuthContext from '../context/PartnerAuthContext'
 import useBodyScrollLock from '../hooks/useBodyScrollLock'
@@ -25,11 +26,15 @@ const LIVE_OCCASIONS = [
   { to: '/weddings', label: 'Weddings', icon: Heart },
   { to: '/guruji-satsangs', label: 'Guruji Satsang', icon: FoldedHandsIcon },
 ]
-const COMING_SOON_LINKS = COMING_SOON_OCCASIONS.map((o) => ({
-  to: `/${o.slug}`,
-  label: o.label,
-  icon: o.icon,
-}))
+const COMING_SOON_LINKS = [
+  // Live page, launching soon: goes to the real category page, never a copy.
+  { to: '/templates/ganesh-chaturthi', label: 'Ganesh Chaturthi', icon: GaneshIcon },
+  ...COMING_SOON_OCCASIONS.map((o) => ({
+    to: `/${o.slug}`,
+    label: o.label,
+    icon: o.icon,
+  })),
+]
 const ALL_OCCASION_PATHS = [...LIVE_OCCASIONS, ...COMING_SOON_LINKS].map((l) => l.to)
 
 const WHATSAPP_NUMBER = '918847044554'

@@ -1,9 +1,7 @@
 import { Cake, Gem, Baby, Home, Briefcase, PartyPopper } from 'lucide-react'
-import { GaneshIcon } from '../components/icons/GaneshIcon'
 import { COMING_SOON_ROUTES } from './routesSeo'
 
 const ICONS = {
-  'ganesh-chaturthi-invites': GaneshIcon,
   birthdays: Cake,
   engagements: Gem,
   'baby-showers': Baby,
@@ -13,7 +11,6 @@ const ICONS = {
 }
 
 const TAGLINES = {
-  'ganesh-chaturthi-invites': 'A curtain-opening darshan reveal, full puja muhurat and RSVP built in.',
   birthdays: 'Playful, festive invites for every milestone birthday.',
   engagements: 'Elegant invites to celebrate the promise before the big day.',
   'baby-showers': 'Sweet, joyful invites to welcome the newest arrival.',

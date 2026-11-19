@@ -734,3 +734,9 @@ export const WEDDING_TYPES = ['All', ...new Set(TEMPLATES.map((t) => t.weddingTy
 export function getTemplateById(id) {
   return TEMPLATES.find((t) => t.id === id) ?? TEMPLATES[0]
 }
+
+// Strict lookup for SEO: unlike getTemplateById, never falls back to the first
+// template, so an unknown id is a 404 rather than a copy of that template.
+export function findTemplateById(id) {
+  return TEMPLATES.find((t) => t.id === id) ?? null
+}

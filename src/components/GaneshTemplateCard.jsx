@@ -1,15 +1,13 @@
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import GaneshShowcase from './GaneshShowcase'
 
 // Not clickable into a live Preview/Customize flow right now — Ganesh
 // Chaturthi templates are fully built (GaneshShowcase below is the real
 // template art, not a placeholder) but deliberately not advertised yet
-// ahead of the ad campaign launch (see routesSeo.js's COMING_SOON_ROUTES
-// comment for the full picture). The card still shows real template art/name/tags to
-// build anticipation — only the two action buttons are gone, replaced
-// with a single "Launching Soon" link to the dedicated landing page.
+// ahead of the ad campaign launch. The card still shows real template
+// art/name/tags to build anticipation — only the two action buttons are gone,
+// replaced with a single "Notify Me" WhatsApp link.
 export default function GaneshTemplateCard({ template }) {
   return (
     <motion.article
@@ -66,13 +64,15 @@ export default function GaneshTemplateCard({ template }) {
         </div>
 
         <div className="mt-auto pt-2">
-          <Link
-            to="/ganesh-chaturthi-invites"
+          <a
+            href={`https://wa.me/918847044554?text=${encodeURIComponent("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 rounded-full border border-champagne-deep/60 bg-ivory/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-champagne/40"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Notify Me When It's Live
-          </Link>
+          </a>
         </div>
       </div>
     </motion.article>

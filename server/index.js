@@ -6,11 +6,8 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ROUTES_SEO, SITE_URL, SITE_NAV_LINKS, satsangSeo, ganeshSeo, weddingSeo } from '../src/data/routesSeo.js'
-import { getSatsangTemplateBySlug } from '../src/data/satsangTemplatesData.js'
-import { getGaneshTemplateBySlug } from '../src/data/ganeshTemplatesData.js'
-import { getTemplateById } from '../src/data/templatesData.js'
-import { getBlogPostBySlug, blogPostSeo, blogListSeo } from '../src/data/blogPosts.js'
+import { SITE_URL } from '../src/data/routesSeo.js'
+import { renderSeoHtml, getRedirectTarget } from '../src/utils/seoHtml.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import {
@@ -887,132 +884,6 @@ app.post('/api/admin/create-invite', async (req, res) => {
   }
 })
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-// Finds a <meta ...> tag by an attribute match (e.g. `name="description"` or
-// `property="og:title"`) and swaps its content="..." value — tolerant of the
-// multi-line attribute formatting index.html uses (`[^>]` matches newlines
-// via its negated character class, no need for a dotall flag).
-function setMetaContent(html, attrMatch, value) {
-  const re = new RegExp(`(<meta\\b[^>]*?${attrMatch}[^>]*?content=")[^"]*("[^>]*>)`, 'i')
-  return html.replace(re, `$1${escapeHtml(value)}$2`)
-}
-
-function setCanonical(html, href) {
-  return html.replace(
-    /(<link\b[^>]*?rel="canonical"[^>]*?href=")[^"]*("[^>]*>)/i,
-    `$1${escapeHtml(href)}$2`,
-  )
-}
-
-function setTitle(html, title) {
-  return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
-}
-
-// Mirrors api/render.js's setRootContent/renderBodyBlock exactly — see its
-// comment for why this is safe (createRoot, not hydrateRoot) and why it
-// exists (a non-JS-executing crawler otherwise only ever sees an empty
-// `<div id="root"></div>`). Each `body` entry is a plain string (<p>), a
-// `{ h2 }` object (<h2>), a `{ h3 }` object (<h3> — used by blog posts, see
-// blogPosts.js), a `{ cta }` object (a plain <a href> here — the live page
-// renders a styled button instead), a `{ widget }` object (a plain <p>
-// naming the demo here — the live page swaps in the real interactive
-// component, see BLOG_WIDGETS in BlogPostPage.jsx), or an array of
-// segments — plain text or a `{ text, href }` internal link, rendered as a
-// real <a href> inside the <p> — see routesSeo.js's homepage `body` for why.
-function renderBodyBlock(block) {
-  if (typeof block === 'string') return `<p>${escapeHtml(block)}</p>`
-  if (Array.isArray(block)) {
-    const inner = block
-      .map((seg) =>
-        typeof seg === 'string'
-          ? escapeHtml(seg)
-          : `<a href="${escapeHtml(seg.href)}">${escapeHtml(seg.text)}</a>`,
-      )
-      .join('')
-    return `<p>${inner}</p>`
-  }
-  if (block.h3) return `<h3>${escapeHtml(block.h3)}</h3>`
-  if (block.cta) return `<p><a href="${escapeHtml(block.cta.href)}">${escapeHtml(block.cta.label)}</a></p>`
-  if (block.widget) return `<p>Interactive demo: search for a song and preview a 30-second clip.</p>`
-  return `<h2>${escapeHtml(block.h2)}</h2>`
-}
-
-// Visually hidden (not display:none — screen readers and non-JS text
-// crawlers, e.g. Seobility, still read it fine) so real visitors never see
-// this markup flash before React's own render() replaces #root's children.
-// The style is inline, part of the very first HTML the browser parses, so
-// there's no visible flash even on a slow connection/device — unlike
-// hiding it via an external stylesheet class or JS, either of which would
-// still paint it visible for at least one frame first.
-const SR_ONLY_STYLE =
-  'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;'
-
-function setRootContent(html, { h1, body, links }) {
-  const content = (body || []).map(renderBodyBlock).join('')
-  const nav = links && links.length
-    ? `<nav>${links.map((l) => `<a href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`).join(' ')}</nav>`
-    : ''
-  return html.replace(
-    '<div id="root"></div>',
-    `<div id="root"><div style="${SR_ONLY_STYLE}"><h1>${escapeHtml(h1)}</h1>${content}${nav}</div></div>`,
-  )
-}
-
-// Mirrors api/render.js's normalizePathname exactly — see its comment for
-// why trailing-slash requests need collapsing before both route lookup and
-// the canonical URL it produces.
-function normalizePathname(pathname) {
-  if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
-  return pathname
-}
-
-// Resolves per-route SEO copy for any URL the SPA router recognizes —
-// static routes come straight from routesSeo.js; /satsang/:slug is dynamic,
-// so its title/description come from the matched template itself.
-function resolveSeoForPath(pathname) {
-  if (ROUTES_SEO[pathname]) return ROUTES_SEO[pathname]
-  // Computed from BLOG_POSTS rather than a ROUTES_SEO entry — see
-  // blogListSeo()'s own comment for why.
-  if (pathname === '/blog') return blogListSeo()
-
-  const satsangMatch = pathname.match(/^\/satsang\/([^/]+)\/?$/)
-  if (satsangMatch) {
-    const template = getSatsangTemplateBySlug(decodeURIComponent(satsangMatch[1]))
-    if (template) return satsangSeo(template)
-  }
-
-  const ganeshMatch = pathname.match(/^\/templates\/ganesh-chaturthi\/([^/]+)\/?$/)
-  if (ganeshMatch) {
-    const template = getGaneshTemplateBySlug(decodeURIComponent(ganeshMatch[1]))
-    if (template) return ganeshSeo(template)
-  }
-
-  const weddingMatch = pathname.match(/^\/templates\/wedding\/([^/]+)\/?$/)
-  if (weddingMatch) {
-    // getTemplateById falls back to TEMPLATES[0] rather than returning
-    // undefined for an unknown id (see templatesData.js) — always truthy,
-    // same as every other pre-built template lookup on this page.
-    const template = getTemplateById(decodeURIComponent(weddingMatch[1]))
-    if (template) return weddingSeo(template)
-  }
-
-  const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/)
-  if (blogMatch) {
-    const post = getBlogPostBySlug(decodeURIComponent(blogMatch[1]))
-    if (post) return blogPostSeo(post)
-  }
-
-  return null
-}
-
 let indexHtmlTemplate = null
 function getIndexHtmlTemplate() {
   // Cached after the first read — the file on disk doesn't change while the
@@ -1030,40 +901,6 @@ function getIndexHtmlTemplate() {
   return indexHtmlTemplate
 }
 
-// The SPA is client-rendered, so the *initial* HTML response is all a
-// non-JS crawler — like WhatsApp's link-preview scraper — ever sees. This
-// swaps in the right title/description/canonical/OG tags per route before
-// sending index.html, so link previews and search snippets are correct for
-// every page, not just "/".
-function renderSeoHtml(rawPathname) {
-  const html = getIndexHtmlTemplate()
-  const pathname = normalizePathname(rawPathname)
-  const seo = resolveSeoForPath(pathname)
-  const url = `${SITE_URL}${pathname}`
-
-  if (!seo) {
-    // Unknown route — the SPA renders its 404 page client-side; keep
-    // crawlers from indexing this URL as a duplicate of the homepage. Still
-    // self-canonicalize (see api/render.js's identical comment) rather than
-    // leaving the shell's baked-in homepage canonical in place.
-    return setCanonical(setMetaContent(html, 'name="robots"', 'noindex, follow'), url)
-  }
-
-  const steps = [
-    [setTitle, seo.title],
-    [setMetaContent, 'name="description"', seo.description],
-    [setCanonical, url],
-    [setMetaContent, 'property="og:title"', seo.ogTitle || seo.title],
-    [setMetaContent, 'property="og:description"', seo.ogDescription || seo.description],
-    [setMetaContent, 'property="og:url"', url],
-    [setMetaContent, 'name="twitter:title"', seo.ogTitle || seo.title],
-    [setMetaContent, 'name="twitter:description"', seo.ogDescription || seo.description],
-  ]
-  // Only static routes carry an `h1` — see api/render.js's identical comment.
-  if (seo.h1) steps.push([setRootContent, { h1: seo.h1, body: seo.body, links: SITE_NAV_LINKS }])
-  return steps.reduce((acc, [fn, ...args]) => fn(acc, ...args), html)
-}
-
 // When a production build exists, serve the site from this same server.
 if (fs.existsSync(DIST_DIR)) {
   // `index: false` is belt-and-suspenders: DIST_DIR has no literal
@@ -1078,8 +915,10 @@ if (fs.existsSync(DIST_DIR)) {
   // rewritten per-route first (see renderSeoHtml) for crawlers that don't
   // execute JS.
   app.get(/^\/(?!api).*/, (req, res) => {
+    const target = getRedirectTarget(req.path)
+    if (target) return res.redirect(301, target)
     res.set('Content-Type', 'text/html')
-    res.send(renderSeoHtml(req.path))
+    res.send(renderSeoHtml(getIndexHtmlTemplate(), req.path))
   })
 }
 

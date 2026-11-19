@@ -55,8 +55,33 @@
 // anything — those routes already enforce their own session check
 // server-side regardless of this middleware.
 
+// One canonical host: https://www.invitemypeople.com. Anything on the bare
+// domain, or on plain http, gets a permanent redirect to the same path and
+// query, so search engines only ever see one version of each URL. Hosts that
+// are neither (the *.pages.dev preview deployments, localhost) pass through.
+const APEX_HOST = 'invitemypeople.com'
+const CANONICAL_HOST = 'www.invitemypeople.com'
+
+export function canonicalRedirect(requestUrl, method) {
+  const url = new URL(requestUrl)
+  const isApex = url.hostname === APEX_HOST
+  const isInsecureCanonical = url.hostname === CANONICAL_HOST && url.protocol === 'http:'
+  if (!isApex && !isInsecureCanonical) return null
+
+  url.protocol = 'https:'
+  url.hostname = CANONICAL_HOST
+  url.port = ''
+  // 301 for pages. A 301 turns a POST into a GET in browsers, so anything
+  // else gets a 308, which keeps the method and body.
+  return Response.redirect(url.toString(), method === 'GET' || method === 'HEAD' ? 301 : 308)
+}
+
 export async function onRequest(context) {
   const { request, env, next } = context
+
+  // Before the production check below: this is the production domain.
+  const redirect = canonicalRedirect(request.url, request.method)
+  if (redirect) return redirect
 
   // Every non-production deployment is gated — production (the `main`
   // branch, and any custom domain attached to it) passes straight through

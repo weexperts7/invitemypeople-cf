@@ -41,6 +41,7 @@ export default function SEO({
   ogDescription,
   ogImage = DEFAULT_OG_IMAGE,
   noindex = false,
+  jsonLd,
 }) {
   useEffect(() => {
     const url = `${SITE_URL}${path}`
@@ -63,6 +64,24 @@ export default function SEO({
     })
     upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: ogImage })
   }, [title, description, path, ogTitle, ogDescription, ogImage, noindex])
+
+  // Page-level structured data. Only the blocks marked data-seo-jsonld are
+  // touched; the site-wide Organization, WebSite and Service blocks in
+  // index.html stay exactly as they are.
+  const jsonLdText = jsonLd && jsonLd.length ? JSON.stringify(jsonLd) : ''
+  useEffect(() => {
+    document.head.querySelectorAll('script[data-seo-jsonld]').forEach((el) => el.remove())
+    if (!jsonLdText) return undefined
+    const added = JSON.parse(jsonLdText).map((block) => {
+      const el = document.createElement('script')
+      el.type = 'application/ld+json'
+      el.setAttribute('data-seo-jsonld', '1')
+      el.textContent = JSON.stringify(block)
+      document.head.appendChild(el)
+      return el
+    })
+    return () => added.forEach((el) => el.remove())
+  }, [jsonLdText])
 
   return null
 }

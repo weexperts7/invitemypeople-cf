@@ -7,7 +7,6 @@
     "/images/*",
     "/videos/*",
     "/favicon.svg",
-    "/logo.svg",
-    "/robots.txt"
+    "/logo.svg"
   ]
 }

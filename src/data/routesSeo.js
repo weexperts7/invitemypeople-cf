@@ -28,38 +28,24 @@
 export const SITE_URL = 'https://www.invitemypeople.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.png`
 
-// "Coming soon" celebration categories — each still gets a real, crawlable,
-// linkable URL (see occasionsData.js, which pairs this list with an icon +
-// tagline for on-page display) and renders through the shared
-// ComingSoonPage.jsx.
+// "Coming soon" celebration categories: each still gets a real, linkable URL
+// (see occasionsData.js, which pairs this list with an icon and tagline) and
+// renders through the shared ComingSoonPage.jsx.
 //
-// The first entry is a different kind of "coming soon" than the rest:
-// Ganesh Chaturthi templates are fully built and already live at their own
-// real route (/templates/ganesh-chaturthi/* — GaneshChaturthiPage.jsx) —
-// they're just deliberately not being *advertised* yet ahead of the ad
-// campaign launch (see GaneshTemplateCard.jsx, SiteHeader.jsx, SiteFooter.jsx,
-// LandingPage.jsx, all pointed at this slug instead of the live category
-// page). Deliberately a distinct slug from that real route ('-invites' suffix)
-// so this list's dynamic route in App.jsx can never collide with it — the real
-// page stays directly reachable for anyone with an existing/bookmarked link,
-// this is purely about what visitors get routed to when they click a card or
-// nav link right now.
+// `comingSoon: true` is the one switch for a category. While it is true the
+// page is noindex and out of the sitemap, because it is a thin page that only
+// collects "notify me" requests. To launch a category, delete the flag (or set
+// it to false) and give it its real page: it becomes indexable and appears in
+// the sitemap with no other change.
+//
+// Ganesh Chaturthi is not in this list. Its templates are built and live at
+// /templates/ganesh-chaturthi/*, and that category page is indexable and says
+// "launching soon" itself. The old /ganesh-chaturthi-invites address
+// duplicated it and now 301s there (see redirects.js).
 export const COMING_SOON_ROUTES = [
   {
-    slug: 'ganesh-chaturthi-invites',
-    label: 'Ganesh Chaturthi',
-    title: 'Ganesh Chaturthi Invites (Launching Soon) | InviteMyPeople',
-    description:
-      'Digital Ganesh Chaturthi invitations are launching soon — the same WhatsApp delivery, RSVP tracking and interactive design already live for weddings.',
-    // On-page paragraph for ComingSoonPage.jsx — distinct from `description`
-    // (meta-tag copy) since, unlike the other six entries below, this one
-    // isn't "still being built," it's finished and deliberately not
-    // advertised yet.
-    blurb:
-      'Our Ganesh Chaturthi templates — a curtain-opening darshan reveal, full puja muhurat and RSVP built in — are fully designed and ready. We’re opening them up very soon as part of our upcoming launch.',
-  },
-  {
     slug: 'birthdays',
+    comingSoon: true,
     label: 'Birthday Parties',
     title: 'Birthday Party Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -67,6 +53,7 @@ export const COMING_SOON_ROUTES = [
   },
   {
     slug: 'engagements',
+    comingSoon: true,
     label: 'Engagements',
     title: 'Digital Engagement Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -74,6 +61,7 @@ export const COMING_SOON_ROUTES = [
   },
   {
     slug: 'baby-showers',
+    comingSoon: true,
     label: 'Baby Showers',
     title: 'Baby Shower Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -81,6 +69,7 @@ export const COMING_SOON_ROUTES = [
   },
   {
     slug: 'housewarmings',
+    comingSoon: true,
     label: 'Housewarmings',
     title: 'Housewarming Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -88,6 +77,7 @@ export const COMING_SOON_ROUTES = [
   },
   {
     slug: 'corporate-events',
+    comingSoon: true,
     label: 'Corporate Events',
     title: 'Corporate Event Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -95,6 +85,7 @@ export const COMING_SOON_ROUTES = [
   },
   {
     slug: 'anniversaries',
+    comingSoon: true,
     label: 'Anniversaries',
     title: 'Anniversary Invites (Coming Soon) | InviteMyPeople',
     description:
@@ -495,6 +486,7 @@ export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
     // Matches ComingSoonPage.jsx's own `Digital {occasion.label} Invitations`
     // heading exactly — see the STATIC_ROUTES_SEO comment above for why.
     h1: `Digital ${occasion.label} Invitations`,
+    noindex: occasion.comingSoon !== false,
   }
   return acc
 }, { ...STATIC_ROUTES_SEO })

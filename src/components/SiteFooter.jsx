@@ -160,17 +160,13 @@ export default function SiteFooter() {
                   Wedding Invitations
                 </Link>
               </li>
-              {/* Both point at the "launching soon" landing pages, not the
-                  real live /guruji-satsangs and /templates/ganesh-chaturthi
-                  routes — not advertised yet ahead of the ad campaign
-                  launch (see routesSeo.js's COMING_SOON_ROUTES comment). */}
               <li>
                 <Link to="/guruji-satsangs" className="text-ink-soft hover:text-rose transition-colors">
                   Guruji Satsang Invitations
                 </Link>
               </li>
               <li>
-                <Link to="/ganesh-chaturthi-invites" className="text-ink-soft hover:text-rose transition-colors">
+                <Link to="/templates/ganesh-chaturthi" className="text-ink-soft hover:text-rose transition-colors">
                   Ganesh Chaturthi Invitations
                   <span className="ml-1.5 text-[10px] uppercase tracking-[0.1em] text-ink-soft/60">Soon</span>
                 </Link>

@@ -184,6 +184,7 @@ function App() {
         <Route path="/templates/wedding/:id" element={<WeddingRoute />} />
         <Route path="/guruji-satsangs" element={<GurujiSatsangsPage />} />
         <Route path="/guruji-satsang-invites" element={<Navigate to="/guruji-satsangs" replace />} />
+        <Route path="/ganesh-chaturthi-invites" element={<Navigate to="/templates/ganesh-chaturthi" replace />} />
         <Route path="/satsang/:slug" element={<SatsangRoute />} />
         <Route path="/templates/ganesh-chaturthi" element={<GaneshChaturthiPage />} />
         <Route path="/templates/ganesh-chaturthi/:slug" element={<GaneshRoute />} />

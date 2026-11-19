@@ -397,12 +397,10 @@ export default function LandingPage() {
               <FoldedHandsIcon className="w-4 h-4" />
               Guruji Satsang Invitations
             </a>
-            {/* Links to its "launching soon" landing page, not an in-page
-                scroll — the section below still showcases the real template
-                art, just without a working Preview/Customize path (see
-                GaneshTemplateCard.jsx's own comment for the full picture). */}
+            {/* The real category page, which says "launching soon" itself
+                (see GaneshTemplateCard.jsx's comment for why). */}
             <Link
-              to="/ganesh-chaturthi-invites"
+              to="/templates/ganesh-chaturthi"
               className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/60 bg-ivory/70 px-6 py-3.5 text-sm font-medium text-ink shadow-card transition-colors hover:bg-champagne/40"
             >
               <GaneshIcon className="w-4 h-4" />
@@ -539,12 +537,8 @@ export default function LandingPage() {
             a curtain-opening darshan reveal, full puja muhurat and RSVP built in,
             launching soon
           </p>
-          {/* Links to the "launching soon" landing page, not the real
-              /templates/ganesh-chaturthi gallery — not advertised yet ahead
-              of the ad campaign launch (see routesSeo.js's
-              COMING_SOON_ROUTES comment). */}
           <Link
-            to="/ganesh-chaturthi-invites"
+            to="/templates/ganesh-chaturthi"
             className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rose hover:underline"
           >
             See what&rsquo;s launching soon

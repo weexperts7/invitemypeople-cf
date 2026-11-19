@@ -6,6 +6,7 @@
 import { createOrder, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import { getEffectivePrice } from './_lib/templatePrices.js'
 import { clean } from './_lib/invites.js'
+import { isOrderingOpen, ORDERING_CLOSED_MESSAGE } from '../src/data/ordering.js'
 import { verifyTurnstileToken, getClientIp } from './_lib/turnstile.js'
 
 export default async function handler(req, res) {
@@ -42,6 +43,10 @@ export default async function handler(req, res) {
     // see api/_lib/templatePrices.js, or the launch-sale rate before its
     // 17-day window — ../src/data/sale.js — closes).
     const templateKey = clean(body.templateId, 80)
+    // Ganesh Chaturthi is not on sale yet (see src/data/ordering.js).
+    if (!isOrderingOpen({ templateId: templateKey, occasion: clean(body.occasion, 40) })) {
+      return res.status(400).json({ ok: false, error: ORDERING_CLOSED_MESSAGE })
+    }
     const expectedAmount = Math.round((await getEffectivePrice(templateKey)) * 100)
     if (amount !== expectedAmount) {
       return res.status(400).json({ ok: false, error: 'amount does not match the current price' })

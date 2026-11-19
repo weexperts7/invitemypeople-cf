@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { SITE_URL } from '../src/data/routesSeo.js'
 import { renderSeoHtml, getRedirectTarget, needsPrices } from '../src/utils/seoHtml.js'
 import { buildSitemap } from '../api/sitemap.js'
+import { isOrderingOpen, ORDERING_CLOSED_MESSAGE } from '../src/data/ordering.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
 import {
@@ -421,6 +422,9 @@ app.post('/api/invites', async (req, res) => {
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
     if (!hostPhone) return res.status(400).json({ ok: false, error: 'hostPhone is required' })
+    if (!isOrderingOpen({ templateId: body.templateId, occasion: body.occasion })) {
+      return res.status(400).json({ ok: false, error: ORDERING_CLOSED_MESSAGE })
+    }
 
     const invite = await enqueueInvites(async () => {
       const entries = await readAllInvites()
@@ -658,6 +662,10 @@ app.post('/api/create-order', async (req, res) => {
     // why this re-derives the per-template price server-side instead of
     // trusting the client's amount.
     const templateKey = clean(body.templateId, 80)
+    // Ganesh Chaturthi is not on sale yet (see src/data/ordering.js).
+    if (!isOrderingOpen({ templateId: templateKey, occasion: clean(body.occasion, 40) })) {
+      return res.status(400).json({ ok: false, error: ORDERING_CLOSED_MESSAGE })
+    }
     const expectedAmount = Math.round((await getEffectivePrice(templateKey)) * 100)
     if (amount !== expectedAmount) {
       return res.status(400).json({ ok: false, error: 'amount does not match the current price' })

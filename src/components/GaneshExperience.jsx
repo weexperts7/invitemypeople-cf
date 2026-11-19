@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Heart } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Bell } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { getGaneshLayoutComponent } from './ganesh/layoutRegistry'
 import LegacyGaneshExperience from './ganesh/LegacyGaneshExperience'
 import AudioToggle from './AudioToggle'
-import { buildCreateLink } from '../utils/createLink'
-import { getActivePrice } from '../data/sale'
-import { findBuilderTemplateBySource } from '../data/builderTemplates'
-import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
 const MUSIC_VOLUME = 0.7
 // The standard track every Ganesh Chaturthi invitation opens with unless
@@ -48,11 +44,6 @@ const DEFAULT_GANESH_MUSIC_URL = '/audio/ganesh-devotional-default.mp3'
 // for its own back button/CTA bar.
 export default function GaneshExperience({ template, invitationSlug: slugOverride, showChrome = true }) {
   const navigate = useNavigate()
-  // Called unconditionally, ABOVE the `!template` early return below, so
-  // this obeys the Rules of Hooks regardless of which branch renders — see
-  // SatsangExperience.jsx's identical comment.
-  const priceOverrides = useTemplatePriceOverrides()
-
   // A real guest link always has its own stable slug — either the free
   // pre-built template's own (`ganesh-<template-slug>`, unchanged default
   // behavior) or a checkout-generated invite's real, persisted slug passed
@@ -139,11 +130,6 @@ export default function GaneshExperience({ template, invitationSlug: slugOverrid
   }
 
   const Layout = getGaneshLayoutComponent(template.layout) ?? LegacyGaneshExperience
-  // Super Admin Template Price Management — see InvitationExperience.jsx's
-  // identical comment. template.slug is the GANESH_TEMPLATES catalog key,
-  // not the builder/pricing key.
-  const builderTemplate = findBuilderTemplateBySource('ganesh-chaturthi', template.slug)
-  const ctaPrice = (builderTemplate && priceOverrides[builderTemplate.id]) ?? getActivePrice()
 
   return (
     <>
@@ -200,13 +186,17 @@ export default function GaneshExperience({ template, invitationSlug: slugOverrid
           whileTap={{ scale: 0.97 }}
           className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-[70]"
         >
-          <Link
-            to={buildCreateLink({ occasion: 'ganesh-chaturthi', sourceId: template.slug })}
-            className="flex items-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
+          {/* Ordering is closed (src/data/ordering.js), so the button invites a
+              WhatsApp message instead of opening the builder. */}
+          <a
+            href={`https://wa.me/918847044554?text=${encodeURIComponent("Hi! I'd like to be notified when InviteMyPeople launches digital Ganesh Chaturthi invitations.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 whitespace-nowrap rounded-full bg-rose px-5 py-3 text-sm font-semibold text-ivory shadow-soft"
           >
-            <Heart className="w-4 h-4" />
-            Create Your Own — &#8377;{ctaPrice.toLocaleString('en-IN')}
-          </Link>
+            <Bell className="w-4 h-4" />
+            Launching Soon — Notify Me
+          </a>
         </motion.div>
       )}
 

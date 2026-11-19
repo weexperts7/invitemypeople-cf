@@ -5,6 +5,7 @@
 // has no writable, persistent filesystem to keep one on.
 import { sanitiseLangar } from '../../src/utils/satsangLangar.js'
 import { slugify } from '../../src/utils/slugify.js'
+import { isOrderingOpen, ORDERING_CLOSED_MESSAGE } from '../../src/data/ordering.js'
 import { getSupabase } from '../_lib/supabase.js'
 import { clean, randomSlugSuffix, rowToInvite, generateHostToken, toEventDateColumn, isPastDate } from '../_lib/invites.js'
 import { MAX_PHOTOS } from '../../src/utils/photoUpload.js'
@@ -35,6 +36,10 @@ export default async function handler(req, res) {
     if (!hostName) return res.status(400).json({ ok: false, error: 'hostName is required' })
     if (!hostEmail) return res.status(400).json({ ok: false, error: 'hostEmail is required' })
     if (!hostPhone) return res.status(400).json({ ok: false, error: 'hostPhone is required' })
+    // Ganesh Chaturthi is not on sale yet (see src/data/ordering.js).
+    if (!isOrderingOpen({ templateId: body.templateId, occasion: body.occasion })) {
+      return res.status(400).json({ ok: false, error: ORDERING_CLOSED_MESSAGE })
+    }
 
     const row = {
       occasion: clean(body.occasion, 40),

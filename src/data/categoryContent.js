@@ -39,7 +39,7 @@ const SATSANG_ABOUT = [
   { h2: 'Chant, offer and give thanks together' },
   "On Shukrana Darshan, guests chant together on the Sangat Jaap, a mala whose count the whole sangat shares. They open a rose to receive one of Guruji's vachans, offer seva as they RSVP, and leave their shukrana on a wall everyone can read. On Gulab Marg, each guest offers a rose to a bouquet that grows with the sangat, and opens a note with Guruji's vachan.",
   { h2: 'RSVP and planning in one place' },
-  'Every response goes into a private host dashboard, so you know how many to expect for langar prasad. You can add your own greeting for Guruji, and an invite-only note if the satsang is not open to everyone.',
+  'Every response goes into a private host dashboard, so you know how many to expect for langar prasad. You can add your own greeting for Guruji, and an invite-only note if the satsang is not open to everyone. If a date or venue changes after you share the link, message us on WhatsApp and we edit it live, so everyone sees the update.',
   { h2: 'Price and how it works' },
   `Both templates are ${rupees(SATSANG_PRICE)}, a special price for Guruji's sangat, against a regular ${rupees(SATSANG_LIST_PRICE)}. Pick a template, fill in your family name, date and venue in the Invitation Builder with a live phone preview, and pay once through Razorpay for an instant link. If you would rather have it set up for you, message us on WhatsApp and we deliver it in about 30 minutes.`,
 ]

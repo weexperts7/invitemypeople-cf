@@ -4,9 +4,9 @@
 export const LASTMOD = {
   '/': '2026-11-19',
   '/about': '2026-08-24',
-  '/weddings': '2026-09-02',
-  '/guruji-satsangs': '2026-11-02',
-  '/templates/ganesh-chaturthi': '2026-08-17',
+  '/weddings': '2026-11-19',
+  '/guruji-satsangs': '2026-11-19',
+  '/templates/ganesh-chaturthi': '2026-11-19',
   '/create': '2026-11-02',
   '/partners': '2026-08-15',
   '/privacy': '2026-08-15',

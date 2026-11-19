@@ -35,6 +35,6 @@ export const LASTMOD = {
   '/templates/ganesh-chaturthi/royal-durbar-darshan': '2026-11-19',
   '/templates/ganesh-chaturthi/divine-threshold': '2026-11-19',
   '/blog/how-to-collect-wedding-rsvps-whatsapp-india': '2026-08-09',
-  '/blog/add-custom-background-music-digital-invitations': '2026-08-09',
-  '/blog': '2026-08-09',
+  '/blog/add-custom-background-music-digital-invitations': '2026-11-19',
+  '/blog': '2026-11-19',
 }

@@ -38,7 +38,15 @@ async function getIndexHtmlTemplate(env, requestUrl) {
   return indexHtmlTemplate
 }
 
+// Real files that must reach the static asset server instead of being
+// rendered as an app page. /robots.txt is not excluded in public/_routes.json,
+// because the bare-domain redirect in _middleware.js has to see it too.
+const STATIC_PASSTHROUGH = new Set(['/robots.txt'])
+
 export async function onRequest(context) {
+  if (STATIC_PASSTHROUGH.has(new URL(context.request.url).pathname)) {
+    return context.env.ASSETS.fetch(context.request)
+  }
   try {
     const { pathname } = new URL(context.request.url)
     const target = getRedirectTarget(pathname)

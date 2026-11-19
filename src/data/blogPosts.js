@@ -124,6 +124,8 @@ export const BLOG_POSTS = [
   {
     slug: 'add-custom-background-music-digital-invitations',
     date: '2026-08-09',
+    // Its search title changed on this date.
+    updated: '2026-11-19',
     // Search-result copy. "Free" and "2 minutes" are deliberately not claimed:
     // the song feature has no separate charge but the invitation itself is
     // paid, and nothing in the product supports a time promise.

@@ -129,6 +129,13 @@ function priceParagraph(kind, template, overrides) {
   return `${name} is ${rupees(facts.price)}${regular ? ` at our launch price, down from the regular ${rupees(regular)}` : ''}. The price is all-inclusive, with no per-guest fees, and it covers every event on the invitation.`
 }
 
+// The short line under the price on the page.
+function priceNote(kind, template) {
+  if (kind === 'satsang') return "A special price for Guruji's sangat. All-inclusive, and it covers the whole invitation."
+  if (template.hasOwnCreateCta) return 'Includes your hand-animated caricature video.'
+  return 'All-inclusive, with no per-guest fees. It covers every event on the invitation.'
+}
+
 function ctaFor(kind, template) {
   const id = template.id ?? template.slug
   if (kind === 'ganesh') {
@@ -180,17 +187,21 @@ export function templatePage(kind, template, overrides = {}) {
   const sibs = siblings(kind, template)
   const sameTradition = kind === 'wedding' ? `${template.weddingType} ` : ''
 
+  const how = howItWorks(kind, template)
+  const priceText = priceParagraph(kind, template, overrides)
+  const appNote = 'Guests need no app and no account: it opens from a link on any phone.'
+
   const body = [
     { breadcrumb },
     ...copy.intro,
     { h2: `Who ${name} is for` },
     copy.suits,
     { h2: `What ${name} includes` },
-    `${name} includes ${joinList(features)}. Guests need no app and no account: it opens from a link on any phone.`,
+    `${name} includes ${joinList(features)}. ${appNote}`,
     { h2: kind === 'ganesh' ? 'Availability' : 'How it works' },
-    ...howItWorks(kind, template),
+    ...how,
     { h2: kind === 'ganesh' ? 'Pricing' : 'Price' },
-    priceParagraph(kind, template, overrides),
+    priceText,
     { cta: { label: cta.label, href: cta.href } },
     { h2: `More ${sameTradition}${cat.noun} templates` },
     { links: sibs },
@@ -241,6 +252,26 @@ export function templatePage(kind, template, overrides = {}) {
     breadcrumb,
     categoryHref: cat.href,
     jsonLd,
+    // The same content, split into pieces so the visible page can lay it out
+    // as cards, chips and a price panel. The server-rendered body above reads
+    // the same text.
+    parts: {
+      eyebrow: kind === 'wedding' ? `${template.weddingType} wedding invitation` : `${cat.noun} invitation`,
+      intro: copy.intro,
+      suits: copy.suits,
+      features,
+      appNote,
+      howHeading: kind === 'ganesh' ? 'Availability' : 'How it works',
+      how,
+      priceHeading: kind === 'ganesh' ? 'Pricing' : 'Price',
+      priceText,
+      price: facts ? facts.price : null,
+      priceList: facts ? facts.list : null,
+      priceNote: facts ? priceNote(kind, template) : null,
+      moreHeading: `More ${sameTradition}${cat.noun} templates`,
+      siblings: sibs,
+      categoryLabel: `${cat.noun} invitations page`,
+    },
   }
 }
 

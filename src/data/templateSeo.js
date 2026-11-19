@@ -79,7 +79,8 @@ function siblings(kind, template) {
   return sorted.slice(0, 5).map((t) => {
     const tid = t.id ?? t.slug
     const href = { wedding: `/templates/wedding/${tid}`, satsang: `/satsang/${tid}`, ganesh: `/templates/ganesh-chaturthi/${tid}` }[kind]
-    return { text: `${t.name} ${cat.noun} invitation`, href }
+    const label = kind === 'wedding' ? `${t.weddingType} wedding invitation` : `${cat.noun} invitation`
+    return { text: `${t.name} ${cat.noun} invitation`, href, name: t.name, label, palette: paletteOf(t) }
   })
 }
 
@@ -97,22 +98,44 @@ function withPrice(meta, facts) {
   return full.length <= 155 ? full : meta
 }
 
+// { intro, steps: [{ title, text }], note }. Every field may be empty.
 function howItWorks(kind, template) {
   const name = template.name
   if (kind === 'ganesh') {
-    return [
-      `Ganesh Chaturthi invitations are launching soon. ${name} is fully designed, but ordering is not open yet. Message us on WhatsApp and we will tell you the moment it is.`,
-    ]
+    return {
+      intro: `Ganesh Chaturthi invitations are launching soon. ${name} is fully designed, but ordering is not open yet. Message us on WhatsApp and we will tell you the moment it is.`,
+      steps: [],
+      note: '',
+    }
   }
   if (kind === 'wedding' && template.hasOwnCreateCta) {
-    return [
-      `Because the caricature video is made by hand, ${name} is arranged on WhatsApp rather than in the self-serve builder. Message us to start, and we send a short details form before making your caricature video and your invitation.`,
-    ]
+    return {
+      intro: `Because the caricature video is made by hand, ${name} is arranged on WhatsApp rather than in the self-serve builder.`,
+      steps: [
+        { title: 'Message us', text: 'Start a chat with us on WhatsApp from this page.' },
+        { title: 'Share your details', text: 'We send you a short details form to fill in.' },
+        { title: 'We make it for you', text: 'We make your caricature video and your invitation.' },
+      ],
+      note: 'If a date or venue changes later, message us on WhatsApp and it is edited live.',
+    }
   }
-  return [
-    `Pick ${name} in the Invitation Builder, add your names, dates and venue, and watch a live phone preview update as you type. You can edit freely before you pay. Pay once through Razorpay and your live, shareable link is ready instantly.`,
-    'Would you rather have it set up for you? Choose the template, message us on WhatsApp and we deliver it in about 30 minutes. If a date or venue changes later, message us on WhatsApp and it is edited live.',
-  ]
+  return {
+    intro: '',
+    steps: [
+      { title: 'Personalise it', text: `Pick ${name} in the Invitation Builder and add your names, dates and venue.` },
+      { title: 'Preview it live', text: 'A live phone preview updates as you type, and you can edit freely before you pay.' },
+      { title: 'Pay once, share instantly', text: 'Pay once through Razorpay and your live, shareable link is ready instantly.' },
+    ],
+    note: 'Would you rather have it set up for you? Choose the template, message us on WhatsApp and we deliver it in about 30 minutes. If a date or venue changes later, message us on WhatsApp and it is edited live.',
+  }
+}
+
+// A template's own colours, used to theme its page (see
+// TemplatePageContent.jsx). Every template defines these four.
+const DEFAULT_PALETTE = { ivory: '#fdf8f0', ink: '#3a1a1f', rose: '#7a1f33', gold: '#b08a3e' }
+function paletteOf(t) {
+  const p = t.palette || {}
+  return { bg: p.ivory || DEFAULT_PALETTE.ivory, ink: p.ink || DEFAULT_PALETTE.ink, accent: p.rose || DEFAULT_PALETTE.rose, gold: p.gold || DEFAULT_PALETTE.gold }
 }
 
 function priceParagraph(kind, template, overrides) {
@@ -199,7 +222,9 @@ export function templatePage(kind, template, overrides = {}) {
     { h2: `What ${name} includes` },
     `${name} includes ${joinList(features)}. ${appNote}`,
     { h2: kind === 'ganesh' ? 'Availability' : 'How it works' },
-    ...how,
+    ...(how.intro ? [how.intro] : []),
+    ...how.steps.flatMap((step, i) => [{ h3: `${i + 1}. ${step.title}` }, step.text]),
+    ...(how.note ? [how.note] : []),
     { h2: kind === 'ganesh' ? 'Pricing' : 'Price' },
     priceText,
     { cta: { label: cta.label, href: cta.href } },
@@ -263,6 +288,10 @@ export function templatePage(kind, template, overrides = {}) {
       appNote,
       howHeading: kind === 'ganesh' ? 'Availability' : 'How it works',
       how,
+      palette: paletteOf(template),
+      madeFor: kind === 'wedding' ? `${template.weddingType} weddings` : kind === 'satsang' ? 'Guruji Satsangs' : 'Ganesh Chaturthi',
+      delivery: kind === 'ganesh' ? 'Launching soon' : template.hasOwnCreateCta ? 'Made by hand' : 'Ready instantly',
+      title: { name, type: h1.slice(name.length + 3) },
       priceHeading: kind === 'ganesh' ? 'Pricing' : 'Price',
       priceText,
       price: facts ? facts.price : null,

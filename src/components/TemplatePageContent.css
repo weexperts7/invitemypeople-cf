@@ -1,0 +1,460 @@
+/* The section under each template's demo. Themed by the template's own
+   palette through four variables set inline by TemplatePageContent.jsx:
+   --tpc-bg, --tpc-ink, --tpc-accent, --tpc-gold. Every other colour is mixed
+   from those, so Rang Mahal reads maroon and gold, Gulab Marg rose, and
+   Mahogany Seal dark, each continuing the invitation above it. */
+.tpc {
+  --tpc-soft: color-mix(in srgb, var(--tpc-ink) 72%, var(--tpc-bg));
+  --tpc-faint: color-mix(in srgb, var(--tpc-ink) 50%, var(--tpc-bg));
+  --tpc-line: color-mix(in srgb, var(--tpc-gold) 38%, transparent);
+  --tpc-wash: color-mix(in srgb, var(--tpc-accent) 7%, var(--tpc-bg));
+  position: relative;
+  overflow: hidden;
+  background: var(--tpc-bg);
+  color: var(--tpc-ink);
+  font-family: var(--font-sans);
+}
+
+.tpc::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 28rem;
+  background:
+    radial-gradient(60% 55% at 15% 0%, color-mix(in srgb, var(--tpc-gold) 16%, transparent), transparent 70%),
+    radial-gradient(55% 50% at 90% 10%, color-mix(in srgb, var(--tpc-accent) 12%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.tpc-wrap {
+  position: relative;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 9rem;
+}
+
+/* --- Header --------------------------------------------------------------- */
+
+.tpc-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--tpc-faint);
+}
+.tpc-crumbs li { display: flex; align-items: center; gap: 0.5rem; }
+.tpc-crumbs a { color: inherit; text-decoration: none; }
+.tpc-crumbs a:hover { color: var(--tpc-accent); text-decoration: underline; }
+
+.tpc-ornament {
+  display: flex;
+  justify-content: center;
+  color: var(--tpc-gold);
+}
+.tpc-ornament svg { width: 7.5rem; height: 1rem; }
+
+.tpc-title {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-weight: 400;
+}
+.tpc-title-name {
+  display: block;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(2.9rem, 12vw, 4.75rem);
+  line-height: 0.95;
+  color: var(--tpc-accent);
+}
+.tpc-title-type {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tpc-soft);
+}
+.tpc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- At a glance ---------------------------------------------------------- */
+
+.tpc-glance {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 2.5rem 0 0;
+  border-top: 1px solid var(--tpc-line);
+  border-bottom: 1px solid var(--tpc-line);
+}
+.tpc-glance > div {
+  padding: 1rem 0.35rem;
+  text-align: center;
+}
+.tpc-glance > div + div { border-left: 1px solid var(--tpc-line); }
+.tpc-glance dt {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tpc-faint);
+}
+.tpc-glance dd {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  line-height: 1.15;
+  color: var(--tpc-ink);
+}
+.tpc-glance s { display: block; font-family: var(--font-sans); font-size: 0.7rem; color: var(--tpc-faint); }
+
+/* --- Story ---------------------------------------------------------------- */
+
+.tpc-lead {
+  margin: 2.5rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  line-height: 1.55;
+  color: var(--tpc-ink);
+}
+.tpc-lead::first-letter {
+  float: left;
+  margin: 0.06em 0.12em 0 0;
+  font-size: 3.4em;
+  font-weight: 600;
+  line-height: 0.8;
+  color: var(--tpc-accent);
+}
+.tpc-p {
+  margin: 1.25rem 0 0;
+  line-height: 1.85;
+  color: var(--tpc-soft);
+}
+
+.tpc-quote {
+  position: relative;
+  margin: 3.5rem 0 0;
+  padding: 2.75rem 1.5rem 2rem;
+  border-radius: 1.75rem;
+  background: var(--tpc-wash);
+  text-align: center;
+}
+.tpc-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: -0.35em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--tpc-gold);
+}
+.tpc-kicker {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--tpc-accent);
+}
+.tpc-quote p {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--tpc-ink);
+}
+
+/* --- Sections ------------------------------------------------------------- */
+
+.tpc-section { margin-top: 4rem; }
+.tpc-h2 {
+  margin: 0.9rem 0 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 2rem;
+  line-height: 1.15;
+  color: var(--tpc-ink);
+}
+
+.tpc-features {
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--tpc-line);
+}
+.tpc-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.95rem 0.25rem;
+  border-bottom: 1px solid var(--tpc-line);
+  color: var(--tpc-ink);
+}
+.tpc-features li::before {
+  content: '';
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  transform: rotate(45deg);
+  background: var(--tpc-gold);
+}
+.tpc-features li span { display: block; }
+.tpc-features li span::first-letter { text-transform: uppercase; }
+.tpc-small {
+  margin: 1rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--tpc-faint);
+}
+
+.tpc-steps {
+  position: relative;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tpc-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-bottom: 1.75rem;
+}
+.tpc-steps li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 3rem;
+  bottom: 0.35rem;
+  left: 1.5rem;
+  width: 1px;
+  background: var(--tpc-line);
+}
+.tpc-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--tpc-line);
+  border-radius: 999px;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--tpc-accent);
+  background: var(--tpc-bg);
+}
+.tpc-steps h3 {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--tpc-ink);
+}
+.tpc-steps p { margin: 0.3rem 0 0; line-height: 1.75; color: var(--tpc-soft); }
+
+.tpc-note {
+  display: flex;
+  gap: 0.85rem;
+  margin: 0.5rem 0 0;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--tpc-line);
+  border-radius: 1.25rem;
+  background: var(--tpc-wash);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--tpc-soft);
+}
+.tpc-note svg { flex: none; margin-top: 0.2rem; width: 1.1rem; height: 1.1rem; color: var(--tpc-accent); }
+
+/* --- Price ticket --------------------------------------------------------- */
+
+.tpc-ticket {
+  position: relative;
+  margin: 4rem 0 0;
+  padding: 2.75rem 1.75rem 2.5rem;
+  border-radius: 2rem;
+  background: var(--tpc-accent);
+  color: var(--tpc-bg);
+  text-align: center;
+  box-shadow: 0 24px 48px -24px color-mix(in srgb, var(--tpc-accent) 70%, transparent);
+}
+.tpc-ticket::after {
+  content: '';
+  position: absolute;
+  inset: 0.65rem;
+  border: 1px dashed color-mix(in srgb, var(--tpc-bg) 40%, transparent);
+  border-radius: 1.5rem;
+  pointer-events: none;
+}
+.tpc-ticket-label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tpc-bg) 75%, transparent);
+}
+.tpc-ticket-price {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.tpc-ticket-price s {
+  margin-left: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  color: color-mix(in srgb, var(--tpc-bg) 55%, transparent);
+}
+.tpc-ticket-soon {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 2.6rem;
+  line-height: 1.05;
+}
+.tpc-ticket-note {
+  max-width: 26rem;
+  margin: 1rem auto 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--tpc-bg) 82%, transparent);
+}
+.tpc-ticket-cta {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+  padding: 0.95rem 2rem;
+  border-radius: 999px;
+  background: var(--tpc-bg);
+  color: var(--tpc-accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.tpc-ticket-cta:hover { transform: scale(1.03); }
+.tpc-ticket-cta:focus-visible { outline: 2px solid var(--tpc-bg); outline-offset: 3px; }
+
+/* --- Related templates ---------------------------------------------------- */
+
+.tpc-related {
+  display: flex;
+  gap: 1rem;
+  margin: 1.75rem -1.5rem 0;
+  padding: 0.25rem 1.5rem 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1.5rem;
+  scrollbar-width: none;
+  list-style: none;
+}
+.tpc-related::-webkit-scrollbar { display: none; }
+.tpc-related li { flex: 0 0 68%; max-width: 15rem; scroll-snap-align: start; }
+.tpc-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--tpc-line);
+  border-radius: 1.5rem;
+  background: var(--card-bg);
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tpc-card:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -22px rgba(0, 0, 0, 0.45); }
+.tpc-card-art {
+  position: relative;
+  height: 6.5rem;
+  background:
+    radial-gradient(70% 90% at 50% 110%, color-mix(in srgb, var(--card-gold) 55%, transparent), transparent 70%),
+    linear-gradient(160deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 70%, var(--card-gold)));
+}
+/* A small arch, like a palace window, rising from the bottom edge. */
+.tpc-card-art::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 2.6rem;
+  height: 3.6rem;
+  transform: translateX(-50%);
+  border: 1px solid color-mix(in srgb, var(--card-bg) 70%, transparent);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+}
+.tpc-card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--card-bg) 45%, transparent);
+  border-radius: 1rem;
+}
+.tpc-card-body { display: flex; flex: 1; flex-direction: column; gap: 0.3rem; padding: 1rem 1.1rem 1.15rem; }
+.tpc-card-name { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; line-height: 1.15; color: var(--card-accent); }
+.tpc-card-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--card-ink) 60%, var(--card-bg));
+}
+
+.tpc-all {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.tpc-all a {
+  display: inline-flex;
+  justify-content: center;
+  text-align: center;
+  max-width: 19rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--tpc-accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--tpc-line);
+  padding-bottom: 0.2rem;
+}
+.tpc-all a:hover { border-color: var(--tpc-accent); }
+
+@media (min-width: 768px) {
+  .tpc-wrap { padding-top: 5rem; }
+  .tpc-glance dd { font-size: 1.45rem; }
+  .tpc-lead { font-size: 1.55rem; }
+  .tpc-quote { padding: 3.25rem 3rem 2.5rem; }
+  .tpc-quote p { font-size: 1.5rem; }
+  .tpc-h2 { font-size: 2.4rem; }
+  .tpc-ticket { padding: 3.5rem 2.5rem 3rem; }
+  .tpc-ticket-price { font-size: 4.75rem; }
+  .tpc-related { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.75rem 0 0; padding: 0; overflow: visible; }
+  .tpc-related li { max-width: none; }
+  /* One or two related templates sit centred rather than in a part-empty row. */
+  .tpc-related:has(> li:only-child),
+  .tpc-related:has(> li:nth-child(2):last-child) { display: flex; justify-content: center; }
+  .tpc-related:has(> li:only-child) li,
+  .tpc-related:has(> li:nth-child(2):last-child) li { flex: 0 0 13.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpc-card, .tpc-ticket-cta { transition: none; }
+  .tpc-card:hover, .tpc-ticket-cta:hover { transform: none; }
+}

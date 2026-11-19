@@ -13,7 +13,8 @@
 //   intro    paragraphs on the look and feel
 //   suits    who it is for, from its tradition
 //   features what it includes, as phrases that finish "It includes ..."
-//   meta     the meta description, 155 characters or fewer
+//   meta     the meta description without a price; templateSeo.js appends
+//            the live price, and the whole thing stays 155 characters or fewer
 
 // What every wedding template that uses the shared invitation layout has
 // (InvitationExperience.jsx): the landing reveal, the scratch card, the events
@@ -47,7 +48,7 @@ export const WEDDING_COPY = {
       'a gallery',
       'RSVP',
     ],
-    meta: 'Mahogany Seal: a cinematic Hindu wedding invitation with a wax-seal envelope reveal and your own hand-animated 3D caricature video. ₹3,900.',
+    meta: 'Mahogany Seal: a cinematic Hindu wedding invitation with a wax-seal envelope reveal and your own hand-animated 3D caricature video.',
   },
   'rajasthani-royal': {
     intro: [
@@ -56,7 +57,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'Choose it for a Hindu wedding with a royal or Rajasthani feel, or for any family that wants gold and crimson to do the talking.',
-    meta: 'Rajasthani Royal: a palace-inspired Hindu wedding invitation with jharokha arches, antique gold, envelope reveal, scratch card and RSVP. From ₹2,399.',
+    meta: 'Rajasthani Royal: a palace-inspired Hindu wedding invitation with jharokha arches, antique gold, envelope reveal, scratch card and RSVP.',
   },
   'royal-festive-vibrant': {
     intro: [
@@ -65,7 +66,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It is a match for Hindu weddings that are colourful and full of events, with a Haldi, a Sangeet and the wedding day all on the same page.',
-    meta: 'Royal Festive Vibrant: a colourful Hindu wedding invitation in crimson, marigold, rani pink and emerald, with envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Royal Festive Vibrant: a colourful Hindu wedding invitation in crimson, marigold, rani pink and emerald, with envelope reveal and RSVP.',
   },
   'gujarati-traditional': {
     intro: [
@@ -74,7 +75,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It is made for Gujarati Hindu weddings, and for anyone who prefers pastel warmth to deep jewel tones.',
-    meta: 'Gujarati Traditional: a pastel Hindu wedding invitation with a marigold garland, bandhani borders and a leheriya-blue accent. RSVP built in. From ₹2,399.',
+    meta: 'Gujarati Traditional: a pastel Hindu wedding invitation with a marigold garland, bandhani borders and a leheriya-blue accent. RSVP built in.',
   },
   'vrindavan-radha-krishna': {
     intro: [
@@ -83,7 +84,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It suits Hindu couples who want a spiritual Radha-Krishna theme, and families who approach the wedding in a devotional spirit.',
-    meta: 'Vrindavan Divine: a Radha-Krishna Hindu wedding invitation with a lotus halo, peacock-feather art and soft pastels. RSVP built in. From ₹2,399.',
+    meta: 'Vrindavan Divine: a Radha-Krishna Hindu wedding invitation with a lotus halo, peacock-feather art and soft pastels. RSVP built in.',
   },
   'western-elegant-minimalist': {
     intro: [
@@ -92,7 +93,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It suits Christian weddings, and any couple who wants a modern, minimal invitation with a romantic touch.',
-    meta: 'Western Elegant Minimalist: a clean Christian wedding invitation with floral line art and champagne-blush tones. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Western Elegant Minimalist: a clean Christian wedding invitation with floral line art and champagne-blush tones. Envelope reveal and RSVP.',
   },
   'south-indian-temple-gold': {
     intro: [
@@ -100,7 +101,7 @@ export const WEDDING_COPY = {
       'It borrows the timeless grammar of a South Indian Kalyanam: gold on ivory, symmetrical and calm.',
     ],
     suits: 'It is made for South Indian weddings and temple-style celebrations.',
-    meta: 'South Indian Temple Gold: a gopuram-arch wedding invitation in matte gold with jasmine and lotus motifs on ivory. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'South Indian Temple Gold: a gopuram-arch wedding invitation in matte gold with jasmine and lotus motifs on ivory. Envelope reveal and RSVP.',
   },
   'punjabi-phulkari': {
     intro: [
@@ -109,7 +110,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It is built for Sikh weddings and the Anand Karaj, and for Punjabi families who want phulkari colour and detail.',
-    meta: 'Punjabi Phulkari: a Sikh wedding invitation for the Anand Karaj, in Bagh Phulkari crimson and antique gold. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Punjabi Phulkari: a Sikh wedding invitation for the Anand Karaj, in Bagh Phulkari crimson and antique gold. Envelope reveal and RSVP.',
   },
   'royal-mughal': {
     intro: [
@@ -118,7 +119,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It is made for a Nikah and Walima, and for families who prefer a Mughal-inspired look.',
-    meta: 'Royal Mughal: a Muslim wedding invitation for a Nikah and Walima, with jaali lattice, arched domes and gold on ivory. RSVP built in. From ₹2,399.',
+    meta: 'Royal Mughal: a Muslim wedding invitation for a Nikah and Walima, with jaali lattice, arched domes and gold on ivory. RSVP built in.',
   },
   'bengali-traditional': {
     intro: [
@@ -126,7 +127,7 @@ export const WEDDING_COPY = {
       'Together they capture the warmth of a Bengali wedding morning.',
     ],
     suits: 'It is a fit for Bengali Hindu weddings.',
-    meta: 'Bengali Traditional: a Hindu wedding invitation in vermilion red and gold with alpona swirls. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Bengali Traditional: a Hindu wedding invitation in vermilion red and gold with alpona swirls. Envelope reveal and RSVP.',
   },
   'midnight-noir': {
     intro: [
@@ -135,7 +136,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It suits a Christian or modern evening wedding with a black-tie feel, for a couple who wants the invitation to set that tone.',
-    meta: 'Midnight Noir: a black-tie wedding invitation in charcoal and gold with an Art Deco sunburst. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Midnight Noir: a black-tie wedding invitation in charcoal and gold with an Art Deco sunburst. Envelope reveal and RSVP.',
   },
   'regal-onyx': {
     intro: [
@@ -144,7 +145,7 @@ export const WEDDING_COPY = {
     ],
     suits:
       'It suits Christian weddings with a formal, dark and elegant look.',
-    meta: 'Regal Onyx: a Christian wedding invitation with a gold heraldic crest on deep emerald-onyx. Envelope reveal and RSVP. From ₹2,399.',
+    meta: 'Regal Onyx: a Christian wedding invitation with a gold heraldic crest on deep emerald-onyx. Envelope reveal and RSVP.',
   },
   'velvet-theatre': {
     intro: [
@@ -162,7 +163,7 @@ export const WEDDING_COPY = {
       'RSVP',
       'a wall of love notes',
     ],
-    meta: 'Velvet Theatre: a Hindu wedding invitation where red velvet curtains rise, coins scratch off to the date and events become tickets. From ₹2,399.',
+    meta: 'Velvet Theatre: a Hindu wedding invitation where red velvet curtains rise, coins scratch off to the date and events become tickets.',
   },
   'rang-mahal': {
     intro: [
@@ -180,7 +181,7 @@ export const WEDDING_COPY = {
       'RSVP',
       'a blessings wall',
     ],
-    meta: 'Rang Mahal: a block-printed Rajasthani Hindu wedding invitation. Pull the latkan, light diyas for the date and walk the Saat Phere. From ₹2,399.',
+    meta: 'Rang Mahal: a block-printed Rajasthani Hindu wedding invitation. Pull the latkan, light diyas for the date and walk the Saat Phere.',
   },
 }
 
@@ -201,7 +202,7 @@ export const SATSANG_COPY = {
       'programme and langar prasad details',
       'an optional invite-only note',
     ],
-    meta: "Shukrana Darshan: a Guruji Satsang invitation. Guests light the jyot, chant on a shared mala, open a rose for Guruji's vachan and RSVP. ₹799.",
+    meta: "Shukrana Darshan: a Guruji Satsang invitation. Guests light the jyot, chant on a shared mala, open a rose for Guruji's vachan and RSVP.",
   },
   'gulab-marg': {
     intro: [
@@ -219,7 +220,7 @@ export const SATSANG_COPY = {
       'programme and langar prasad details',
       'RSVP and a Shukrana Wall',
     ],
-    meta: "Gulab Marg: a rose-garden Guruji Satsang invitation. Open the gate, follow the rose vine, receive Guruji's vachan and offer a rose. ₹799.",
+    meta: "Gulab Marg: a rose-garden Guruji Satsang invitation. Open the gate, follow the rose vine, receive Guruji's vachan and offer a rose.",
   },
 }
 

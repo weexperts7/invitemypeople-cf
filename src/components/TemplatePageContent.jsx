@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import SeoBlocks from './SeoBlocks'
 import { templatePage } from '../data/templateSeo'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 
 // The readable part of a template's own page, shown under the full-screen
 // demo: breadcrumb, H1, the written copy, a link to customise it, and links to
@@ -29,7 +30,8 @@ function Breadcrumb({ items }) {
 }
 
 export default function TemplatePageContent({ kind, template }) {
-  const page = templatePage(kind, template)
+  const overrides = useTemplatePriceOverrides()
+  const page = templatePage(kind, template, overrides)
   if (!page) return null
 
   const [lead, ...rest] = page.body

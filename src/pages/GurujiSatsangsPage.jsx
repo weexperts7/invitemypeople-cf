@@ -9,7 +9,8 @@ import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import SatsangSpotlight from '../components/SatsangSpotlight'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
-import { ROUTES_SEO } from '../data/routesSeo'
+import { routeSeo } from '../data/routesSeo'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { buildCreateLink } from '../utils/createLink'
 
 const STEPS = [
@@ -33,12 +34,13 @@ const STEPS = [
 // Where anyone looking for a Guruji Satsang invite lands: the invitation
 // available today (SatsangSpotlight.jsx), how it works, and a way to start.
 export default function GurujiSatsangsPage() {
+  const priceOverrides = useTemplatePriceOverrides()
   const reduceMotion = useReducedMotion()
   const template = SATSANG_TEMPLATES.find((t) => t.fullExperience)
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO {...ROUTES_SEO['/guruji-satsangs']} path="/guruji-satsangs" />
+      <SEO {...routeSeo('/guruji-satsangs', priceOverrides)} path="/guruji-satsangs" />
       <SiteHeader />
 
       <main>

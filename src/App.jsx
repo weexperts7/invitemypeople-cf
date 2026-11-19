@@ -46,6 +46,7 @@ import GaneshExperience from './components/GaneshExperience'
 import SEO from './components/SEO'
 import TemplatePageContent from './components/TemplatePageContent'
 import { DemoPageContext } from './context/DemoPageContext'
+import { useTemplatePriceOverrides } from './hooks/useTemplatePriceOverrides'
 import { getTemplateById } from './data/templatesData'
 import { getSatsangTemplateBySlug } from './data/satsangTemplatesData'
 import { getGaneshTemplateBySlug } from './data/ganeshTemplatesData'
@@ -61,6 +62,7 @@ function WeddingRoute() {
   const { id } = useParams()
   const navigate = useNavigate()
   const template = getTemplateById(id)
+  const priceOverrides = useTemplatePriceOverrides()
   // getTemplateById falls back to the first template for an unknown id, so
   // the written content and indexing only apply when the id really matched.
   const known = template && template.id === id
@@ -68,7 +70,7 @@ function WeddingRoute() {
   return (
     <DemoPageContext.Provider value>
       {template && (
-        <SEO {...weddingSeo(template)} path={`/templates/wedding/${id}`} noindex={!known || weddingSeo(template).noindex} />
+        <SEO {...weddingSeo(template, priceOverrides)} path={`/templates/wedding/${id}`} noindex={!known || weddingSeo(template).noindex} />
       )}
       <InvitationExperience template={template} isPreview onBack={() => navigate('/')} />
       {known && <TemplatePageContent kind="wedding" template={template} />}
@@ -119,10 +121,11 @@ function MahoganySealPreviewRoute() {
 function SatsangRoute() {
   const { slug } = useParams()
   const template = getSatsangTemplateBySlug(slug)
+  const priceOverrides = useTemplatePriceOverrides()
 
   return (
     <DemoPageContext.Provider value>
-      {template && <SEO {...satsangSeo(template)} path={`/satsang/${slug}`} />}
+      {template && <SEO {...satsangSeo(template, priceOverrides)} path={`/satsang/${slug}`} />}
       <SatsangExperience template={template} />
       {template && <TemplatePageContent kind="satsang" template={template} />}
     </DemoPageContext.Provider>

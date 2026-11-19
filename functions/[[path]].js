@@ -20,7 +20,9 @@
 // Workers, so the HTML template is read via Cloudflare Pages' ASSETS
 // binding (a Fetcher over this same build output) instead of
 // `fs.readFileSync`.
-import { renderSeoHtml, getRedirectTarget } from '../src/utils/seoHtml.js'
+import { renderSeoHtml, getRedirectTarget, needsPrices } from '../src/utils/seoHtml.js'
+import { getPriceOverrides } from '../api/_lib/templatePrices.js'
+import { bridgeEnv } from './_lib/adapt.js'
 
 // Per-isolate cache — Cloudflare reuses a worker isolate across requests, so
 // this avoids re-fetching the static shell from ASSETS on every request,
@@ -42,7 +44,15 @@ export async function onRequest(context) {
     const target = getRedirectTarget(pathname)
     if (target) return Response.redirect(new URL(target, context.request.url), 301)
     const shell = await getIndexHtmlTemplate(context.env, context.request.url)
-    const html = renderSeoHtml(shell, pathname)
+    // The price a visitor sees in the page text must be the one they would
+    // pay, including a price an admin has set. A slow or failed lookup falls
+    // back to the default prices rather than delaying the page.
+    let overrides = {}
+    if (needsPrices(pathname)) {
+      bridgeEnv(context.env)
+      overrides = await Promise.race([getPriceOverrides(), new Promise((resolve) => setTimeout(() => resolve({}), 1500))])
+    }
+    const html = renderSeoHtml(shell, pathname, overrides)
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
   } catch (err) {
     // Never let an SEO-injection bug take the whole site down — fall back

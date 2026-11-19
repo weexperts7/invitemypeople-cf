@@ -7,7 +7,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SITE_URL } from '../src/data/routesSeo.js'
-import { renderSeoHtml, getRedirectTarget } from '../src/utils/seoHtml.js'
+import { renderSeoHtml, getRedirectTarget, needsPrices } from '../src/utils/seoHtml.js'
 import { buildSitemap } from '../api/sitemap.js'
 import { slugify } from '../src/utils/slugify.js'
 import { createOrder, verifySignature, MIN_AMOUNT_PAISE } from '../src/utils/razorpay.js'
@@ -82,6 +82,7 @@ import { verifyTurnstileToken, getClientIp } from '../api/_lib/turnstile.js'
 // api/admin/template-prices/*. See api/_lib/templatePrices.js.
 import {
   getEffectivePrice,
+  getPriceOverrides,
   listTemplatePrices,
   adminUpsertTemplatePrice,
   adminResetTemplatePrice,
@@ -919,11 +920,12 @@ if (fs.existsSync(DIST_DIR)) {
   // any non-API path — the app then reads the URL itself. The HTML is
   // rewritten per-route first (see renderSeoHtml) for crawlers that don't
   // execute JS.
-  app.get(/^\/(?!api).*/, (req, res) => {
+  app.get(/^\/(?!api).*/, async (req, res) => {
     const target = getRedirectTarget(req.path)
     if (target) return res.redirect(301, target)
+    const overrides = needsPrices(req.path) ? await getPriceOverrides() : {}
     res.set('Content-Type', 'text/html')
-    res.send(renderSeoHtml(getIndexHtmlTemplate(), req.path))
+    res.send(renderSeoHtml(getIndexHtmlTemplate(), req.path, overrides))
   })
 }
 

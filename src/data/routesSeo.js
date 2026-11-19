@@ -21,7 +21,7 @@
 // here because most of the codebase imports them from this file.
 import { SITE_URL, DEFAULT_OG_IMAGE } from './siteUrl.js'
 import { HOW_IT_WORKS, getHomepageFaqs, faqBlocks, faqJsonLd } from './faqData.js'
-import { CATEGORY_BLOCKS, CATEGORY_JSONLD, CATEGORY_REPLACES_BODY } from './categoryContent.js'
+import { getCategoryBlocks, getCategoryJsonLd, CATEGORY_PATHS, CATEGORY_REPLACES_BODY } from './categoryContent.js'
 export { SITE_URL, DEFAULT_OG_IMAGE }
 
 // "Coming soon" celebration categories: each still gets a real, linkable URL
@@ -165,7 +165,7 @@ export const SITE_NAV_LINKS = [
 // live page — e.g. "digital wedding invitations" linking to /weddings
 // right where that phrase naturally occurs, rather than only in a nav
 // list divorced from the sentence that justifies the link.
-export const HOMEPAGE_SEO_BODY = [
+export const homepageBody = (overrides = {}) => [
   "InviteMyPeople is the digital wedding invitation maker India families turn to for digital invites for weddings & events. A printed card can't update itself. A forwarded WhatsApp video isn't interactive. Every InviteMyPeople invitation is different: mobile-first, genuinely unforgettable, and built to open like a story rather than be glanced at once and forgotten. Whether you're planning a wedding, a Guruji Satsang, or a Ganesh Chaturthi celebration, one link does it all. It becomes a tap-to-open envelope reveal, a scratch-to-reveal card, and a live guest list your whole event runs on.",
   { h2: 'A Digital Wedding Invitation Maker Built for Indian Celebrations' },
   [
@@ -205,7 +205,7 @@ export const HOMEPAGE_SEO_BODY = [
   { h2: 'How Digital Invites for Weddings & Events Work' },
   HOW_IT_WORKS.subtitle,
   ...HOW_IT_WORKS.steps.flatMap((step, i) => [{ h2: `Step ${i + 1}: ${step.title}` }, step.description]),
-  ...faqBlocks('Frequently Asked Questions About Our Digital Invites', getHomepageFaqs()),
+  ...faqBlocks('Frequently Asked Questions About Our Digital Invites', getHomepageFaqs(overrides)),
   { h2: 'One Platform for Every Celebration' },
   'Weddings, Guruji Satsangs, and Ganesh Chaturthi celebrations are live today, with birthdays, engagements, baby showers, housewarmings, corporate events, and anniversaries on the way. Every occasion runs on the same live builder, the same interactive RSVP tracking, and the same private host dashboard — one platform, built for celebrations across India.',
 ]
@@ -222,7 +222,7 @@ const STATIC_ROUTES_SEO = {
     // See HOMEPAGE_SEO_BODY above for what this is and why it's shared with
     // LandingPage.jsx's own "About InviteMyPeople" section instead of being
     // duplicated here.
-    body: HOMEPAGE_SEO_BODY,
+    body: homepageBody(),
     jsonLd: [faqJsonLd(getHomepageFaqs())],
   },
   '/about': {
@@ -462,14 +462,17 @@ const withoutFaq = (body) => {
   const i = body.findIndex((b) => b && b.h2 && /^Frequently Asked/.test(b.h2))
   return i < 0 ? body : body.slice(0, i)
 }
-for (const path of Object.keys(CATEGORY_BLOCKS)) {
-  const route = STATIC_ROUTES_SEO[path]
-  STATIC_ROUTES_SEO[path] = {
+const RAW_CATEGORY_ROUTES = Object.fromEntries(CATEGORY_PATHS.map((path) => [path, STATIC_ROUTES_SEO[path]]))
+function composeCategory(path, overrides) {
+  const route = RAW_CATEGORY_ROUTES[path]
+  const blocks = getCategoryBlocks(path, overrides)
+  return {
     ...route,
-    body: CATEGORY_REPLACES_BODY.has(path) ? CATEGORY_BLOCKS[path] : [...withoutFaq(route.body), ...CATEGORY_BLOCKS[path]],
-    jsonLd: CATEGORY_JSONLD[path],
+    body: CATEGORY_REPLACES_BODY.has(path) ? blocks : [...withoutFaq(route.body), ...blocks],
+    jsonLd: getCategoryJsonLd(path, overrides),
   }
 }
+for (const path of CATEGORY_PATHS) STATIC_ROUTES_SEO[path] = composeCategory(path, {})
 
 export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
   acc[`/${occasion.slug}`] = {
@@ -484,6 +487,17 @@ export const ROUTES_SEO = COMING_SOON_ROUTES.reduce((acc, occasion) => {
   }
   return acc
 }, { ...STATIC_ROUTES_SEO })
+
+// A route's SEO with the admin's per-template price overrides applied, for the
+// pages whose text shows prices (the homepage and the weddings and Guruji
+// Satsang categories). With no overrides it is exactly ROUTES_SEO[path].
+export function routeSeo(path, overrides = {}) {
+  const seo = ROUTES_SEO[path]
+  if (!seo || !overrides || !Object.keys(overrides).length) return seo
+  if (path === '/') return { ...seo, body: homepageBody(overrides), jsonLd: [faqJsonLd(getHomepageFaqs(overrides))] }
+  if (CATEGORY_PATHS.includes(path)) return composeCategory(path, overrides)
+  return seo
+}
 
 // Each template page's title, description, H1, body and structured data are
 // built in templateSeo.js from the template's own data and written copy.

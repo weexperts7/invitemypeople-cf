@@ -9,7 +9,7 @@
 // output. Pure string functions with no Node or Workers APIs, so it runs in
 // either.
 import {
-  ROUTES_SEO,
+  routeSeo,
   SITE_URL,
   SITE_NAV_LINKS,
   satsangSeo,
@@ -128,14 +128,15 @@ export function getRedirectTarget(rawPathname) {
 // one. Template lookups are strict on purpose: getTemplateById falls back to
 // the first template, which would give every made-up /templates/wedding/xyz
 // URL a real-looking, indexable page.
-export function resolveSeoForPath(pathname) {
-  if (ROUTES_SEO[pathname]) return ROUTES_SEO[pathname]
+export function resolveSeoForPath(pathname, overrides = {}) {
+  const route = routeSeo(pathname, overrides)
+  if (route) return route
   if (pathname === '/blog') return blogListSeo()
 
   const satsang = pathname.match(/^\/satsang\/([^/]+)$/)
   if (satsang) {
     const template = getSatsangTemplateBySlug(decodeURIComponent(satsang[1]))
-    if (template) return satsangSeo(template)
+    if (template) return satsangSeo(template, overrides)
   }
 
   const ganesh = pathname.match(/^\/templates\/ganesh-chaturthi\/([^/]+)$/)
@@ -147,7 +148,7 @@ export function resolveSeoForPath(pathname) {
   const wedding = pathname.match(/^\/templates\/wedding\/([^/]+)$/)
   if (wedding) {
     const template = findTemplateById(decodeURIComponent(wedding[1]))
-    if (template) return weddingSeo(template)
+    if (template) return weddingSeo(template, overrides)
   }
 
   const blog = pathname.match(/^\/blog\/([^/]+)$/)
@@ -159,9 +160,23 @@ export function resolveSeoForPath(pathname) {
   return null
 }
 
-export function renderSeoHtml(shellHtml, rawPathname) {
+// Pages whose text shows a price, and so need the admin's price overrides.
+export function needsPrices(rawPathname) {
   const pathname = normalizePathname(rawPathname)
-  const seo = resolveSeoForPath(pathname)
+  return (
+    pathname === '/' ||
+    pathname === '/weddings' ||
+    pathname === '/guruji-satsangs' ||
+    pathname.startsWith('/templates/wedding/') ||
+    pathname.startsWith('/satsang/')
+  )
+}
+
+// `overrides` is { [builderTemplateId]: price } (api/_lib/templatePrices.js
+// getPriceOverrides). Without it, prices are the defaults.
+export function renderSeoHtml(shellHtml, rawPathname, overrides = {}) {
+  const pathname = normalizePathname(rawPathname)
+  const seo = resolveSeoForPath(pathname, overrides)
   const url = `${SITE_URL}${pathname}`
 
   if (!seo) {

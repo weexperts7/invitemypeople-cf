@@ -15,8 +15,7 @@ import { SITE_URL } from './siteUrl.js'
 import { TEMPLATES } from './templatesData.js'
 import { SATSANG_TEMPLATES } from './satsangTemplatesData.js'
 import { GANESH_TEMPLATES } from './ganeshTemplatesData.js'
-import { PRICING } from './pricing.js'
-import { SATSANG_PRICE, SATSANG_LIST_PRICE } from './sale.js'
+import { effectivePrice } from './pricesFor.js'
 import { WEDDING_COPY, SATSANG_COPY, GANESH_COPY, SHARED_WEDDING_FEATURES } from './templateCopy.js'
 
 const WHATSAPP_NUMBER = '918847044554'
@@ -84,11 +83,18 @@ function siblings(kind, template) {
   })
 }
 
-function priceFacts(kind, template) {
-  if (kind === 'satsang') return { price: SATSANG_PRICE, list: SATSANG_LIST_PRICE }
-  if (kind === 'wedding' && template.salePrice) return { price: template.salePrice, list: template.originalPrice }
-  if (kind === 'wedding') return { price: PRICING.shagunPrice, list: PRICING.price }
-  return null
+// What the template costs right now, including a price an admin has set
+// (overrides: { [builderTemplateId]: price }), or null if it is not for sale.
+function priceFacts(kind, template, overrides) {
+  return kind === 'ganesh' ? null : effectivePrice(kind, template, overrides)
+}
+
+// The written meta description plus the live price, if the two still fit in 155
+// characters.
+function withPrice(meta, facts) {
+  if (!facts) return meta
+  const full = `${meta} From ${rupees(facts.price)}.`
+  return full.length <= 155 ? full : meta
 }
 
 function howItWorks(kind, template) {
@@ -109,17 +115,18 @@ function howItWorks(kind, template) {
   ]
 }
 
-function priceParagraph(kind, template) {
-  const facts = priceFacts(kind, template)
+function priceParagraph(kind, template, overrides) {
+  const facts = priceFacts(kind, template, overrides)
   const name = template.name
   if (!facts) return `We will share pricing when ordering opens for ${name}.`
+  const regular = facts.list
   if (kind === 'satsang') {
-    return `${name} is ${rupees(facts.price)}, a special price for Guruji's sangat, against a regular ${rupees(facts.list)}. The price is all-inclusive and covers the whole invitation.`
+    return `${name} is ${rupees(facts.price)}, a special price for Guruji's sangat${regular ? `, against a regular ${rupees(regular)}` : ''}. The price is all-inclusive and covers the whole invitation.`
   }
   if (template.hasOwnCreateCta) {
-    return `${name} is ${rupees(facts.price)}, down from ${rupees(facts.list)}. The price includes your hand-animated caricature video.`
+    return `${name} is ${rupees(facts.price)}${regular ? `, down from ${rupees(regular)}` : ''}. The price includes your hand-animated caricature video.`
   }
-  return `${name} is ${rupees(facts.price)} at our launch price, down from the regular ${rupees(facts.list)}. The price is all-inclusive, with no per-guest fees, and it covers every event on the invitation.`
+  return `${name} is ${rupees(facts.price)}${regular ? ` at our launch price, down from the regular ${rupees(regular)}` : ''}. The price is all-inclusive, with no per-guest fees, and it covers every event on the invitation.`
 }
 
 function ctaFor(kind, template) {
@@ -145,10 +152,12 @@ function featureList(kind, template, copy) {
 }
 
 // The whole page, or null when the template is not one to sell or index.
-export function templatePage(kind, template) {
+export function templatePage(kind, template, overrides = {}) {
   if (!template || !isIndexable(kind, template)) return null
   const copy = describe(kind, template)
   if (!copy) return null
+  const facts = priceFacts(kind, template, overrides)
+  const meta = withPrice(copy.meta, facts)
 
   const cat = CATEGORY[kind]
   const id = template.id ?? template.slug
@@ -181,7 +190,7 @@ export function templatePage(kind, template) {
     { h2: kind === 'ganesh' ? 'Availability' : 'How it works' },
     ...howItWorks(kind, template),
     { h2: kind === 'ganesh' ? 'Pricing' : 'Price' },
-    priceParagraph(kind, template),
+    priceParagraph(kind, template, overrides),
     { cta: { label: cta.label, href: cta.href } },
     { h2: `More ${sameTradition}${cat.noun} templates` },
     { links: sibs },
@@ -199,13 +208,12 @@ export function templatePage(kind, template) {
     })),
   }
   const jsonLd = [crumbLd]
-  const facts = priceFacts(kind, template)
   if (facts) {
     jsonLd.push({
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: `${name} ${noun}`,
-      description: copy.meta,
+      description: meta,
       category: 'Digital invitation',
       brand: { '@type': 'Brand', name: 'InviteMyPeople' },
       url,
@@ -226,7 +234,7 @@ export function templatePage(kind, template) {
     path,
     url,
     title,
-    description: copy.meta,
+    description: meta,
     h1,
     body,
     cta,
@@ -242,8 +250,8 @@ function clip(text, max) {
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`
 }
 
-function seoFor(kind, template) {
-  const page = templatePage(kind, template)
+function seoFor(kind, template, overrides) {
+  const page = templatePage(kind, template, overrides)
   if (!page) {
     // Real, reachable page that is not for sale: keep a basic title and
     // description for browsers and link previews, and keep it out of the index.
@@ -262,6 +270,6 @@ function seoFor(kind, template) {
   }
 }
 
-export const weddingSeo = (template) => seoFor('wedding', template)
-export const satsangSeo = (template) => seoFor('satsang', template)
-export const ganeshSeo = (template) => seoFor('ganesh', template)
+export const weddingSeo = (template, overrides) => seoFor('wedding', template, overrides)
+export const satsangSeo = (template, overrides) => seoFor('satsang', template, overrides)
+export const ganeshSeo = (template, overrides) => seoFor('ganesh', template, overrides)

@@ -8,7 +8,8 @@ import SEO from '../components/SEO'
 import { SectionEyebrow, FloatingOrb, FloatingIcon } from '../components/PageDecor'
 import TemplateCard from '../components/TemplateCard'
 import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
-import { ROUTES_SEO } from '../data/routesSeo'
+import { routeSeo } from '../data/routesSeo'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { SHOW_WEDDING_TEMPLATE_FILTERS } from '../data/featureFlags'
 
 const WHATSAPP_NUMBER = '918847044554'
@@ -20,6 +21,7 @@ function getWhatsAppLink(message) {
 // homepage's wedding section stays a lighter teaser marquee that links here
 // for the complete browsing experience (see LandingPage.jsx).
 export default function WeddingsPage() {
+  const priceOverrides = useTemplatePriceOverrides()
   const reduceMotion = useReducedMotion()
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
@@ -41,7 +43,7 @@ export default function WeddingsPage() {
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO {...ROUTES_SEO['/weddings']} path="/weddings" />
+      <SEO {...routeSeo('/weddings', priceOverrides)} path="/weddings" />
       <SiteHeader />
 
       <main>

@@ -29,12 +29,13 @@ import {
 import { FoldedHandsIcon } from './icons/FoldedHandsIcon'
 import { GaneshIcon } from './icons/GaneshIcon'
 import { TEMPLATES, WEDDING_TYPES } from '../data/templatesData'
-import { getActivePrice, SATSANG_PRICE } from '../data/sale'
+import { lowestPrice } from '../data/pricesFor'
+import { useTemplatePriceOverrides } from '../hooks/useTemplatePriceOverrides'
 import { HOW_IT_WORKS, getHomepageFaqs } from '../data/faqData'
 import { SATSANG_TEMPLATES } from '../data/satsangTemplatesData'
 import { GANESH_TEMPLATES } from '../data/ganeshTemplatesData'
 import { COMING_SOON_OCCASIONS } from '../data/occasionsData'
-import { ROUTES_SEO } from '../data/routesSeo'
+import { routeSeo } from '../data/routesSeo'
 import { SHOW_WEDDING_TEMPLATE_FILTERS } from '../data/featureFlags'
 import TemplateCard from './TemplateCard'
 import SatsangSpotlight from './SatsangSpotlight'
@@ -57,9 +58,6 @@ function getWhatsAppLink(message) {
 // comparison table and FAQ copy below are static marketing text, not a
 // live countdown like SaleBanner.jsx, so second-by-second reactivity isn't
 // needed here.
-const ACTIVE_PRICE = getActivePrice()
-// The cheapest live template, for "From ₹X" copy: Guruji Satsang's price.
-const MIN_PRICE = Math.min(ACTIVE_PRICE, SATSANG_PRICE)
 // Templates a visitor can actually buy today. Ganesh Chaturthi is launching
 // soon, so it is not counted.
 const LIVE_TEMPLATE_COUNT =
@@ -88,7 +86,8 @@ const HIGHLIGHTS = [
 const STEP_ICONS = [LayoutTemplate, MessageCircle, Timer]
 const STEPS = HOW_IT_WORKS.steps.map((step, i) => ({ ...step, icon: STEP_ICONS[i] }))
 
-const COMPARISON_ROWS = [
+// `minPrice` is the cheapest live price today, admin-set prices included.
+const getComparisonRows = (minPrice) => [
   {
     feature: 'Interactive experience',
     ours: { state: 'yes', text: 'Envelope reveal, scratch card, animations' },
@@ -103,7 +102,7 @@ const COMPARISON_ROWS = [
   },
   {
     feature: 'Cost',
-    ours: { state: 'yes', text: `From ₹${MIN_PRICE.toLocaleString('en-IN')}, all-inclusive` },
+    ours: { state: 'yes', text: `From ₹${minPrice.toLocaleString('en-IN')}, all-inclusive` },
     printed: { state: 'no', text: 'Card + printing + courier, per guest' },
     whatsapp: { state: 'partial', text: '"Free" but generic, no real design' },
   },
@@ -138,8 +137,6 @@ function ComparisonMark({ state }) {
   const { icon, Icon } = STATE_STYLES[state]
   return <Icon className={`w-4 h-4 ${icon}`} strokeWidth={2.5} />
 }
-
-const FAQS = getHomepageFaqs()
 
 function FaqItem({ item, isOpen, onToggle }) {
   const reduceMotion = useReducedMotion()
@@ -234,6 +231,11 @@ const TESTIMONIALS = [
 ]
 
 export default function LandingPage() {
+  // A price an admin has set must show here too, in the FAQ, the comparison
+  // table and the structured data, not just on the cards.
+  const priceOverrides = useTemplatePriceOverrides()
+  const faqs = useMemo(() => getHomepageFaqs(priceOverrides), [priceOverrides])
+  const comparisonRows = useMemo(() => getComparisonRows(lowestPrice(priceOverrides)), [priceOverrides])
   const [search, setSearch] = useState('')
   const [activeWeddingType, setActiveWeddingType] = useState('All')
   // All FAQ answers are visible by default — see FaqItem below — rather
@@ -262,7 +264,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-svh w-full bg-linen text-ink">
-      <SEO {...ROUTES_SEO['/']} path="/" />
+      <SEO {...routeSeo('/', priceOverrides)} path="/" />
       <SaleBanner />
       <SiteHeader />
       <main>
@@ -787,7 +789,7 @@ export default function LandingPage() {
                 </tr>
               </thead>
               <tbody>
-                {COMPARISON_ROWS.map((row) => (
+                {comparisonRows.map((row) => (
                   <tr key={row.feature} className="border-t border-champagne-deep/20">
                     <td className="px-5 py-4 text-ink font-medium whitespace-nowrap bg-ivory">
                       {row.feature}
@@ -1008,7 +1010,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="space-y-4"
           >
-            {FAQS.map((item, i) => (
+            {faqs.map((item, i) => (
               <FaqItem
                 key={item.question}
                 item={item}

@@ -5,9 +5,8 @@
 //
 // Plain data and string work only, so it is safe to import from Node and from
 // the Cloudflare function.
-import { PRICING } from './pricing.js'
-import { SATSANG_PRICE, SATSANG_LIST_PRICE, getActivePrice, getSavingsPercent, isSaleActive } from './sale.js'
 import { TEMPLATES } from './templatesData.js'
+import { priceSummary, effectivePrice } from './pricesFor.js'
 
 const rupees = (n) => `₹${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
 const flagship = TEMPLATES.find((t) => t.salePrice)
@@ -35,26 +34,31 @@ export const HOW_IT_WORKS = {
   ],
 }
 
-const costAnswer = () => {
-  const saleLive = isSaleActive()
-  const price = getActivePrice()
-  const wedding = saleLive
-    ? `Most wedding templates are ${rupees(price)} during our current launch sale, a ${getSavingsPercent()}% saving on the regular ${rupees(PRICING.price)}.`
-    : `Most wedding templates are ${rupees(price)} at our launch price, against a regular ${rupees(PRICING.price)}.`
-  const flag = flagship
-    ? ` ${flagship.name}, our caricature-video template, is ${rupees(flagship.salePrice)} (regular ${rupees(flagship.originalPrice)}).`
+// "₹2,399 (regular ₹4,500)" when every template in a group costs the same,
+// "from ₹2,399 to ₹3,000" when an admin has set different prices.
+const priced = (summary) =>
+  summary.same
+    ? `${rupees(summary.min)}${summary.regular ? ` (regular ${rupees(summary.regular)})` : ''}`
+    : `from ${rupees(summary.min)} to ${rupees(summary.max)}`
+
+export const costAnswer = (overrides = {}) => {
+  const wedding = `Wedding templates are ${priced(priceSummary('wedding', overrides))}.`
+  const satsang = `Guruji Satsang invitations are ${priced(priceSummary('satsang', overrides))}, a special price for Guruji's sangat.`
+  const fixed = flagship ? effectivePrice('wedding', flagship) : null
+  const flag = fixed
+    ? ` ${flagship.name}, our caricature-video template, is ${rupees(fixed.price)}${fixed.list ? ` (regular ${rupees(fixed.list)})` : ''}.`
     : ''
-  return `${wedding} Guruji Satsang invitations are ${rupees(SATSANG_PRICE)}, a special price for Guruji's sangat (regular ${rupees(SATSANG_LIST_PRICE)}).${flag} Every price is all-inclusive, with no per-guest or printing costs, and you pay once through Razorpay.`
+  return `${wedding} ${satsang}${flag} Every price is all-inclusive, with no per-guest or printing costs, and you pay once through Razorpay.`
 }
 
-export function getHomepageFaqs() {
+export function getHomepageFaqs(overrides = {}) {
   return [
     {
       question: 'How does the whole process work?',
       answer:
         'Pick a template in our Invitation Builder, then fill in your names, dates and venue. A live phone preview updates as you type, so you see exactly what your guests will get. When it looks right, pay once through Razorpay and your own live, shareable link is ready instantly. If you would rather have it done for you, message us on WhatsApp and we deliver it in about 30 minutes.',
     },
-    { question: 'How much does it cost?', answer: costAnswer() },
+    { question: 'How much does it cost?', answer: costAnswer(overrides) },
     {
       question: 'Can I make changes after I see my invitation?',
       answer: "Yes. You can edit every detail live in the builder before you pay, so nothing is locked in until you're happy with it.",
@@ -82,7 +86,7 @@ export function getHomepageFaqs() {
   ]
 }
 
-export const WEDDING_FAQS = [
+export const getWeddingFaqs = (overrides = {}) => [
   {
     question: 'Is a digital invitation acceptable for a traditional Indian wedding?',
     answer:
@@ -100,7 +104,7 @@ export const WEDDING_FAQS = [
   },
   {
     question: 'How much does a digital wedding invitation cost?',
-    answer: costAnswer(),
+    answer: costAnswer(overrides),
   },
   {
     question: 'Do my guests need to install an app?',
@@ -113,7 +117,9 @@ export const WEDDING_FAQS = [
   },
 ]
 
-export const SATSANG_FAQS = [
+const satsangPriceText = (overrides) => priced(priceSummary('satsang', overrides))
+
+export const getSatsangFaqs = (overrides = {}) => [
   {
     question: "Can I include Guruji's photo and a personal greeting?",
     answer:
@@ -131,7 +137,7 @@ export const SATSANG_FAQS = [
   },
   {
     question: 'How much does a Guruji Satsang invitation cost?',
-    answer: `${rupees(SATSANG_PRICE)}, a special price for Guruji's sangat, against a regular ${rupees(SATSANG_LIST_PRICE)}. It is all-inclusive and you pay once through Razorpay.`,
+    answer: `${satsangPriceText(overrides)}, a special price for Guruji's sangat. It is all-inclusive and you pay once through Razorpay.`,
   },
   {
     question: 'Can I update the invitation after sending it to my community?',

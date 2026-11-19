@@ -63,6 +63,29 @@ export async function getEffectivePrice(templateKey) {
   }
 }
 
+// Every override as a { [templateKey]: price } map, for the page copy and
+// meta descriptions the server renders (see src/data/pricesFor.js). Cached for
+// five minutes so a busy page does not hit Supabase on every request, and it
+// never throws: any failure means "no overrides", i.e. the default prices.
+const OVERRIDES_TTL_MS = 5 * 60 * 1000
+let overridesCache = { at: 0, value: {} }
+
+export async function getPriceOverrides() {
+  if (Date.now() - overridesCache.at < OVERRIDES_TTL_MS) return overridesCache.value
+  try {
+    const { data, error } = await getSupabase().from('template_prices').select('template_key, price')
+    if (error) throw error
+    const value = Object.fromEntries((data || []).map((row) => [row.template_key, row.price]))
+    overridesCache = { at: Date.now(), value }
+    return value
+  } catch (err) {
+    console.error('[template-prices] could not load overrides for page copy, using defaults:', err)
+    // Try again in 30 seconds rather than hammering a failing connection.
+    overridesCache = { at: Date.now() - OVERRIDES_TTL_MS + 30_000, value: {} }
+    return {}
+  }
+}
+
 // ---------------------------------------------------------------------------
 // GET /api/template-prices — public, unauthenticated. Every template price
 // *override* currently set (templates without one aren't listed — callers
